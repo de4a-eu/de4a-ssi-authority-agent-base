@@ -24,6 +24,7 @@ public class GenerateVCResource {
 
             if(doc.getChildNodes().getLength() != 0 )
                 return XMLConverter.toXmlString(doc);
+
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {

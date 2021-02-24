@@ -37,6 +37,5 @@ public class XMLConverter {
         transformer.transform(source, result);
 
         return strWriter.getBuffer().toString();
-
     }
 }
