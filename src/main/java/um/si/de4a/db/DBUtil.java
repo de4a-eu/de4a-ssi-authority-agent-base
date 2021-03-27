@@ -1,9 +1,11 @@
 package um.si.de4a.db;
 
+import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.ektorp.support.GenerateView;
 
 import java.net.MalformedURLException;
+import java.util.List;
 
 public class DBUtil {
     private DBConnect db = DBConnect.getConnection();
@@ -15,11 +17,21 @@ public class DBUtil {
 
     public boolean saveDIDConn(String userId, String invitationId, String invitationJSON){
         boolean dbStatus = false;
-        DIDConn didConn = new DIDConn(userId,invitationId, invitationJSON, Status.INVITATION_GENERATED, "DIDConn");
+        DIDConn didConn = new DIDConn(null, null, userId, null, null,
+                invitationId, invitationJSON, null, Status.INVITATION_GENERATED, "DIDConn");
 
         didConnRepository.add(didConn);
         dbStatus = true;
         return dbStatus;
     }
 
+    public List<DIDConn> getDIDConn(String userId){
+        ViewQuery query = new ViewQuery()
+                .designDocId("_design/DIDConn")
+                .viewName("by_user_id")
+                .key(userId);
+
+        List<DIDConn> didConnList = db.dbConnector.queryView(query, DIDConn.class);
+        return didConnList;
+    }
 }

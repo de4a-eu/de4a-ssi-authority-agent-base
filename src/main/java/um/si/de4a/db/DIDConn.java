@@ -1,16 +1,20 @@
 package um.si.de4a.db;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonWriteNullProperties;
 import org.ektorp.support.CouchDbDocument;
 import org.ektorp.support.TypeDiscriminator;
 
+@JsonIgnoreProperties({"id", "revision"})
 public class DIDConn extends CouchDbDocument {
     @JsonProperty("_id")
+    @Ignore
     private String id;
 
     @JsonProperty("_rev")
+    @Ignore
     private String revision;
 
     private String userId;
@@ -30,6 +34,9 @@ public class DIDConn extends CouchDbDocument {
     @TypeDiscriminator
     private String type;
 
+    public DIDConn() {
+    }
+
     public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, Status status, String type) {
         this.id = id;
         this.revision = revision;
@@ -39,14 +46,6 @@ public class DIDConn extends CouchDbDocument {
         this.invitationId = invitationId;
         this.invitationJSON = invitationJSON;
         this.connectionId = connectionId;
-        this.status = status;
-        this.type = type;
-    }
-
-    public DIDConn(String userId, String invitationId, String invitationJSON, Status status, String type) {
-        this.userId = userId;
-        this.invitationId = invitationId;
-        this.invitationJSON = invitationJSON;
         this.status = status;
         this.type = type;
     }
@@ -132,37 +131,6 @@ public class DIDConn extends CouchDbDocument {
     }
 }
 
-
-
-enum Status {
-    CONNECTION_ESTABLISHED("ConnectionEstablished"),
-    INVITATION_GENERATED("InvitationGenerated"),
-    INVITATION_ACCEPTED("InvitationAccepted"),
-    INVITATION_REJECTED("InvitationRejected"),
-    VC_ACCEPTED("VCAccepted"),
-    VC_SENT("VCSent"),
-    OFFER_ACCEPTED("OfferAccepted"),
-    OFFER_NOT_SENT("OfferNotSent"),
-    OFFER_REJECTED("OfferRejected"),
-    VC_REJECTED("VCRejected");
-
-    private final String text;
-
-    /**
-     * @param text
-     */
-    Status(final String text) {
-        this.text = text;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return text;
-    }
-}
 
 
 

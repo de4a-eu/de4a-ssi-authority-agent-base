@@ -14,5 +14,4 @@ public class DIDConnRepository extends CouchDbRepositorySupport<DIDConn> {
         super(type, db);
     }
 
-
 }
