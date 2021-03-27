@@ -1,4 +1,4 @@
-package um.si.de4a.resources;
+package um.si.de4a.resources.vp;
 
 
 import org.jboss.resteasy.annotations.Query;
