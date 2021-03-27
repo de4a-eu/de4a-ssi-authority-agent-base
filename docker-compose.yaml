@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+    db:
+        container_name: de4a-couchdb
+        image: couchdb:latest
+        environment:
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=de4a
+        ports:
+            - "5984:5984"
+
+    tomcat:
+        container_name: de4a-tomcat
+        links:
+            - de4a-couchdb:couchdb
+        image: tomcat:latest
+        ports:
+            - "127.0.0.1:8080:8080"
+        deploy:
+            restart_policy:
+                condition: always
+        volumes:
+            - "./out/artifacts/de4a_agent:/usr/local/tomcat/webapps"
+volumes:
+    db_data: {}    
