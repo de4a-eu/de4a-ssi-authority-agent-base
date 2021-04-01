@@ -2,7 +2,7 @@ package um.si.de4a.resources.vc;
 
 import javax.ws.rs.*;
 
-public class CheckVCStatusResource {
+public class CheckOfferVCResponseResource {
     @GET
     @Consumes("text/plain")
     @Produces("text/plain")

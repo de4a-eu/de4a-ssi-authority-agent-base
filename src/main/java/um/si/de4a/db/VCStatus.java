@@ -1,6 +1,6 @@
 package um.si.de4a.db;
 
-public enum Status {
+public enum VCStatus {
     CONNECTION_ESTABLISHED("ConnectionEstablished"),
     INVITATION_GENERATED("InvitationGenerated"),
     INVITATION_ACCEPTED("InvitationAccepted"),
@@ -17,7 +17,7 @@ public enum Status {
     /**
      * @param text
      */
-    Status(final String text) {
+    VCStatus(final String text) {
         this.text = text;
     }
 

@@ -3,7 +3,6 @@ package um.si.de4a.db;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonWriteNullProperties;
 import org.ektorp.support.CouchDbDocument;
 import org.ektorp.support.TypeDiscriminator;
 
@@ -29,7 +28,7 @@ public class DIDConn extends CouchDbDocument {
 
     private String connectionId;
 
-    private Status status;
+    private VCStatus VCStatus;
 
     @TypeDiscriminator
     private String type;
@@ -37,7 +36,7 @@ public class DIDConn extends CouchDbDocument {
     public DIDConn() {
     }
 
-    public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, Status status, String type) {
+    public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, VCStatus VCStatus, String type) {
         this.id = id;
         this.revision = revision;
         this.userId = userId;
@@ -46,7 +45,7 @@ public class DIDConn extends CouchDbDocument {
         this.invitationId = invitationId;
         this.invitationJSON = invitationJSON;
         this.connectionId = connectionId;
-        this.status = status;
+        this.VCStatus = VCStatus;
         this.type = type;
     }
 
@@ -114,12 +113,12 @@ public class DIDConn extends CouchDbDocument {
         this.connectionId = connectionId;
     }
 
-    public Status getStatus() {
-        return status;
+    public VCStatus getStatus() {
+        return VCStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setStatus(VCStatus VCStatus) {
+        this.VCStatus = VCStatus;
     }
 
     public String getType() {
