@@ -1,36 +1,53 @@
 package um.si.de4a.resources.offer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import um.si.de4a.db.DBUtil;
+import um.si.de4a.db.DIDConn;
+import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.xml.Credential;
 import um.si.de4a.util.XMLtoJSONConverter;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 
+@Path("/send-vc-offer")
 public class SendVCOfferResource {
     @POST
     @Consumes({"text/plain", "application/xml"})
     @Produces("text/plain")
-    public boolean sendVCOffer(@QueryParam("userId")String userID, @QueryParam("evidence") String evidence) {
-        boolean result = false;
+    @Path("{userId}/{evidence}")
+    public boolean sendVCOffer(@PathParam("userId") String userID, @PathParam("evidence") String evidence) throws MalformedURLException {
+        boolean resultStatus = false;
 
-        // call database getDIDConnStatus(userID): row
+        DBUtil dbUtil = new DBUtil();
 
-        // call generateVC(evidence, myDID, theirDID) method: VC
+        // DONE: call database getDIDConnStatus(userID): DIDConn
+        DIDConn userDIDConn = dbUtil.getDIDConnStatus(userID);
+        if(userDIDConn != null){
+            System.out.println("[SEND-VC-OFFER] Status: " + userDIDConn.getMyDID());
 
-        // call Aries /verifiable/sign-credential(vc) : boolean
+            // TODO call generateVC(evidence, myDID, theirDID) method: VC
 
-        // if (true)
+            // call Aries /verifiable/sign-credential(vc) : boolean
+
+            // if (true)
             // call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
-            // call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
-            // return boolean
 
-        return result;
+            // DONE: call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
+            try{
+                dbUtil.saveVCStatus(userID, "piid1", "vc1", VCStatusEnum.OFFER_SENT);
+            }
+            catch(Exception ex){
+                System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());
+            }
+            // return boolean
+            resultStatus = true;
+        }
+
+        return resultStatus;
     }
 }

@@ -1,23 +1,43 @@
 package um.si.de4a.resources.vc;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import um.si.de4a.db.DBUtil;
+import um.si.de4a.db.VCStatus;
+import um.si.de4a.db.VCStatusEnum;
 
+import javax.ws.rs.*;
+import java.net.MalformedURLException;
+
+@Path("/send-vc")
 public class SendVCResource {
     @POST
     @Consumes("text/plain")
     @Produces("text/plain")
-    public boolean sendVC(@QueryParam("userId")String userID) {
+    @Path("{userId}")
+    public boolean sendVC(@PathParam("userId") String userID) throws MalformedURLException {
         boolean vcStatusResult = false;
+        DBUtil dbUtil = new DBUtil();
+        VCStatus vcStatus = null;
 
-        // call database getVCStatus(userID): status, piid
+        // DONE: call database getVCStatus(userID): status, piid
+        try{
+            vcStatus = dbUtil.getVCStatus(userID);
+        }
+        catch(Exception ex){
+            System.out.println("[SEND-VC] Exception: " + ex.getMessage());
+        }
 
-        // call Aries /issuecredential/{PIID}/accept-request(VC):  null/empty
+        if(vcStatus != null) {
+            try{
+                // TODO: call Aries /issuecredential/{PIID}/accept-request(VC):  null/empty
 
-        // call database updateVCStatus(userId, status: vc_sent): boolean
-
+                // DONE: call database updateVCStatus(userId, status: vc_sent): boolean
+                dbUtil.updateVCStatus(userID, VCStatusEnum.VC_SENT);
+                vcStatusResult = true;
+            }
+            catch(Exception ex){
+                System.out.println("[SEND-VC] Exception: " + ex.getMessage());
+            }
+        }
         return vcStatusResult;
     }
 }

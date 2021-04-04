@@ -20,19 +20,30 @@ public class GenerateInvitationResource {
     @POST
     @Consumes("text/plain")
     @Produces("text/plain")
-    public String createInvitation(@QueryParam("userId")String userID) throws MalformedURLException {
+    @Path("{userId}")
+    public String createInvitation(@PathParam("userId") String userID) throws MalformedURLException {
         String jsonInvitation = "";
         boolean dbStored= false;
 
-        // call Aries /connections/create-invitation : JSON
+        // TODO: call Aries /connections/create-invitation : JSON
         Invitation invitation = new Invitation("id1", "endpoint1",
                 new String[]{"key1", "key2"}, "de4a-invitation", "invitation");
-        jsonInvitation = ObjectToJSONConverter.getJsonObject(invitation);
+        long currentTime = System.currentTimeMillis();
+        invitation.setStatusChangedTime(currentTime);
+        try {
+            jsonInvitation = ObjectToJSONConverter.getJsonObject(invitation);
+        }catch (Exception ex){
+            System.out.println("[GENERATE-INVITATION] Exception: " + ex.getMessage());
+        }
 
-        // saveDIDConn(userID, invitationID, invitationJSON, status: invitation_generated): boolean
+        // DONE: saveDIDConn(userID, invitationID, invitationJSON, status: invitation_generated): boolean
         DBUtil dbUtil = new DBUtil();
-        dbStored = dbUtil.saveDIDConn(userID, "inv1", jsonInvitation);
-        
+        try {
+            dbStored = dbUtil.saveDIDConn(userID, "inv1", jsonInvitation, currentTime);
+        }catch (Exception ex){
+            System.out.println("[GENERATE-INVITATION] Exception: " + ex.getMessage());
+        }
+
         return jsonInvitation;
     }
 }

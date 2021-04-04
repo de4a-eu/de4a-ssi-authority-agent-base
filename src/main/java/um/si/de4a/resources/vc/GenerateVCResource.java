@@ -15,7 +15,8 @@ public class GenerateVCResource {
     @POST
     @Consumes("application/xml")
     @Produces("text/plain")
-    public boolean generateVC(@QueryParam("userId")String userID, @QueryParam("evidence") String evidence) {
+    @Path("{userId}/{evidence}")
+    public boolean generateVC(@PathParam("userId") String userID, @PathParam("evidence") String evidence) {
         boolean result = false;
 
         JAXBContext context;
@@ -25,6 +26,7 @@ public class GenerateVCResource {
             Unmarshaller jaxbUnmarshaller = context.createUnmarshaller();
             Credential modelEvidence = (Credential) jaxbUnmarshaller.unmarshal(new StringReader(evidence));
 
+            // TODO: convert to JSON schema, adjust model classes
             String jsonVerCredential = XMLtoJSONConverter.toJSONObject(modelEvidence);
             System.out.println("[INPUT EVIDENCE] " + jsonVerCredential);
             result = true;

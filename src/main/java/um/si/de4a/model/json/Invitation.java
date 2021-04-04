@@ -6,6 +6,7 @@ public class Invitation {
     private String[] recipientKeys;
     private String label;
     private String type;
+    private long statusChangedTime;
 
     public Invitation() {
     }
@@ -56,5 +57,13 @@ public class Invitation {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public long getStatusChangedTime() {
+        return statusChangedTime;
+    }
+
+    public void setStatusChangedTime(long statusChangedTime) {
+        this.statusChangedTime = statusChangedTime;
     }
 }

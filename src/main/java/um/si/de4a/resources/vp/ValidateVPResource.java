@@ -9,7 +9,8 @@ public class ValidateVPResource {
     @GET
     @Consumes({"text/plain","application/json"})
     @Produces("text/plain")
-    public int validateVP(@QueryParam("userId")String userId, @QueryParam("eidasMDS")Object eidasMds) {
+    @Path("{userId}")
+    public int validateVP(@PathParam("userId") String userId, @QueryParam("eidasMDS")String eidasMds) {
         int validationResult = 0;
 
         // call database getVPStatus(userId): VPStatus object

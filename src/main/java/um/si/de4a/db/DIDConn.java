@@ -28,7 +28,9 @@ public class DIDConn extends CouchDbDocument {
 
     private String connectionId;
 
-    private VCStatus VCStatus;
+    private DIDConnStatusEnum didConnStatusEnum;
+
+    private long timeUpdated;
 
     @TypeDiscriminator
     private String type;
@@ -36,7 +38,7 @@ public class DIDConn extends CouchDbDocument {
     public DIDConn() {
     }
 
-    public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, VCStatus VCStatus, String type) {
+    public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, DIDConnStatusEnum didConnStatusEnum, String type, long timeUpdated) {
         this.id = id;
         this.revision = revision;
         this.userId = userId;
@@ -45,8 +47,9 @@ public class DIDConn extends CouchDbDocument {
         this.invitationId = invitationId;
         this.invitationJSON = invitationJSON;
         this.connectionId = connectionId;
-        this.VCStatus = VCStatus;
+        this.didConnStatusEnum = didConnStatusEnum;
         this.type = type;
+        this.timeUpdated = timeUpdated;
     }
 
     public String getId() {
@@ -113,12 +116,12 @@ public class DIDConn extends CouchDbDocument {
         this.connectionId = connectionId;
     }
 
-    public VCStatus getStatus() {
-        return VCStatus;
+    public DIDConnStatusEnum getStatus() {
+        return didConnStatusEnum;
     }
 
-    public void setStatus(VCStatus VCStatus) {
-        this.VCStatus = VCStatus;
+    public void setStatus(DIDConnStatusEnum didConnStatusEnum) {
+        this.didConnStatusEnum = didConnStatusEnum;
     }
 
     public String getType() {
@@ -127,6 +130,14 @@ public class DIDConn extends CouchDbDocument {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public long getTimeUpdated() {
+        return timeUpdated;
+    }
+
+    public void setTimeUpdated(long timeUpdated) {
+        this.timeUpdated = timeUpdated;
     }
 }
 
