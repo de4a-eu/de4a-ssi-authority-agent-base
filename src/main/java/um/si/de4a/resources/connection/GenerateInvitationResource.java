@@ -2,17 +2,12 @@ package um.si.de4a.resources.connection;
 
 
 import org.json.simple.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.json.simple.parser.ParseException;
+import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
-import um.si.de4a.model.json.Invitation;
-import um.si.de4a.util.ObjectToJSONConverter;
 
 import javax.ws.rs.*;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 @Path("/generate-invitation")
 public class GenerateInvitationResource {
@@ -20,30 +15,23 @@ public class GenerateInvitationResource {
     @POST
     @Consumes("text/plain")
     @Produces("text/plain")
-    @Path("{userId}")
-    public String createInvitation(@PathParam("userId") String userID) throws MalformedURLException {
-        String jsonInvitation = "";
+    public String createInvitation(@QueryParam("userId") String userID) throws IOException, ParseException {
         boolean dbStored= false;
 
-        // TODO: call Aries /connections/create-invitation : JSON
-        Invitation invitation = new Invitation("id1", "endpoint1",
-                new String[]{"key1", "key2"}, "de4a-invitation", "invitation");
+        // DONE: call Aries /connections/create-invitation : JSON
+        AriesUtil aries = new AriesUtil();
+        JSONObject invitation = aries.generateInvitation();
+
         long currentTime = System.currentTimeMillis();
-        invitation.setStatusChangedTime(currentTime);
-        try {
-            jsonInvitation = ObjectToJSONConverter.getJsonObject(invitation);
-        }catch (Exception ex){
-            System.out.println("[GENERATE-INVITATION] Exception: " + ex.getMessage());
-        }
 
         // DONE: saveDIDConn(userID, invitationID, invitationJSON, status: invitation_generated): boolean
         DBUtil dbUtil = new DBUtil();
         try {
-            dbStored = dbUtil.saveDIDConn(userID, "inv1", jsonInvitation, currentTime);
+            dbStored = dbUtil.saveDIDConn(userID, invitation.get("@id").toString(), invitation.toJSONString(), currentTime);
         }catch (Exception ex){
             System.out.println("[GENERATE-INVITATION] Exception: " + ex.getMessage());
         }
 
-        return jsonInvitation;
+        return invitation.toJSONString();
     }
 }
