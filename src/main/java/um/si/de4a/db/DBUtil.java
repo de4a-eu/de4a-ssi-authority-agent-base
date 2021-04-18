@@ -10,15 +10,19 @@ public class DBUtil {
     private DBConnect db = DBConnect.getConnection();
     private DIDConnRepository didConnRepository = null;
     private VCStatusRepository vcStatusRepository = null;
+    private VPStatusRepository vpStatusRepository = null;
 
     private List<DIDConn> didConnList = null;
     private List<VCStatus> vcstatusList = null;
+    private List<VPStatus> vpstatusList = null;
 
     public DBUtil() throws MalformedURLException {
         didConnRepository = new DIDConnRepository(DIDConn.class, db.dbConnector);
         vcStatusRepository = new VCStatusRepository(VCStatus.class, db.dbConnector);
+        vpStatusRepository = new VPStatusRepository(VPStatus.class, db.dbConnector);
         didConnList = new ArrayList<>();
         vcstatusList = new ArrayList<>();
+        vpstatusList = new ArrayList<>();
     }
 
     public boolean saveDIDConn(String userId, String invitationId, String invitationJSON, long statusChanged){
@@ -36,7 +40,7 @@ public class DBUtil {
         return dbStatus;
     }
 
-    public List<DIDConn> getDIDConn(String userId){
+    public DIDConn getDIDConnStatus(String userId){
         ViewQuery query = new ViewQuery()
                 .designDocId("_design/DIDConn")
                 .viewName("by_user_id")
@@ -49,14 +53,13 @@ public class DBUtil {
             System.out.println("[GET DID CONN] Exception: " + ex.getMessage());
         }
         System.out.println("[DIDConn] size: " + didConnList.size());
-        return didConnList;
+        return didConnList.get(0);
     }
 
     public boolean updateDIDConnection(String userID, String myDID, String theirDID, String connectionID, DIDConnStatusEnum status){
         boolean dbStatus = false;
 
-        didConnList = getDIDConn(userID);
-        DIDConn userDIDConn = didConnList.get(didConnList.size()-1);
+        DIDConn userDIDConn = getDIDConnStatus(userID);
         userDIDConn.setMyDID(myDID);
         userDIDConn.setTheirDID(theirDID);
         userDIDConn.setConnectionId(connectionID);
@@ -70,16 +73,6 @@ public class DBUtil {
             dbStatus = false;
         }
         return dbStatus;
-    }
-
-    public DIDConn getDIDConnStatus(String userID){
-        DIDConn userDIDConn = null;
-
-        didConnList = getDIDConn(userID);
-        if(didConnList.size() > 0)
-            userDIDConn = didConnList.get(didConnList.size()-1);
-
-        return userDIDConn;
     }
 
     public boolean saveVCStatus(String userID, String PIID, String VC, VCStatusEnum status){
@@ -142,5 +135,83 @@ public class DBUtil {
             dbStatus = false;
         }
         return dbStatus;
+    }
+
+    public boolean saveVPStatus(String userID, String PIID, String vp, String vpName, VPStatusEnum status){
+        boolean dbStatus = false;
+        VPStatus vpStatus = null;
+
+        DIDConn userDIDConn = getDIDConnStatus(userID);
+        if(userDIDConn != null){
+            vpStatus = new VPStatus(null, null, userID, PIID, vp,
+                    userDIDConn,status.REQUEST_SENT,vpName,System.currentTimeMillis(),"VPStatus");
+            try {
+                vpStatusRepository.add(vpStatus);
+                dbStatus = true;
+            }
+            catch(Exception ex){
+                dbStatus = false;
+            }
+        }
+        return dbStatus;
+    }
+
+    public List<VPStatus> getVPStatusList(String userId){
+        ViewQuery query = new ViewQuery()
+                .designDocId("_design/VPStatus")
+                .viewName("by_user_id")
+                .key(userId);
+
+        try {
+            vpstatusList = db.dbConnector.queryView(query, VPStatus.class);
+        }
+        catch(Exception ex){
+            System.out.println("[GET VP STATUS] Exception: " + ex.getMessage());
+        }
+        System.out.println("[VPStatus] size: " + vpstatusList.size());
+        return vpstatusList;
+    }
+
+    public VPStatus getVPStatus(String userID){
+        VPStatus userVPStatus = null;
+
+        vpstatusList = getVPStatusList(userID);
+        if(vpstatusList.size() > 0)
+            userVPStatus = vpstatusList.get(vpstatusList.size()-1);
+
+        return userVPStatus;
+    }
+
+    public boolean updateVPStatus(String userID, VPStatusEnum status){
+        boolean dbStatus = false;
+
+        vpstatusList = getVPStatusList(userID);
+        VPStatus vpStatus = vpstatusList.get(vpstatusList.size()-1);
+        vpStatus.setVPStatusEnum(status);
+        vpStatus.setTimeUpdated(System.currentTimeMillis());
+        try {
+            vpStatusRepository.update(vpStatus);
+            dbStatus = true;
+        }
+        catch (Exception ex) {
+            dbStatus = false;
+        }
+        return dbStatus;
+    }
+
+    public List<VPStatus> findVPById(String vpId){
+        ViewQuery query = new ViewQuery()
+                .designDocId("_design/VPStatus")
+                .viewName("by_vp_id")
+                .key(vpId);
+
+        try {
+            vpstatusList = db.dbConnector.queryView(query, VPStatus.class);
+        }
+        catch(Exception ex){
+            System.out.println("[FIND BY VP ID] Exception: " + ex.getMessage());
+        }
+        System.out.println("[VPStatus] size: " + vpstatusList.size());
+        return vpstatusList;
     }
 }

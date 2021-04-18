@@ -32,10 +32,10 @@ public class SendVCOfferResource {
 
             // TODO call generateVC(evidence, myDID, theirDID) method: VC
 
-            // call Aries /verifiable/sign-credential(vc) : boolean
+            // TODO: call Aries /verifiable/sign-credential(vc) : boolean
 
             // if (true)
-            // call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
+            // TODO: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
 
             // DONE: call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
             try{

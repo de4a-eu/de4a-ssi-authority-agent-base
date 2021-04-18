@@ -15,9 +15,9 @@ public final class DBConnect {
 
     private DBConnect() throws MalformedURLException {
         HttpClient httpClient = new StdHttpClient.Builder()
-                .url("http://de4a-couchdb:5984")
+                .url("http://164.8.250.43:5984/")
                 .username("admin")
-                .password("de4a").build();
+                .password("password").build();
 
         CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
         this.dbConnector = dbInstance.createConnector("de4a-authority-agent", true);
