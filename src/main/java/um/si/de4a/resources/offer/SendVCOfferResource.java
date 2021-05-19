@@ -1,20 +1,16 @@
 package um.si.de4a.resources.offer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VCStatusEnum;
-import um.si.de4a.model.xml.Credential;
-import um.si.de4a.util.XMLtoJSONConverter;
+import um.si.de4a.resources.vc.GenerateVCResource;
 
 import javax.ws.rs.*;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 @Path("/send-vc-offer")
@@ -22,15 +18,17 @@ public class SendVCOfferResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public boolean sendVCOffer(String offer) throws MalformedURLException {
+    public boolean sendVCOffer(String offer) throws IOException {
         boolean resultStatus = false;
         JSONObject jsonOffer = null;
 
         DBUtil dbUtil = new DBUtil();
+        AriesUtil ariesUtil = new AriesUtil();
 
         JSONParser jsonParser = new JSONParser();
         try {
             jsonOffer = (JSONObject) jsonParser.parse(offer);
+            System.out.println("JSON offer: " + jsonOffer.toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -41,24 +39,34 @@ public class SendVCOfferResource {
             // DONE: call database getDIDConnStatus(userID): DIDConn
             DIDConn userDIDConn = dbUtil.getDIDConnStatus(userID);
             if(userDIDConn != null){
-                System.out.println("[SEND-VC-OFFER] Status: " + userDIDConn.getMyDID());
+                System.out.println("[SEND-VC-OFFER] MyDID: " + userDIDConn.getMyDID());
 
-                // TODO call generateVC(evidence, myDID, theirDID) method: VC
+                JSONObject jo = new JSONObject();
+                jo.put("evidence", jsonOffer.get("evidence").toString());
+                jo.put("publicDID", "did:ebsi:1234"); //TODO: replace later with EBSI DID
+                jo.put("myDID", userDIDConn.getMyDID());
+                jo.put("theirDID", userDIDConn.getTheirDID());
 
-                // TODO: call Aries /verifiable/sign-credential(vc) : boolean
+                String jsonRequest = jo.toJSONString();
+                System.out.println("[SEND-VC-OFFER] JSON request: " + jsonRequest);
+                // DONE: call generateVC(evidence, myDID, theirDID) method: VC
+                GenerateVCResource generateVCResource = new GenerateVCResource();
+                boolean vcGenerated = generateVCResource.generateVC(jsonRequest);
 
-                // if (true)
-                // TODO: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
+                if(vcGenerated == true) {
+                    // TODO: call Aries /verifiable/sign-credential(vc) : boolean
 
-                // DONE: call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
-                try{
-                    dbUtil.saveVCStatus(userID, "piid1", "vc1", VCStatusEnum.OFFER_SENT);
+                    // if (true)
+                    // TODO: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
+
+                    // DONE: call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
+                    try {
+                        dbUtil.saveVCStatus(userID, "piid1", "vc1", VCStatusEnum.OFFER_SENT);
+                    } catch (Exception ex) {
+                        System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());
+                    }
+                    resultStatus = true;
                 }
-                catch(Exception ex){
-                    System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());
-                }
-                // return boolean
-                resultStatus = true;
             }
         }
         return resultStatus;
