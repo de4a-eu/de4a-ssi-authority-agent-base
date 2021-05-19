@@ -10,8 +10,8 @@ import java.net.MalformedURLException;
 @Path("/check-offer-vc-response")
 public class CheckOfferVCResponseResource {
     @GET
-    @Consumes("text/plain")
-    @Produces("text/plain")
+    @Consumes("application/json")
+    @Produces("application/json")
     @Path("{userId}")
     public int checkResponse(@PathParam("userId") String userID) throws MalformedURLException {
         int vcStatusCode = 0;

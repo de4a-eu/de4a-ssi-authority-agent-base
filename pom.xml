@@ -104,7 +104,11 @@
             <artifactId>jackson-core-asl</artifactId>
             <version>1.9.13</version>
         </dependency>
-
+        <dependency>
+        <groupId>com.github.psamsotha</groupId>
+            <artifactId>jersey-properties</artifactId>
+            <version>0.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>

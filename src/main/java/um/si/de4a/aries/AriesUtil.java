@@ -5,6 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.AppConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,16 +19,18 @@ import java.util.List;
 
 public class AriesUtil {
 
-    private String result;
+    private AppConfig appConfig = null;
+    private String baseUrl = "";
 
-    public AriesUtil() {
-        result = "";
+    public AriesUtil() throws IOException {
+        appConfig = new AppConfig();
+        baseUrl = appConfig.getProperties().getProperty("aries.enterprise.ip.address");
+        System.out.println("[CONFIG] Aries IP address: " + baseUrl);
     }
 
     public JSONObject generateInvitation() throws IOException, ParseException {
         JSONObject jsonInvitation = null;
-
-        HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://164.8.250.43:8082/connections/create-invitation?alias=de4a").openConnection();
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "connections/create-invitation?alias=de4a").openConnection();
         urlConnection.setRequestMethod("POST");
         urlConnection.connect();
         int responseCode = urlConnection.getResponseCode();
@@ -55,7 +58,7 @@ public class AriesUtil {
         ArrayList<JSONObject> connectionList = new ArrayList<>();
         JSONObject connection = null;
 
-        HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://164.8.250.43:8082/connections").openConnection();
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "connections").openConnection();
         urlConnection.setRequestMethod("GET");
         urlConnection.connect();
 
@@ -98,7 +101,7 @@ public class AriesUtil {
 
     public String acceptRequest(String connectionId) throws IOException, ParseException {
         String response = "";
-        String url = buildURL("http://164.8.250.43:8082", connectionId, "accept-request");
+        String url = buildURL(baseUrl, connectionId, "accept-request");
         HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
         urlConnection.setRequestMethod("POST");
         urlConnection.connect();
@@ -121,6 +124,6 @@ public class AriesUtil {
     }
 
     private String buildURL(String baseURL, String parameter, String method){
-        return baseURL + "/" + parameter + "/" + method;
+        return baseURL +  parameter + "/" + method;
     }
 }

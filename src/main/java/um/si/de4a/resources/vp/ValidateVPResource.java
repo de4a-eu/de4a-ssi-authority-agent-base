@@ -11,11 +11,11 @@ import java.net.MalformedURLException;
 public class ValidateVPResource {
 
     @GET
-    @Consumes({"text/plain","application/json"})
-    @Produces("text/plain")
+    @Consumes("application/json")
+    @Produces("application/json")
     @Path("{userId}")
     public int validateVP(@PathParam("userId") String userId, @QueryParam("eidasMDS")String eidasMds) throws MalformedURLException {
-        int validationResult = 0;
+        int validationResult = 1;
         DBUtil dbUtil = new DBUtil();
         // DONE: call database getVPStatus(userId): VPStatus object
         VPStatus userVPStatus = dbUtil.getVPStatus(userId);

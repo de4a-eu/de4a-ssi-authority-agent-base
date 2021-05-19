@@ -2,6 +2,7 @@ package um.si.de4a.db;
 
 import org.ektorp.ViewQuery;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class DBUtil {
     }
 
     public DIDConn getDIDConnStatus(String userId){
+
         ViewQuery query = new ViewQuery()
                 .designDocId("_design/DIDConn")
                 .viewName("by_user_id")
@@ -53,6 +55,8 @@ public class DBUtil {
             System.out.println("[GET DID CONN] Exception: " + ex.getMessage());
         }
         System.out.println("[DIDConn] size: " + didConnList.size());
+
+
         return didConnList.get(0);
     }
 
@@ -72,6 +76,7 @@ public class DBUtil {
         catch (Exception ex) {
             dbStatus = false;
         }
+
         return dbStatus;
     }
 
@@ -91,6 +96,7 @@ public class DBUtil {
                 dbStatus = false;
             }
         }
+
         return dbStatus;
     }
 
@@ -107,6 +113,7 @@ public class DBUtil {
             System.out.println("[GET VC STATUS] Exception: " + ex.getMessage());
         }
         System.out.println("[VCStatus] size: " + vcstatusList.size());
+
         return vcstatusList;
     }
 
@@ -134,6 +141,7 @@ public class DBUtil {
         catch (Exception ex) {
             dbStatus = false;
         }
+
         return dbStatus;
     }
 
@@ -169,6 +177,7 @@ public class DBUtil {
             System.out.println("[GET VP STATUS] Exception: " + ex.getMessage());
         }
         System.out.println("[VPStatus] size: " + vpstatusList.size());
+
         return vpstatusList;
     }
 
@@ -212,6 +221,7 @@ public class DBUtil {
             System.out.println("[FIND BY VP ID] Exception: " + ex.getMessage());
         }
         System.out.println("[VPStatus] size: " + vpstatusList.size());
+
         return vpstatusList;
     }
 }

@@ -7,14 +7,15 @@ import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
 
 import javax.ws.rs.*;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 @Path("/check-request-vp-response")
 public class CheckRequestVPStatusResource {
 
     @GET
-    @Consumes("text/plain")
-    @Produces("text/plain")
+    @Consumes("application/json")
+    @Produces("application/json")
     @Path("{userId}")
     public int getStatus(@PathParam("userId") String userId) throws MalformedURLException {
         int vpRequestStatus = 0;

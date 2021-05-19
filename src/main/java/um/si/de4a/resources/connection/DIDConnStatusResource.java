@@ -19,8 +19,8 @@ import java.util.Set;
 public class DIDConnStatusResource {
 
     @GET
-    @Consumes("text/plain")
-    @Produces("text/plain")
+    @Consumes("application/json")
+    @Produces("application/json")
     @Path("{userId}")
     public int fetch(@PathParam("userId") String userID) throws IOException, ParseException {
         int connectionStatusCode = 0;
