@@ -52,8 +52,6 @@ public class SendVCOfferResource {
             // DONE: call database getDIDConnStatus(userID): DIDConn
             DIDConn userDIDConn = dbUtil.getDIDConnStatus(userID);
             if(userDIDConn != null){
-                System.out.println("[SEND-VC-OFFER] MyDID: " + userDIDConn.getMyDID());
-
                 JSONObject jo = new JSONObject();
                 jo.put("evidence", jsonOffer.get("evidence").toString());
                 jo.put("publicDID", "did:ebsi:1234"); //TODO: replace later with EBSI DID
@@ -68,7 +66,7 @@ public class SendVCOfferResource {
                 VerifiableCredential generatedVC = generateVCResource.generateVC(jsonRequest);
                 //System.out.println(gson.toJson(generatedVC));
                 if(generatedVC != null) {
-                    // TODO: call Aries /verifiable/sign-credential(vc) : boolean
+                    // DONE: call Aries /verifiable/sign-credential(vc) : boolean
                     Clock clock = Clock.systemDefaultZone();
 
                     Instant now = clock.instant();
@@ -76,7 +74,7 @@ public class SendVCOfferResource {
                     SignRequest jsonSignRequest = new SignRequest(now.toString(), generatedVC,
                             didKey, signatureType);
 
-                    // TODO: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
+                    // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
                     try {
                         SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
 

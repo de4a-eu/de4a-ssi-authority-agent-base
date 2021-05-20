@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.AppConfig;
 import um.si.de4a.model.json.VerifiableCredential;
 import um.si.de4a.model.xml.HigherEducationDiploma;
 import um.si.de4a.util.XMLtoJSONAdapter;
@@ -17,6 +18,8 @@ public class GenerateVCResource {
     @Consumes("application/json")
     @Produces("application/json")
     public VerifiableCredential generateVC(String vcData) throws IOException, ParseException, java.text.ParseException {
+        AppConfig appConfig = new AppConfig();
+        String didKey = appConfig.getProperties().getProperty("did.key");
 
         VerifiableCredential evidenceVC = null;
         JSONObject jsonObject = null;
@@ -33,7 +36,7 @@ public class GenerateVCResource {
             HigherEducationDiploma diploma = XMLtoJSONAdapter.convertXMLToPOJO(jsonObject.get("evidence").toString());
 
             if (diploma != null) {
-                evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, jsonObject.get("myDID").toString());
+                evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, didKey);
             }
         }
 

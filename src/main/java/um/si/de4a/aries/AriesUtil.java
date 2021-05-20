@@ -18,6 +18,7 @@ import um.si.de4a.db.DBUtil;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.resources.offer.OfferRequest;
 import um.si.de4a.resources.offer.SignRequest;
+import um.si.de4a.resources.vc.SendVCRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,7 +151,6 @@ public class AriesUtil {
 
     public String sendOffer(OfferRequest offer) throws IOException, ParseException {
 
-        DBUtil dbUtil = new DBUtil();
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         HttpResponse response = null;
         String piid = "";
@@ -188,31 +188,49 @@ public class AriesUtil {
     }
 
 
-    public String acceptRequest(String connectionId) throws IOException, ParseException {
-        String response = "";
-        String url = buildURL(baseUrl, connectionId, "accept-request");
-        HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-        urlConnection.setRequestMethod("POST");
-        urlConnection.connect();
+    public boolean acceptRequest(String piid, SendVCRequest credential) throws IOException, ParseException {
+        boolean response = false;
 
-        int responseCode = urlConnection.getResponseCode();
-        System.out.println("[ARIES get-connections] GET Response Code :: " + responseCode);
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpResponse httpResponse = null;
 
-        if (responseCode == HttpURLConnection.HTTP_OK) { // success
-            InputStream stream = urlConnection.getInputStream();
+        Gson gson = new Gson();
+        try {
+            String url = buildURL(baseUrl, "issuecredential", piid, "accept-request");
+            System.out.println("[ARIES ACCEPT REQUEST] URL: " + url);
 
-            String result = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
-            System.out.println("[result]: " + result);
+            HttpPost request = new HttpPost(url);
+            StringEntity input = new StringEntity(gson.toJson(credential));
+            input.setContentType("application/json;charset=UTF-8");
+            input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
+            request.setEntity(input);
+            httpResponse = httpClient.execute(request);
 
-        } else {
-            System.out.println("[ARIES JSON connections] GET request has not worked");
+            if (httpResponse != null) {
+                InputStream in = httpResponse.getEntity().getContent(); //Get the data in the entity
+                String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
+
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+                System.out.println("[ARIES result] " + jsonObject.toString());
+
+                if (jsonObject.toString().equals("{}"))
+                    response = true;
+            }
         }
-        urlConnection.disconnect();
+        catch (Exception ex) {
+            System.out.println("[ARIES send-vc] Exception: " + ex.getMessage());
+        } finally {
+            httpClient.close();
+        }
 
         return response;
     }
 
-    private String buildURL(String baseURL, String parameter, String method){
-        return baseURL +  parameter + "/" + method;
+    private String buildURL(String baseURL, String endpoint, String parameter, String method){
+        return baseURL + endpoint + "/" + parameter + "/" + method;
     }
+
+
 }

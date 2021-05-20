@@ -11,7 +11,7 @@ public class AppConfig {
 
     public AppConfig() throws IOException {
         String propFile = new File("conf/app.properties").getAbsolutePath();
-        System.out.println("[CONFIG] Property file path: " + propFile);
+
         FileInputStream inputStream = new FileInputStream(propFile);
         properties = new Properties();
         properties.load(inputStream);
