@@ -1,50 +1,45 @@
 package um.si.de4a.resources.offer;
 
 
+import com.google.gson.annotations.SerializedName;
+import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.model.json.VerifiableCredential;
 
 public class OfferRequest {
-    private String created;
-    private VerifiableCredential credential;
-    private String did;
-    private String signatureType;
+    @SerializedName("my_did")
+    private String myDID;
+    @SerializedName("their_did")
+    private String theirDID;
+    @SerializedName("offer_credential")
+    private SignedVerifiableCredential credential;
 
-    public OfferRequest(String created, VerifiableCredential credential, String did, String signatureType) {
-        this.created = created;
+    public OfferRequest(String myDID, String theirDID, SignedVerifiableCredential credential) {
+        this.myDID = myDID;
+        this.theirDID = theirDID;
         this.credential = credential;
-        this.did = did;
-        this.signatureType = signatureType;
     }
 
-    public String getCreated() {
-        return created;
+    public String getMyDID() {
+        return myDID;
     }
 
-    public void setCreated(String created) {
-        this.created = created;
+    public void setMyDID(String myDID) {
+        this.myDID = myDID;
     }
 
-    public VerifiableCredential getCredential() {
+    public String getTheirDID() {
+        return theirDID;
+    }
+
+    public void setTheirDID(String theirDID) {
+        this.theirDID = theirDID;
+    }
+
+    public SignedVerifiableCredential getCredential() {
         return credential;
     }
 
-    public void setCredential(VerifiableCredential credential) {
+    public void setCredential(SignedVerifiableCredential credential) {
         this.credential = credential;
-    }
-
-    public String getDid() {
-        return did;
-    }
-
-    public void setDid(String did) {
-        this.did = did;
-    }
-
-    public String getSignatureType() {
-        return signatureType;
-    }
-
-    public void setSignatureType(String signatureType) {
-        this.signatureType = signatureType;
     }
 }

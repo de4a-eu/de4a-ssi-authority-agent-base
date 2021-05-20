@@ -28,10 +28,9 @@ public class GenerateVCResource {
             e.printStackTrace();
         }
 
-        Gson gson = new Gson();
         if(jsonObject != null) {
 
-            HigherEducationDiploma diploma = XMLtoJSONAdapterCopy.convertXMLToPOJO(jsonObject.get("evidence").toString());
+            HigherEducationDiploma diploma = XMLtoJSONAdapter.convertXMLToPOJO(jsonObject.get("evidence").toString());
 
             if (diploma != null) {
                 evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, jsonObject.get("myDID").toString());
