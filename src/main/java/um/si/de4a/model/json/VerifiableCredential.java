@@ -10,21 +10,19 @@ public class VerifiableCredential {
      private String issuer;
      private String issuanceDate;
      private CredentialSubject credentialSubject;
-     private CredentialStatus credentialStatus;
-     private CredentialSchema credentialSchema;
-     private Evidence evidence;
+    // private CredentialStatus credentialStatus;
+    // private CredentialSchema credentialSchema;
+    //  private Evidence evidence;
 
-    public VerifiableCredential(String[] context, String id, String[] type, String issuer, String issuanceDate, CredentialSubject credentialSubject, CredentialStatus credentialStatus, CredentialSchema credentialSchema, Evidence evidence) {
+    public VerifiableCredential(String[] context, String id, String[] type, String issuer, String issuanceDate, CredentialSubject credentialSubject) {
         this.context = context;
         this.id = id;
         this.type = type;
         this.issuer = issuer;
         this.issuanceDate = issuanceDate;
         this.credentialSubject = credentialSubject;
-        this.credentialStatus = credentialStatus;
-        this.credentialSchema = credentialSchema;
-        this.evidence = evidence;
     }
+
 
     public String[] getContext() {
         return context;
@@ -74,6 +72,7 @@ public class VerifiableCredential {
         this.credentialSubject = credentialSubject;
     }
 
+    /*
     public CredentialStatus getCredentialStatus() {
         return credentialStatus;
     }
@@ -82,13 +81,6 @@ public class VerifiableCredential {
         this.credentialStatus = credentialStatus;
     }
 
-    public CredentialSchema getCredentialSchema() {
-        return credentialSchema;
-    }
-
-    public void setCredentialSchema(CredentialSchema credentialSchema) {
-        this.credentialSchema = credentialSchema;
-    }
 
     public Evidence getEvidence() {
         return evidence;
@@ -96,5 +88,5 @@ public class VerifiableCredential {
 
     public void setEvidence(Evidence evidence) {
         this.evidence = evidence;
-    }
+    }*/
 }

@@ -34,6 +34,13 @@ public class CredentialSubject {
         this.learningOpportunityReferences = learningOpportunityReferences;
     }
 
+   /* public CredentialSubject(String currentFamilyName, String currentGivenName, String dateOfBirth, String personIdentifier) {
+        this.currentFamilyName = currentFamilyName;
+        this.currentGivenName = currentGivenName;
+        this.dateOfBirth = dateOfBirth;
+        this.personIdentifier = personIdentifier;
+    }*/
+
     public String getCurrentFamilyName() {
         return currentFamilyName;
     }
@@ -65,6 +72,7 @@ public class CredentialSubject {
     public void setPersonIdentifier(String personIdentifier) {
         this.personIdentifier = personIdentifier;
     }
+
 
     public LearningAchievement getLearningAchievement() {
         return learningAchievement;
@@ -121,4 +129,6 @@ public class CredentialSubject {
     public void setLearningOpportunityReferences(LearningOpportunityReferences learningOpportunityReferences) {
         this.learningOpportunityReferences = learningOpportunityReferences;
     }
+
+
 }
