@@ -100,7 +100,7 @@ public class XMLtoJSONAdapter {
         Date dateIssued = inputFormat.parse(inputIssueDate);
         String outputDateIssued = outputFormat.format(dateIssued);
 
-        Date dateBirth = inputFormat.parse(inputIssueDate);
+        Date dateBirth = inputFormat.parse(inputBirthDate);
         String outputDateBirth = outputFormat.format(dateBirth);
 
         Location location = new Location("urn:epass:location:1", new Title(new Text(diploma.getPlaceOfIssue().getName().getText().getContentType(), diploma.getPlaceOfIssue().getName().getText().getLang(), diploma.getPlaceOfIssue().getName().getText().getValue())),
@@ -128,7 +128,6 @@ public class XMLtoJSONAdapter {
        // Evidence evidence = new Evidence("https://essif.europa.eu/evidence/f2aeec97-fc0d-42bf-8ca7-0548192d4231", new String[]{"eIDAS"}, "https://essif.europa.eu/issuers/48", new String[]{"eIDAS identifier"});
 
         VerifiableCredential vc = new VerifiableCredential(context, "http://example.edu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued,subject);
-
         return vc;
     }
 }

@@ -120,7 +120,7 @@ public class AriesUtil {
         try {
             HttpPost request = new HttpPost(baseUrl + "verifiable/signcredential");
             StringEntity input = new StringEntity(gson.toJson(vcCredential));
-            System.out.println("Request VC: " + gson.toJson(vcCredential));
+           // System.out.println("Request VC: " + gson.toJson(vcCredential));
 
             input.setContentType("application/json;charset=UTF-8");
             input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));

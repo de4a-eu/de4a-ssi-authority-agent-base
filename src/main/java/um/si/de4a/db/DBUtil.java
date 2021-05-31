@@ -43,21 +43,7 @@ public class DBUtil {
 
     public DIDConn getDIDConnStatus(String userId){
 
-        ViewQuery query = new ViewQuery()
-                .designDocId("_design/DIDConn")
-                .viewName("by_user_id")
-                .key(userId);
-
-        try {
-            didConnList = db.dbConnector.queryView(query, DIDConn.class);
-        }
-        catch(Exception ex){
-            System.out.println("[GET DID CONN] Exception: " + ex.getMessage());
-        }
-        System.out.println("[DIDConn] size: " + didConnList.size());
-
-
-        return didConnList.get(0);
+        return didConnRepository.findByUserId(userId);
     }
 
     public boolean updateDIDConnection(String userID, String myDID, String theirDID, String connectionID, DIDConnStatusEnum status){
@@ -100,38 +86,14 @@ public class DBUtil {
         return dbStatus;
     }
 
-    public List<VCStatus> getVCStatusList(String userId){
-        ViewQuery query = new ViewQuery()
-                .designDocId("_design/VCStatus")
-                .viewName("by_user_id")
-                .key(userId);
-
-        try {
-            vcstatusList = db.dbConnector.queryView(query, VCStatus.class);
-        }
-        catch(Exception ex){
-            System.out.println("[GET VC STATUS] Exception: " + ex.getMessage());
-        }
-        System.out.println("[VCStatus] size: " + vcstatusList.size());
-
-        return vcstatusList;
-    }
-
     public VCStatus getVCStatus(String userID){
-        VCStatus userVCStatus = null;
-
-        vcstatusList = getVCStatusList(userID);
-        if(vcstatusList.size() > 0)
-            userVCStatus = vcstatusList.get(vcstatusList.size()-1);
-
-        return userVCStatus;
+        return vcStatusRepository.findByUserId(userID);
     }
 
     public boolean updateVCStatus(String userID, VCStatusEnum status){
         boolean dbStatus = false;
 
-        vcstatusList = getVCStatusList(userID);
-        VCStatus vcStatus = vcstatusList.get(vcstatusList.size()-1);
+        VCStatus vcStatus = getVCStatus(userID);
         vcStatus.setVCStatusEnum(status);
         vcStatus.setTimeUpdated(System.currentTimeMillis());
         try {
@@ -164,38 +126,14 @@ public class DBUtil {
         return dbStatus;
     }
 
-    public List<VPStatus> getVPStatusList(String userId){
-        ViewQuery query = new ViewQuery()
-                .designDocId("_design/VPStatus")
-                .viewName("by_user_id")
-                .key(userId);
-
-        try {
-            vpstatusList = db.dbConnector.queryView(query, VPStatus.class);
-        }
-        catch(Exception ex){
-            System.out.println("[GET VP STATUS] Exception: " + ex.getMessage());
-        }
-        System.out.println("[VPStatus] size: " + vpstatusList.size());
-
-        return vpstatusList;
-    }
-
     public VPStatus getVPStatus(String userID){
-        VPStatus userVPStatus = null;
-
-        vpstatusList = getVPStatusList(userID);
-        if(vpstatusList.size() > 0)
-            userVPStatus = vpstatusList.get(vpstatusList.size()-1);
-
-        return userVPStatus;
+        return vpStatusRepository.findByUserId(userID);
     }
 
     public boolean updateVPStatus(String userID, VPStatusEnum status){
         boolean dbStatus = false;
 
-        vpstatusList = getVPStatusList(userID);
-        VPStatus vpStatus = vpstatusList.get(vpstatusList.size()-1);
+        VPStatus vpStatus = getVPStatus(userID);
         vpStatus.setVPStatusEnum(status);
         vpStatus.setTimeUpdated(System.currentTimeMillis());
         try {
