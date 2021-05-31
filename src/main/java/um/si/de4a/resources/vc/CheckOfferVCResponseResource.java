@@ -35,39 +35,35 @@ public class CheckOfferVCResponseResource {
             else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_REJECTED)
                 vcStatusCode = -4; // return -4 (VC rejected)
             else if ((vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT) || (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_SENT)){
-                System.out.println("[CHECK OFFER VC STATUS] Offer/VC sent part");
 
-                // TODO: call Aries /issuecredential/actions: [action]
+                // DONE: call Aries /issuecredential/actions: [action]
                 AriesUtil ariesUtil = new AriesUtil();
                 JSONObject action = ariesUtil.getAction(vcStatus.getPiid());
                 if(action != null) {
                     System.out.println("[CHECK OFFER VC STATUS] Action: " + action.toJSONString());
-                    /*if ((vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_REJECTED) || (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_REJECTED))
-                    {
-                        try {
-                            dbUtil.updateVCStatus(userID, vcStatus.getVCStatusEnum());
-                        }
-                        catch(Exception ex) {
-                            System.out.println("[CHECK-OFFER-VC-RESPONSE] Exception: " + ex.getMessage());
-                        }
-                        if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_REJECTED)
-                            vcStatusCode = -2; // return -1 (offer rejected)
-                        else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_REJECTED)
-                            vcStatusCode = -4; // return -4 (VC rejected)
+                    JSONObject msg = (JSONObject) action.get("Msg");
+
+                    if(msg.get("@type").equals("https://didcomm.org/issue-credential/2.0/request-credential") && msg.get("description") == null){
+                        dbUtil.updateVCStatus(userID, VCStatusEnum.OFFER_ACCEPTED);
+                        vcStatusCode = 1; // (offer accepted)
                     }
-                    else if ((vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_ACCEPTED) || (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_ACCEPTED))
-                    {
-                        try {
-                            dbUtil.updateVCStatus(userID, vcStatus.getVCStatusEnum()); // TODO: why update if it's already written in the DB?
+                    else {
+                        JSONObject description = (JSONObject) msg.get("description");
+                        if(description.get("code").equals("rejected")){
+                            if(action.get("MyDID") != null && action.get("TheirDID") != null) {
+                                dbUtil.updateVCStatus(userID, VCStatusEnum.VC_REJECTED);
+                                vcStatusCode = -4; // return -4 (VC rejected)
+                            }
+                            else{
+                                dbUtil.updateVCStatus(userID, VCStatusEnum.OFFER_REJECTED);
+                                vcStatusCode = -2; // return -1 (offer rejected)
+                            }
                         }
-                        catch(Exception ex) {
-                            System.out.println("[CHECK-OFFER-VC-RESPONSE] Exception: " + ex.getMessage());
-                        }
-                        if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_ACCEPTED)
-                            vcStatusCode = 1; // return 1 (offer accepted)
-                        else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_ACCEPTED)
+                        else if(description.get("code").equals("internal") || description.get("code").equals("accepted")){
+                            dbUtil.updateVCStatus(userID,VCStatusEnum.VC_ACCEPTED);
                             vcStatusCode = 5; // return 5 (VC accepted)
-                    }*/
+                        }
+                    }
                 }
             }
         }

@@ -250,7 +250,6 @@ public class AriesUtil {
 
                 if (!jsonObject.isEmpty()) {
                     JSONArray resultsArray = (JSONArray) jsonObject.get("actions");
-                    System.out.println("[ARIES JSON actions] " + resultsArray.toString());
 
                     if (resultsArray.size() > 0) {
                         for (int i = 0; i < resultsArray.size(); i++) {

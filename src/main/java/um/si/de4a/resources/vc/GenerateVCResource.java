@@ -37,6 +37,7 @@ public class GenerateVCResource {
 
             if (diploma != null) {
                 evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, didKey);
+                System.out.println("evidence vc: " + evidenceVC);
             }
         }
 

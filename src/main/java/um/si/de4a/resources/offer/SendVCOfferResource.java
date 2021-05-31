@@ -2,9 +2,7 @@ package um.si.de4a.resources.offer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
 import um.si.de4a.aries.AriesUtil;
@@ -14,6 +12,7 @@ import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.model.json.VerifiableCredential;
 import um.si.de4a.resources.vc.GenerateVCResource;
+import org.json.simple.parser.JSONParser;
 
 import javax.ws.rs.*;
 import java.io.IOException;
@@ -40,11 +39,7 @@ public class SendVCOfferResource {
         AriesUtil ariesUtil = new AriesUtil();
 
         JSONParser jsonParser = new JSONParser();
-        try {
-            jsonOffer = (JSONObject) jsonParser.parse(inputOffer);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        jsonOffer = (JSONObject) jsonParser.parse(inputOffer);
         if(jsonOffer != null) {
             System.out.println("user ID: " + jsonOffer.get("userId"));
 
@@ -77,31 +72,27 @@ public class SendVCOfferResource {
                             didKey, signatureType);
 
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
-                    try {
-                        SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
+                    SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
 
-                        if(credential != null){
+                    if(credential != null){
 
-                            String prettyJson = gson.toJson(credential);
-                            System.out.println("[SEND-VC-OFFER] Result: " + prettyJson);
+                        String prettyJson = gson.toJson(credential);
+                        System.out.println("[SEND-VC-OFFER] Result: " + prettyJson);
 
-                            OfferRequest offer = new OfferRequest(userDIDConn.getMyDID(),userDIDConn.getTheirDID(), credential);
-                            String piid = ariesUtil.sendOffer(offer);
+                        OfferRequest offer = new OfferRequest(userDIDConn.getMyDID(),userDIDConn.getTheirDID(), credential);
+                        String piid = ariesUtil.sendOffer(offer);
 
-                            // DONE: call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
-                            if(piid != "") {
-                                try {
-                                    dbUtil.saveVCStatus(userID, piid, gson.toJson(credential), VCStatusEnum.OFFER_SENT);
+                        // DONE: call database saveVCStatus(userID, PIID, VC, status: offer_sent): boolean
+                        if(piid != "") {
+                            try {
+                                dbUtil.saveVCStatus(userID, piid, gson.toJson(credential), VCStatusEnum.OFFER_SENT);
 
-                                } catch (Exception ex) {
-                                    System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());
-                                }
-                                resultStatus = true;
+                            } catch (Exception ex) {
+                                System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());
                             }
-
+                            resultStatus = true;
                         }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
+
                     }
 
                 }
