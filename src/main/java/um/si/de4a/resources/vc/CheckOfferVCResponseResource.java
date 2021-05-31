@@ -1,10 +1,14 @@
 package um.si.de4a.resources.vc;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VCStatus;
 import um.si.de4a.db.VCStatusEnum;
 
 import javax.ws.rs.*;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 @Path("/check-offer-vc-response")
@@ -13,7 +17,7 @@ public class CheckOfferVCResponseResource {
     @Consumes("application/json")
     @Produces("application/json")
     @Path("{userId}")
-    public int checkResponse(@PathParam("userId") String userID) throws MalformedURLException {
+    public int checkResponse(@PathParam("userId") String userID) throws IOException, ParseException {
         int vcStatusCode = 0;
         DBUtil dbUtil = new DBUtil();
 
@@ -31,16 +35,14 @@ public class CheckOfferVCResponseResource {
             else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_REJECTED)
                 vcStatusCode = -4; // return -4 (VC rejected)
             else if ((vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT) || (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_SENT)){
-                // TODO: call Aries /issuecredential/actions: [action]
+                System.out.println("[CHECK OFFER VC STATUS] Offer/VC sent part");
 
-                if(vcStatus.getPiid() == null){
-                    if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT)
-                        vcStatusCode = 0; // return 0 (offer sent)
-                    else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_SENT)
-                        vcStatusCode = 2; // return 2 (VC sent)
-                }
-                else {
-                    if ((vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_REJECTED) || (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_REJECTED))
+                // TODO: call Aries /issuecredential/actions: [action]
+                AriesUtil ariesUtil = new AriesUtil();
+                JSONObject action = ariesUtil.getAction(vcStatus.getPiid());
+                if(action != null) {
+                    System.out.println("[CHECK OFFER VC STATUS] Action: " + action.toJSONString());
+                    /*if ((vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_REJECTED) || (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_REJECTED))
                     {
                         try {
                             dbUtil.updateVCStatus(userID, vcStatus.getVCStatusEnum());
@@ -65,7 +67,7 @@ public class CheckOfferVCResponseResource {
                             vcStatusCode = 1; // return 1 (offer accepted)
                         else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_ACCEPTED)
                             vcStatusCode = 5; // return 5 (VC accepted)
-                    }
+                    }*/
                 }
             }
         }

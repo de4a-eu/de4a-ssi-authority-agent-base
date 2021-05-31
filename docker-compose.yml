@@ -13,6 +13,17 @@ services:
             - ./src/main/resources/app.properties:/usr/local/tomcat/conf/app.properties  
         networks:
             - bdd_net
+
+    mock.eportal.de4a.eu:
+        container_name: ${EPORTAL_CONTAINER_NAME}
+        image: ${EPORTAL_IMAGE}:${EPORTAL_IMAGE_TAG}
+        ports:
+            - 0.0.0.0:${EPORTAL_PORT}:8080
+        volumes:
+            - ../de4a-demo/mock-eprocedure-portal/target/mock-eprocedure-portal-0.0.1-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war
+            - ../de4a-demo/mock-eprocedure-portal/src/main/resources/application.properties:/usr/local/tomcat/conf/application.properties
+        networks:
+            - bdd_net
    
 volumes:
     db_data: {}

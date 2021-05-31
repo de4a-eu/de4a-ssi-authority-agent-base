@@ -228,6 +228,52 @@ public class AriesUtil {
         return response;
     }
 
+    public JSONObject getAction(String piid) throws IOException, ParseException {
+        JSONObject action = null;
+
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "issuecredential/actions").openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
+
+        int responseCode = urlConnection.getResponseCode();
+        System.out.println("[ARIES get-actions] GET Response Code :: " + responseCode);
+
+        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+            InputStream stream = urlConnection.getInputStream();
+
+            String result = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
+
+            try {
+
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+                if (!jsonObject.isEmpty()) {
+                    JSONArray resultsArray = (JSONArray) jsonObject.get("actions");
+                    System.out.println("[ARIES JSON actions] " + resultsArray.toString());
+
+                    if (resultsArray.size() > 0) {
+                        for (int i = 0; i < resultsArray.size(); i++) {
+                            JSONObject actionObj = (JSONObject) resultsArray.get(i);
+                            if(actionObj.get("PIID").equals(piid)){
+                                action = actionObj;
+                                System.out.println("[ARIES actions] Found action match: " + action.get("PIID"));
+                            }
+                        }
+                    }
+                }
+            }catch(Exception ex){
+                System.out.println("[ARIES get actions] Exception: " + ex.getMessage());
+            }
+
+        } else {
+            System.out.println("[ARIES JSON actions] GET request has not worked");
+        }
+        urlConnection.disconnect();
+
+        return action;
+    }
+
     private String buildURL(String baseURL, String endpoint, String parameter, String method){
         return baseURL + endpoint + "/" + parameter + "/" + method;
     }
