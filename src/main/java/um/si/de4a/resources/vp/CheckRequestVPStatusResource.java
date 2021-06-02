@@ -2,7 +2,11 @@ package um.si.de4a.resources.vp;
 
 
 import org.jboss.resteasy.annotations.Query;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
+import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
 
@@ -17,7 +21,7 @@ public class CheckRequestVPStatusResource {
     @Consumes("application/json")
     @Produces("application/json")
     @Path("{userId}")
-    public int getStatus(@PathParam("userId") String userId) throws MalformedURLException {
+    public int getStatus(@PathParam("userId") String userId) throws IOException {
         int vpRequestStatus = 0;
         DBUtil dbUtil = new DBUtil();
         // DONE: call database getVPStatus(userID): VPStatus object
@@ -33,19 +37,32 @@ public class CheckRequestVPStatusResource {
                 vpRequestStatus = -2; // return -2 (request rejected)
             else if (vpStatus.getVPStatusEnum() == VPStatusEnum.REQUEST_SENT){
                 // TODO: call Aries /presentproof/actions: [action]
+                AriesUtil ariesUtil = new AriesUtil();
+                try {
+                    JSONObject action = ariesUtil.getActionVP(vpStatus.getPiid());
+                    if (action != null){
+                        System.out.println("[CHECK REQUEST VP STATUS] Action: " + action.toJSONString());
+                        JSONObject msg = (JSONObject) action.get("Msg");
 
-                // for (action in actions):
-                    // if (PIID == null): return 0 (request was sent but not yet accepted)
-                    // else if (PIID != null && status == "vp_rejected"):
-                        // DONE: call database updateVPStatus(userId, status:vp_rejected): boolean
-                        //dbUtil.updateVPStatus(userId, VPStatusEnum.VP_REJECTED);
-                        //vpRequestStatus = -2; // return -2 (request rejected)
-                    // else if (PIID != null && status == "vp_accepted":
-                        // generateName(userId, PIID): name
-                        // call Aries /presentproof/{PIID}/accept-presentation(name): boolean
-                        // call database updateVPStatus(userId, name, status: vp_received): boolean
-                        // dbUtil.updateVPStatus(userId, VPStatusEnum.VP_RECEIVED);
-                        // vpRequestStatus = 1; // return 1 (vp received)
+                        if(msg.get("@type").equals("https://didcomm.org/present-proof/2.0/presentation") && msg.get("description") == null){
+                            boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new String[]{"vp" + userId + vpStatus.getPiid()});
+                            if(acceptResult == true){
+                                boolean updateStatus = dbUtil.updateVPStatus(userId, VPStatusEnum.VP_RECEIVED);
+                                if(updateStatus == true)
+                                    vpRequestStatus = 1; // (vp received)
+                            }
+                        }
+                        else {
+                            JSONObject description = (JSONObject) msg.get("description");
+                            if (description.get("code").equals("rejected")) {
+                                dbUtil.updateVPStatus(userId, VPStatusEnum.VP_REJECTED);
+                                vpRequestStatus = -2; // return -1 (vp rejected)
+                            }
+                        }
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

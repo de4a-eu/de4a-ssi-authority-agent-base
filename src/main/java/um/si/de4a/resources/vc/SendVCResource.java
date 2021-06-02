@@ -20,7 +20,7 @@ public class SendVCResource {
     @Consumes("application/json")
     @Produces("application/json")
     public boolean sendVC(String user) throws IOException {
-        boolean vcStatusResult = false;
+        boolean vcStatusResult = false, vcAcceptStatus = false;
         JSONObject jsonRequest = null;
 
         DBUtil dbUtil = new DBUtil();
@@ -50,11 +50,14 @@ public class SendVCResource {
             if (vcStatus != null) {
                 try {
                     SendVCRequest request = new SendVCRequest(gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class));
+                    System.out.println("[SEND VC] Signed VC ID: " + request.getCredential().getId());
                     // DONE: call Aries /issuecredential/{PIID}/accept-request(VC):  null/empty
-                    vcStatusResult = ariesUtil.acceptRequest(vcStatus.getPiid(),request);
+                    vcAcceptStatus = ariesUtil.acceptRequest(vcStatus.getPiid(),request);
                     // DONE: call database updateVCStatus(userId, status: vc_sent): boolean
-                    if (vcStatusResult == true)
+                    if (vcAcceptStatus == true) {
                         dbUtil.updateVCStatus(userID, VCStatusEnum.VC_SENT);
+                        vcStatusResult = true;
+                    }
 
                 } catch (Exception ex) {
                     System.out.println("[SEND-VC] Exception: " + ex.getMessage());

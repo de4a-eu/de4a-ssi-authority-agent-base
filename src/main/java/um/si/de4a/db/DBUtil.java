@@ -107,13 +107,13 @@ public class DBUtil {
         return dbStatus;
     }
 
-    public boolean saveVPStatus(String userID, String PIID, String vp, String vpName, VPStatusEnum status){
+    public boolean saveVPStatus(String userID, String PIID, String vpName, VPStatusEnum status){
         boolean dbStatus = false;
         VPStatus vpStatus = null;
 
         DIDConn userDIDConn = getDIDConnStatus(userID);
         if(userDIDConn != null){
-            vpStatus = new VPStatus(null, null, userID, PIID, vp,
+            vpStatus = new VPStatus(null, null, userID, PIID,
                     userDIDConn,status.REQUEST_SENT,vpName,System.currentTimeMillis(),"VPStatus");
             try {
                 vpStatusRepository.add(vpStatus);

@@ -3,11 +3,13 @@ package um.si.de4a.resources.vp;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VPStatusEnum;
 
 import javax.ws.rs.*;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 @Path("/send-vp-request")
@@ -15,7 +17,7 @@ public class SendVPRequestResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-     public boolean sendVPRequest(String vpRequest) throws MalformedURLException {
+     public boolean sendVPRequest(String vpRequest) throws IOException, ParseException {
         boolean vpRequestStatus = false;
         JSONObject jsonRequest = null;
         DBUtil dbUtil = new DBUtil();
@@ -28,21 +30,32 @@ public class SendVPRequestResource {
         }
 
         if(jsonRequest != null) {
-            System.out.println("user ID: " + jsonRequest.get("userId"));
+            System.out.println("[SEND VP REQUEST] User ID: " + jsonRequest.get("userId"));
 
             String userID = jsonRequest.get("userId").toString();
 
             // DONE: call database getDIDConnStatus(userID): DIDConn object
             DIDConn userDIDConn = dbUtil.getDIDConnStatus(userID);
 
-            // TODO: generate VPRequest (format, myDID, theirDID): VPRequest object
+            if(userDIDConn != null) { // if invitation is generated
+                if (!userDIDConn.getConnectionId().equals("")) { // if DIDConn is established
+                    // DONE: generate VPRequest (format, myDID, theirDID): VPRequest object
+                    VPRequest vpRequestObj = new VPRequest(userDIDConn.getMyDID(), new RequestPresentationObj(), userDIDConn.getTheirDID());
+                    System.out.println("[SEND VP REQUEST] VP request object - myDID: " + vpRequestObj.getMyDID());
 
-            // TODO: call Aries /presentproof/send-request-presentation(VPRequest):  PIID
+                    // DONE: call Aries /presentproof/send-request-presentation(VPRequest):  PIID
+                    AriesUtil ariesUtil = new AriesUtil();
+                    String piid = ariesUtil.sendRequest(vpRequestObj);
+                    if (piid != "") {
+                        System.out.println("[SEND VP REQUEST] Received PIID: " + piid);
 
-            // DONE: call database saveVPStatus(userId, PIID, status: request_sent): boolean
-            boolean response = dbUtil.saveVPStatus(userID, "piid1", "vp1", "name1", VPStatusEnum.REQUEST_SENT);
-            if (response == true)
-                vpRequestStatus = true;
+                        // DONE: call database saveVPStatus(userId, PIID, status: request_sent): boolean
+                        boolean response = dbUtil.saveVPStatus(userID, piid, "vp-" + userID, VPStatusEnum.REQUEST_SENT);
+                        if (response == true)
+                            vpRequestStatus = true;
+                    }
+                }
+            }
         }
         return vpRequestStatus;
     }

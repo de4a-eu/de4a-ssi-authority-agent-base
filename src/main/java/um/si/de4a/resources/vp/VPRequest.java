@@ -1,0 +1,112 @@
+package um.si.de4a.resources.vp;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+
+public class VPRequest {
+    @SerializedName("my_did")
+    private String myDID;
+
+    @SerializedName("request_presentation")
+    private RequestPresentationObj requestPresentationObj;
+
+    @SerializedName("their_did")
+    private String theirDID;
+
+    public VPRequest(String myDID, RequestPresentationObj requestPresentationObj, String theirDID) {
+        this.myDID = myDID;
+        this.requestPresentationObj = requestPresentationObj;
+        this.theirDID = theirDID;
+    }
+
+    public String getMyDID() {
+        return myDID;
+    }
+
+    public void setMyDID(String myDID) {
+        this.myDID = myDID;
+    }
+
+    public RequestPresentationObj getRequestPresentationObj() {
+        return requestPresentationObj;
+    }
+
+    public void setRequestPresentationObj(RequestPresentationObj requestPresentationObj) {
+        this.requestPresentationObj = requestPresentationObj;
+    }
+
+    public String getTheirDID() {
+        return theirDID;
+    }
+
+    public void setTheirDID(String theirDID) {
+        this.theirDID = theirDID;
+    }
+}
+
+class RequestPresentationObj {
+    @SerializedName("@type")
+    private String type;
+    private String comment;
+    private ArrayList<Format> formats;
+
+    public RequestPresentationObj(){}
+
+    public RequestPresentationObj(String type, String comment, ArrayList<Format> formats) {
+        this.type = type;
+        this.comment = comment;
+        this.formats = formats;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public ArrayList<Format> getFormats() {
+        return formats;
+    }
+
+    public void setFormats(ArrayList<Format> formats) {
+        this.formats = formats;
+    }
+}
+
+class Format {
+    @SerializedName("attach_id")
+    private String attachId;
+    private String format;
+
+    public Format(String attachId, String format) {
+        this.attachId = attachId;
+        this.format = format;
+    }
+
+    public String getAttachId() {
+        return attachId;
+    }
+
+    public void setAttachId(String attachId) {
+        this.attachId = attachId;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+}

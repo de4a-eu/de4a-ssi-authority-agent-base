@@ -65,6 +65,12 @@ public class CheckOfferVCResponseResource {
                         }
                     }
                 }
+                else{
+                    if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT)
+                        vcStatusCode = 0; // (offer sent and awaiting response)
+                    else if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_SENT)
+                        vcStatusCode = 2; // (vc sent and awaiting response)
+                }
             }
         }
         return vcStatusCode;

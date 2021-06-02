@@ -20,8 +20,6 @@ public class VPStatus extends CouchDbDocument {
 
     private String piid;
 
-    private String vp;
-
     private DIDConn didConn;
 
     private VPStatusEnum VPStatusEnum;
@@ -36,12 +34,11 @@ public class VPStatus extends CouchDbDocument {
     public VPStatus() {
     }
 
-    public VPStatus(String id, String revision, String userId, String piid, String vp, DIDConn didConn, um.si.de4a.db.VPStatusEnum VPStatusEnum, String vpName, long timeUpdated, String type) {
+    public VPStatus(String id, String revision, String userId, String piid, DIDConn didConn, um.si.de4a.db.VPStatusEnum VPStatusEnum, String vpName, long timeUpdated, String type) {
         this.id = id;
         this.revision = revision;
         this.userId = userId;
         this.piid = piid;
-        this.vp = vp;
         this.didConn = didConn;
         this.VPStatusEnum = VPStatusEnum;
         this.vpName = vpName;
@@ -107,14 +104,6 @@ public class VPStatus extends CouchDbDocument {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public String getVp() {
-        return vp;
-    }
-
-    public void setVp(String vp) {
-        this.vp = vp;
     }
 
     public um.si.de4a.db.VPStatusEnum getVPStatusEnum() {
