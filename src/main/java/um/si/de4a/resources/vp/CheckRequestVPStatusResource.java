@@ -31,12 +31,14 @@ public class CheckRequestVPStatusResource {
         if(vpStatus == null)
             vpRequestStatus = -1; // return -1 (request was never sent)
         else{
+            System.out.println("[CHECK-REQUEST-VP-RESPONSE] VP PIID: " + vpStatus.getPiid());
+
             if (vpStatus.getVPStatusEnum() == VPStatusEnum.VP_RECEIVED)
                 vpRequestStatus = 1; // return 1 (VP received)
             else if (vpStatus.getVPStatusEnum() == VPStatusEnum.VP_REJECTED)
                 vpRequestStatus = -2; // return -2 (request rejected)
             else if (vpStatus.getVPStatusEnum() == VPStatusEnum.REQUEST_SENT){
-                // TODO: call Aries /presentproof/actions: [action]
+                // DONE: call Aries /presentproof/actions: [action]
                 AriesUtil ariesUtil = new AriesUtil();
                 try {
                     JSONObject action = ariesUtil.getActionVP(vpStatus.getPiid());
@@ -44,8 +46,9 @@ public class CheckRequestVPStatusResource {
                         System.out.println("[CHECK REQUEST VP STATUS] Action: " + action.toJSONString());
                         JSONObject msg = (JSONObject) action.get("Msg");
 
+
                         if(msg.get("@type").equals("https://didcomm.org/present-proof/2.0/presentation") && msg.get("description") == null){
-                            boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new String[]{"vp" + userId + vpStatus.getPiid()});
+                            boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new NamesObj(new String[]{vpStatus.getVpName()}));
                             if(acceptResult == true){
                                 boolean updateStatus = dbUtil.updateVPStatus(userId, VPStatusEnum.VP_RECEIVED);
                                 if(updateStatus == true)
@@ -56,7 +59,7 @@ public class CheckRequestVPStatusResource {
                             JSONObject description = (JSONObject) msg.get("description");
                             if (description.get("code").equals("rejected")) {
                                 dbUtil.updateVPStatus(userId, VPStatusEnum.VP_REJECTED);
-                                vpRequestStatus = -2; // return -1 (vp rejected)
+                                vpRequestStatus = -2; // return -2 (vp rejected)
                             }
                         }
                     }

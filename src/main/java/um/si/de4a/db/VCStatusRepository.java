@@ -24,7 +24,7 @@ public class VCStatusRepository extends CouchDbRepositorySupport<VCStatus> {
                     .key(userId);
             List<VCStatus> result = db.queryView(query, VCStatus.class);
             if (result.size() > 0) {
-                return result.get(0);
+                return result.get(result.size()-1); // get the most recent VC status
             }
         } catch (DocumentNotFoundException e) {
             return null;

@@ -1,6 +1,9 @@
 package um.si.de4a.aries;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -19,6 +22,7 @@ import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.resources.offer.OfferRequest;
 import um.si.de4a.resources.offer.SignRequest;
 import um.si.de4a.resources.vc.SendVCRequest;
+import um.si.de4a.resources.vp.NamesObj;
 import um.si.de4a.resources.vp.VPRequest;
 
 import java.io.IOException;
@@ -350,19 +354,23 @@ public class AriesUtil {
         return action;
     }
 
-    public boolean acceptPresentation(String piid, String[] names) throws IOException {
+    public boolean acceptPresentation(String piid, NamesObj namesObj) throws IOException {
         boolean response = false;
 
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         HttpResponse httpResponse = null;
 
         Gson gson = new Gson();
+
+
+        System.out.println("[CHECK-REQUEST-VP-RESPONSE] Names: " + gson.toJson(namesObj));
+
         try {
             String url = buildURL(baseUrl, "presentproof", piid, "accept-presentation");
             System.out.println("[ARIES ACCEPT REQUEST] URL: " + url);
 
             HttpPost request = new HttpPost(url);
-            StringEntity input = new StringEntity(gson.toJson(names));
+            StringEntity input = new StringEntity(gson.toJson(namesObj));
             input.setContentType("application/json;charset=UTF-8");
             input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
             request.setEntity(input);
@@ -388,6 +396,91 @@ public class AriesUtil {
         }
 
         return response;
+    }
+
+    public JSONObject getPresentation(String name) throws IOException {
+        JSONObject presentation = null;
+
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "verifiable/presentations").openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
+
+        int responseCode = urlConnection.getResponseCode();
+        System.out.println("[ARIES get-presentations] GET Response Code :: " + responseCode);
+
+        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+            InputStream stream = urlConnection.getInputStream();
+
+            String result = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
+
+            try {
+
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+                if (!jsonObject.isEmpty()) {
+                    JSONArray resultsArray = (JSONArray) jsonObject.get("result");
+
+                    if (resultsArray.size() > 0) {
+                        for (int i = 0; i < resultsArray.size(); i++) {
+                            JSONObject presentationObj = (JSONObject) resultsArray.get(i);
+                            if(presentationObj.get("name").equals(name)){
+                                presentation = presentationObj;
+                                System.out.println("[ARIES presentations] Found VP match: " + presentation.get("id"));
+                            }
+                        }
+                    }
+                }
+            }catch(Exception ex){
+                System.out.println("[ARIES get presentations] Exception: " + ex.getMessage());
+            }
+
+        } else {
+            System.out.println("[ARIES JSON presentations] GET request has not worked");
+        }
+        urlConnection.disconnect();
+
+        return presentation;
+    }
+
+    public JSONObject findPresentationByID(String vpID) throws IOException {
+        JSONObject presentation = null;
+
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "verifiable/presentation/" + vpID).openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
+
+        int responseCode = urlConnection.getResponseCode();
+        System.out.println("[ARIES get-presentation] GET Response Code :: " + responseCode);
+
+        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+            InputStream stream = urlConnection.getInputStream();
+
+            String result = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
+
+            try {
+
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+                if (!jsonObject.isEmpty()) {
+                    JSONObject verifiablePresentationJSON = (JSONObject) jsonObject.get("verifiablePresentation");
+
+                    if (verifiablePresentationJSON != null) {
+                        System.out.println("[ARIES presentation] VP: " + verifiablePresentationJSON.get("id"));
+                        presentation = verifiablePresentationJSON;
+                    }
+                }
+            }catch(Exception ex){
+                System.out.println("[ARIES get presentation] Exception: " + ex.getMessage());
+            }
+
+        } else {
+            System.out.println("[ARIES JSON presentation] GET request has not worked");
+        }
+        urlConnection.disconnect();
+
+        return presentation;
     }
 
 

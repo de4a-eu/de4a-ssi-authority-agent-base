@@ -9,7 +9,7 @@ import org.ektorp.support.View;
 
 import java.util.List;
 
-@View( name = "all", map = "function(doc) { if (doc.type == 'VPStatus' ) emit( doc.userId, doc)}")
+@View( name = "all", map = "function(doc) { if (doc.type == 'VPStatus' ) emit( doc.timeUpdated, doc)}")
 public class VPStatusRepository extends CouchDbRepositorySupport<VPStatus> {
 
     protected VPStatusRepository(Class<VPStatus> type, CouchDbConnector db) {
@@ -17,15 +17,14 @@ public class VPStatusRepository extends CouchDbRepositorySupport<VPStatus> {
         initStandardDesignDocument();
     }
 
-    @View( name="byUserId", map = "function(doc) { if (doc.type == 'VPStatus') { emit(doc.userId, doc) } }")
+    @View( name="byUserId", map = "function(doc) { if (doc.type == 'VPStatus') { emit(doc.timeUpdated, doc) } }")
     public VPStatus findByUserId(String userId) {
         try {
             ViewQuery query = createQuery("byUserId")
                     .key(userId);
             List<VPStatus> result = db.queryView(query, VPStatus.class);
-            if (result.size() > 0) {
-                return result.get(0);
-            }
+            if(result.size() > 0)
+                return result.get(result.size()-1); // get the most recent VP status
         } catch (DocumentNotFoundException e) {
             return null;
         }

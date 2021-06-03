@@ -41,7 +41,6 @@ public class SendVPRequestResource {
                 if (!userDIDConn.getConnectionId().equals("")) { // if DIDConn is established
                     // DONE: generate VPRequest (format, myDID, theirDID): VPRequest object
                     VPRequest vpRequestObj = new VPRequest(userDIDConn.getMyDID(), new RequestPresentationObj(), userDIDConn.getTheirDID());
-                    System.out.println("[SEND VP REQUEST] VP request object - myDID: " + vpRequestObj.getMyDID());
 
                     // DONE: call Aries /presentproof/send-request-presentation(VPRequest):  PIID
                     AriesUtil ariesUtil = new AriesUtil();
@@ -50,7 +49,7 @@ public class SendVPRequestResource {
                         System.out.println("[SEND VP REQUEST] Received PIID: " + piid);
 
                         // DONE: call database saveVPStatus(userId, PIID, status: request_sent): boolean
-                        boolean response = dbUtil.saveVPStatus(userID, piid, "vp-" + userID, VPStatusEnum.REQUEST_SENT);
+                        boolean response = dbUtil.saveVPStatus(userID, piid, "vp-" + userID + "-" + piid, VPStatusEnum.REQUEST_SENT);
                         if (response == true)
                             vpRequestStatus = true;
                     }
