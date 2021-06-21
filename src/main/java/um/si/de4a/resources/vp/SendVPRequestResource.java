@@ -11,6 +11,7 @@ import um.si.de4a.db.VPStatusEnum;
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 
 @Path("/send-vp-request")
 public class SendVPRequestResource {
@@ -40,7 +41,12 @@ public class SendVPRequestResource {
             if(userDIDConn != null) { // if invitation is generated
                 if (!userDIDConn.getConnectionId().equals("")) { // if DIDConn is established
                     // DONE: generate VPRequest (format, myDID, theirDID): VPRequest object
-                    VPRequest vpRequestObj = new VPRequest(userDIDConn.getMyDID(), new RequestPresentationObj(), userDIDConn.getTheirDID());
+                    RequestPresentationAttachObj rpa = new RequestPresentationAttachObj(new DataObj(new JsonObj
+                            (new String[]{"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"},
+                                    new String[]{"UniversityDegreeCredential"})));
+                    ArrayList<RequestPresentationAttachObj> rpaList = new ArrayList<>();
+                    rpaList.add(rpa);
+                    VPRequest vpRequestObj = new VPRequest(userDIDConn.getMyDID(), new RequestPresentationObj(rpaList), userDIDConn.getTheirDID());
 
                     // DONE: call Aries /presentproof/send-request-presentation(VPRequest):  PIID
                     AriesUtil ariesUtil = new AriesUtil();
@@ -49,7 +55,7 @@ public class SendVPRequestResource {
                         System.out.println("[SEND VP REQUEST] Received PIID: " + piid);
 
                         // DONE: call database saveVPStatus(userId, PIID, status: request_sent): boolean
-                        boolean response = dbUtil.saveVPStatus(userID, piid, "vp-" + userID + "-" + piid, VPStatusEnum.REQUEST_SENT);
+                        boolean response = dbUtil.saveVPStatus(userID, piid, null, VPStatusEnum.REQUEST_SENT);
                         if (response == true)
                             vpRequestStatus = true;
                     }

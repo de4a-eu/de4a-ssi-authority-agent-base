@@ -13,6 +13,7 @@ import um.si.de4a.model.json.SignedVerifiableCredential;
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 
 @Path("/send-vc")
 public class SendVCResource {
@@ -49,8 +50,11 @@ public class SendVCResource {
             Gson gson = new Gson();
             if (vcStatus != null) {
                 try {
-                    SendVCRequest request = new SendVCRequest(gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class));
-                    System.out.println("[SEND VC] Signed VC ID: " + request.getCredential().getId());
+                    Data data = new Data(gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class));
+                    CredentialsAttach credentialsAttach = new CredentialsAttach(data.getJson().getIssuanceDate(), data);
+                    IssueCredential issueCredential = new IssueCredential(new ArrayList<CredentialsAttach>(){{add(credentialsAttach);}});
+                    SendVCRequest request = new SendVCRequest(issueCredential);
+                    System.out.println("[SEND VC] Signed VC ID: " + request.getCredential().getCredentialsAttach().get(0).getData().getJson().getId());
                     // DONE: call Aries /issuecredential/{PIID}/accept-request(VC):  null/empty
                     vcAcceptStatus = ariesUtil.acceptRequest(vcStatus.getPiid(),request);
                     // DONE: call database updateVCStatus(userId, status: vc_sent): boolean

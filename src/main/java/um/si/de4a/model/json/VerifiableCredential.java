@@ -9,20 +9,24 @@ public class VerifiableCredential {
      private String[] type;
      private String issuer;
      private String issuanceDate;
+     private String validFrom;
+     private String expirationDate;
      private CredentialSubject credentialSubject;
     // private CredentialStatus credentialStatus;
     // private CredentialSchema credentialSchema;
     //  private Evidence evidence;
 
-    public VerifiableCredential(String[] context, String id, String[] type, String issuer, String issuanceDate, CredentialSubject credentialSubject) {
+
+    public VerifiableCredential(String[] context, String id, String[] type, String issuer, String issuanceDate, String validFrom, String expirationDate, CredentialSubject credentialSubject) {
         this.context = context;
         this.id = id;
         this.type = type;
         this.issuer = issuer;
         this.issuanceDate = issuanceDate;
+        this.validFrom = validFrom;
+        this.expirationDate = expirationDate;
         this.credentialSubject = credentialSubject;
     }
-
 
     public String[] getContext() {
         return context;
@@ -70,6 +74,22 @@ public class VerifiableCredential {
 
     public void setCredentialSubject(CredentialSubject credentialSubject) {
         this.credentialSubject = credentialSubject;
+    }
+
+    public String getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(String validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public String getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(String expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     /*

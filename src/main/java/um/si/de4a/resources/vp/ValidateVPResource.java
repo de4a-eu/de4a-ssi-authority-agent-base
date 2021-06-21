@@ -33,6 +33,7 @@ public class ValidateVPResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonEIDAS = (JSONObject) jsonParser.parse(eidasMds);
+            System.out.println("Received: " + jsonEIDAS.toJSONString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -40,9 +41,10 @@ public class ValidateVPResource {
         // DONE: call database getVPStatus(userId): VPStatus object
         VPStatus userVPStatus = dbUtil.getVPStatus(userId);
 
-        ValidationObj validationObj = new ValidationObj(subjectCheckResult,schemaCheckResult,issuerCheckResult);
+        ValidationObj validationObj = new ValidationObj(subjectCheckResult,schemaCheckResult,issuerCheckResult, "");
         if(!(userVPStatus.getVPStatusEnum() == VPStatusEnum.REQUEST_SENT) && !(userVPStatus.getVPStatusEnum() == VPStatusEnum.VP_REJECTED) ){
             // DONE: call Aries /verifiable/presentations: [presentation]
+            System.out.println("user vp: " + userVPStatus.getVpName());
             AriesUtil ariesUtil = new AriesUtil();
             JSONObject jsonPresentation = ariesUtil.getPresentation(userVPStatus.getVpName());
             if (jsonPresentation != null){
@@ -60,11 +62,11 @@ public class ValidateVPResource {
                     System.out.println("[VALIDATE VP] EIDAS user: " + jsonEIDAS.get("userId"));
                     if(jsonEIDAS.get("userId") != null) {
                         subjectCheckResult = checkSubject(jsonVP.get("holder").toString(), jsonEIDAS.get("userId").toString());
-                        validationObj = new ValidationObj(subjectCheckResult, 1, 1); // invalid
+                        validationObj = new ValidationObj(subjectCheckResult, 1, 1, userVPStatus.getVpName()); // invalid
                         dbUtil.updateVPStatus(userId,VPStatusEnum.VP_VALID);
                     }
                     else {
-                        validationObj = new ValidationObj(0, 0, 0); // invalid
+                        validationObj = new ValidationObj(0, 0, 0, null); // invalid
                         dbUtil.updateVPStatus(userId,VPStatusEnum.VP_NOT_VALID);
                     }
                 }
@@ -79,7 +81,7 @@ public class ValidateVPResource {
 
 
     private int checkSubject(String vpSubject, String eidasSubject){
-        int result = -1;
+        int result = 0;
         if(vpSubject.equals(eidasSubject))
             result = 1;
         return result;

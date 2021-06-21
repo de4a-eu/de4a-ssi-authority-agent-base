@@ -146,6 +146,22 @@ public class DBUtil {
         return dbStatus;
     }
 
+    public boolean updateVPStatus(String userID, String vpName, VPStatusEnum status){
+        boolean dbStatus = false;
+
+        VPStatus vpStatus = getVPStatus(userID);
+        vpStatus.setVpName(vpName);
+        vpStatus.setVPStatusEnum(status);
+        vpStatus.setTimeUpdated(System.currentTimeMillis());
+        try {
+            vpStatusRepository.update(vpStatus);
+            dbStatus = true;
+        }
+        catch (Exception ex) {
+            dbStatus = false;
+        }
+        return dbStatus;
+    }
     public List<VPStatus> findVPById(String vpId){
         ViewQuery query = new ViewQuery()
                 .designDocId("_design/VPStatus")

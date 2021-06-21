@@ -48,9 +48,9 @@ public class CheckRequestVPStatusResource {
 
 
                         if(msg.get("@type").equals("https://didcomm.org/present-proof/2.0/presentation") && msg.get("description") == null){
-                            boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new NamesObj(new String[]{vpStatus.getVpName()}));
+                            boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new NamesObj(new String[]{"vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid()}));
                             if(acceptResult == true){
-                                boolean updateStatus = dbUtil.updateVPStatus(userId, VPStatusEnum.VP_RECEIVED);
+                                boolean updateStatus = dbUtil.updateVPStatus(userId, "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(),VPStatusEnum.VP_RECEIVED);
                                 if(updateStatus == true)
                                     vpRequestStatus = 1; // (vp received)
                             }

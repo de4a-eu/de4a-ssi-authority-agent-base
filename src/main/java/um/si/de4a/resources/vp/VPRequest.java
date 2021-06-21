@@ -50,13 +50,19 @@ class RequestPresentationObj {
     private String type;
     private String comment;
     private ArrayList<Format> formats;
-
+    @SerializedName("request_presentations~attach")
+    private ArrayList<RequestPresentationAttachObj> requestPresentationAttachObjs;
     public RequestPresentationObj(){}
 
-    public RequestPresentationObj(String type, String comment, ArrayList<Format> formats) {
+    public RequestPresentationObj(ArrayList<RequestPresentationAttachObj> requestPresentationAttachObjs) {
+        this.requestPresentationAttachObjs = requestPresentationAttachObjs;
+    }
+
+    public RequestPresentationObj(String type, String comment, ArrayList<Format> formats, ArrayList<RequestPresentationAttachObj> requestPresentationAttachObjs) {
         this.type = type;
         this.comment = comment;
         this.formats = formats;
+        this.requestPresentationAttachObjs = requestPresentationAttachObjs;
     }
 
     public String getType() {
@@ -81,6 +87,14 @@ class RequestPresentationObj {
 
     public void setFormats(ArrayList<Format> formats) {
         this.formats = formats;
+    }
+
+    public ArrayList<RequestPresentationAttachObj> getRequestPresentationAttachObjs() {
+        return requestPresentationAttachObjs;
+    }
+
+    public void setRequestPresentationAttachObjs(ArrayList<RequestPresentationAttachObj> requestPresentationAttachObjs) {
+        this.requestPresentationAttachObjs = requestPresentationAttachObjs;
     }
 }
 

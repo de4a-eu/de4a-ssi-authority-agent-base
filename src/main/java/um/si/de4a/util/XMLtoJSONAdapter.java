@@ -29,15 +29,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 public class XMLtoJSONAdapter {
 
@@ -103,6 +101,10 @@ public class XMLtoJSONAdapter {
         Date dateBirth = inputFormat.parse(inputBirthDate);
         String outputDateBirth = outputFormat.format(dateBirth);
 
+        Calendar cal = Calendar.getInstance();
+        String validFrom = outputFormat.format(cal.getTime());
+        cal.add(Calendar.YEAR, 1);
+        String expirationDate = outputFormat.format(cal.getTime());
         Location location = new Location("urn:epass:location:1", new Title(new Text(diploma.getPlaceOfIssue().getName().getText().getContentType(), diploma.getPlaceOfIssue().getName().getText().getLang(), diploma.getPlaceOfIssue().getName().getText().getValue())),
                 new SpatialCode("http://publications.europa.eu/resource/authority/country", countryCode, "http://publications.europa.eu/resource/authority/country/" + countryCode,
                         new Title(new Text("text/plain", "en", "Countries Named Authority List")), new Title(new Text("text/plain", "en", countryName))));
@@ -127,7 +129,7 @@ public class XMLtoJSONAdapter {
         //CredentialSchema schema = new CredentialSchema("https://essif.europa.eu/tsr-123/verifiableattestation.json", "JsonSchemaValidator2018");
        // Evidence evidence = new Evidence("https://essif.europa.eu/evidence/f2aeec97-fc0d-42bf-8ca7-0548192d4231", new String[]{"eIDAS"}, "https://essif.europa.eu/issuers/48", new String[]{"eIDAS identifier"});
 
-        VerifiableCredential vc = new VerifiableCredential(context, "http://example.edu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued,subject);
+        VerifiableCredential vc = new VerifiableCredential(context, "http://example.edu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
         for (String t: vc.getType())
             System.out.println("VC TYPE: " + t);
 

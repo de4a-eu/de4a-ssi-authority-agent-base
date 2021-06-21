@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 public class SignedVerifiableCredential {
     private CredentialSubject credentialSubject;
     private String issuanceDate;
+    private String validFrom;
+    private String expirationDate;
     private String id;
     private Proof proof;
     private String[] type;
@@ -12,9 +14,11 @@ public class SignedVerifiableCredential {
      private String[] context;
      private String issuer;
 
-    public SignedVerifiableCredential(CredentialSubject credentialSubject, String issuanceDate, String id, Proof proof, String[] type, String[] context, String issuer) {
+    public SignedVerifiableCredential(CredentialSubject credentialSubject, String issuanceDate, String validFrom, String expirationDate, String id, Proof proof, String[] type, String[] context, String issuer) {
         this.credentialSubject = credentialSubject;
         this.issuanceDate = issuanceDate;
+        this.validFrom = validFrom;
+        this.expirationDate = expirationDate;
         this.id = id;
         this.proof = proof;
         this.type = type;
@@ -76,5 +80,21 @@ public class SignedVerifiableCredential {
 
     public void setProof(Proof proof) {
         this.proof = proof;
+    }
+
+    public String getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(String validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public String getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(String expirationDate) {
+        this.expirationDate = expirationDate;
     }
 }

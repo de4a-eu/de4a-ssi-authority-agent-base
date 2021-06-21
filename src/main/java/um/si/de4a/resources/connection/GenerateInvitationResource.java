@@ -28,6 +28,7 @@ public class GenerateInvitationResource {
             e.printStackTrace();
         }
 
+        JSONObject invitation = null;
         if(jsonUserID != null) {
             System.out.println("user ID: " + jsonUserID.get("userId"));
 
@@ -35,21 +36,24 @@ public class GenerateInvitationResource {
 
             // DONE: call Aries /connections/create-invitation : JSON
             AriesUtil aries = new AriesUtil();
-            JSONObject invitation = aries.generateInvitation();
+            invitation = aries.generateInvitation();
 
             if (invitation != null) {
-                invitationJson = invitation.toJSONString();
+                invitationJson = invitation.get("invitation").toString();
+
+                JSONObject jsonObjectInv = (JSONObject) jsonParser.parse(invitationJson);
+
                 long currentTime = System.currentTimeMillis();
 
                 // DONE: saveDIDConn(userID, invitationID, invitationJSON, status: invitation_generated): boolean
                 DBUtil dbUtil = new DBUtil();
                 try {
-                    dbStored = dbUtil.saveDIDConn(userID, invitation.get("@id").toString(), invitation.toString(), currentTime);
+                    dbStored = dbUtil.saveDIDConn(userID, jsonObjectInv.get("@id").toString(), invitation.toString(), currentTime);
                 } catch (Exception ex) {
                     System.out.println("[GENERATE-INVITATION] Exception: " + ex.getMessage());
                 }
             }
         }
-        return invitationJson;
+        return invitation.toString();
     }
 }

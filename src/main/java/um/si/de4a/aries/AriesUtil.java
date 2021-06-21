@@ -51,22 +51,23 @@ public class AriesUtil {
         int responseCode = urlConnection.getResponseCode();
         System.out.println("[ARIES generate-invitation] POST Response Code :: " + responseCode);
 
+        JSONObject jsonObject = null;
         if (responseCode == HttpURLConnection.HTTP_OK) { // success
             InputStream stream = urlConnection.getInputStream();
 
             String result = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
 
             JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            jsonObject = (JSONObject) jsonParser.parse(result);
 
-            jsonInvitation = (JSONObject) jsonObject.get("invitation");
-            System.out.println("[ARIES JSON invitation] " + jsonInvitation);
+            //jsonInvitation = (JSONObject) jsonObject.get("invitation");
+            System.out.println("[ARIES JSON invitation] " + jsonObject);
 
         } else {
             System.out.println("[ARIES JSON invitation] POST request has not worked");
         }
         urlConnection.disconnect();
-        return jsonInvitation;
+        return jsonObject;
     }
 
     public ArrayList<JSONObject> getConnections() throws IOException, ParseException {
@@ -131,7 +132,7 @@ public class AriesUtil {
             input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
             request.setEntity(input);
             response = httpClient.execute(request);
-
+            System.out.println("Request: " + request.toString());
             if (response != null) {
                 InputStream in = response.getEntity().getContent(); //Get the data in the entity
                 String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
@@ -170,7 +171,8 @@ public class AriesUtil {
             input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
             request.setEntity(input);
             response = httpClient.execute(request);
-
+            System.out.println("[Send offer] Request: " + request.toString());
+            System.out.println("[Send offer] Response: " + response.toString());
             if (response != null) {
                 InputStream in = response.getEntity().getContent(); //Get the data in the entity
                 String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
@@ -206,6 +208,7 @@ public class AriesUtil {
 
             HttpPost request = new HttpPost(url);
             StringEntity input = new StringEntity(gson.toJson(credential));
+            System.out.println("[ACCEPT-REQUEST] Request credential: " + gson.toJson(credential));
             input.setContentType("application/json;charset=UTF-8");
             input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
             request.setEntity(input);
@@ -291,6 +294,7 @@ public class AriesUtil {
         request.setEntity(input);
         httpResponse = httpClient.execute(request);
 
+        System.out.println("[SEND-VP-REQUEST] Request:" + request.getEntity().getContent().toString());
         if (httpResponse != null) {
             InputStream in = httpResponse.getEntity().getContent(); //Get the data in the entity
             String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
@@ -420,7 +424,7 @@ public class AriesUtil {
 
                 if (!jsonObject.isEmpty()) {
                     JSONArray resultsArray = (JSONArray) jsonObject.get("result");
-
+                    System.out.println("JSON Array size: " + resultsArray.size());
                     if (resultsArray.size() > 0) {
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject presentationObj = (JSONObject) resultsArray.get(i);

@@ -49,7 +49,7 @@ public class SendVCOfferResource {
             if(userDIDConn != null){
                 JSONObject jo = new JSONObject();
                 jo.put("evidence", jsonOffer.get("evidence").toString());
-                jo.put("publicDID", "did:ebsi:1234"); //TODO: replace later with EBSI DID
+                jo.put("publicDID", "did:ebsi:1234");
                 jo.put("myDID", userDIDConn.getMyDID());
                 jo.put("theirDID", userDIDConn.getTheirDID());
 
@@ -61,7 +61,7 @@ public class SendVCOfferResource {
                 VerifiableCredential generatedVC = generateVCResource.generateVC(jsonRequest);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
+                //System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
                 if(generatedVC != null) {
                     // DONE: call Aries /verifiable/sign-credential(vc) : boolean
                     Clock clock = Clock.systemDefaultZone();
@@ -77,7 +77,7 @@ public class SendVCOfferResource {
                     if(credential != null){
 
                         String prettyJson = gson.toJson(credential);
-                        System.out.println("[SEND-VC-OFFER] Result: " + prettyJson);
+                        System.out.println("[SEND-VC-OFFER] Signed credential: " + prettyJson);
 
                         OfferRequest offer = new OfferRequest(userDIDConn.getMyDID(),userDIDConn.getTheirDID(), credential);
                         String piid = ariesUtil.sendOffer(offer);
