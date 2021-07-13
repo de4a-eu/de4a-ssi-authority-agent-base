@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class AriesUtil {
 
@@ -445,7 +446,8 @@ public class AriesUtil {
         }
         urlConnection.disconnect();
 
-        return presentation;
+        JSONObject vpContent = findPresentationByID(Base64.getEncoder().encodeToString(presentation.get("id").toString().getBytes(StandardCharsets.UTF_8)));
+        return vpContent;
     }
 
     public JSONObject findPresentationByID(String vpID) throws IOException {
@@ -472,7 +474,7 @@ public class AriesUtil {
                     JSONObject verifiablePresentationJSON = (JSONObject) jsonObject.get("verifiablePresentation");
 
                     if (verifiablePresentationJSON != null) {
-                        System.out.println("[ARIES presentation] VP: " + verifiablePresentationJSON.get("id"));
+                        System.out.println("[ARIES presentation] VP ID: " + verifiablePresentationJSON.get("id"));
                         presentation = verifiablePresentationJSON;
                     }
                 }

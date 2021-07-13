@@ -14,7 +14,7 @@ public class StartServletListener extends HttpServlet {
     public void init() {
         System.out.println("/////////////////////////");
         System.out.println("Authority Agent is initializing.....");
-        ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "/usr/local/tomcat/webapps/DE4AEBSIConnector-0.1-launcher.jar");
+        /*ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "/usr/local/tomcat/webapps/DE4AEBSIConnector-0.1-launcher.jar");
         Process process = null;
         try {
             process = processBuilder.start();
@@ -31,6 +31,6 @@ public class StartServletListener extends HttpServlet {
                 e.printStackTrace();
             }
             System.out.println(s);
-        }
+        }*/
     }
 }

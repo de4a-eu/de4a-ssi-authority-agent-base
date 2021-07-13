@@ -9,7 +9,7 @@ import org.ektorp.support.View;
 
 import java.util.List;
 
-@View( name = "all", map = "function(doc) { if (doc.type == 'VPStatus' ) emit( doc.timeUpdated, doc)}")
+@View( name = "all", map = "function(doc) { if (doc.type == 'VPStatus' ) emit( doc.userId, doc)}")
 public class VPStatusRepository extends CouchDbRepositorySupport<VPStatus> {
 
     protected VPStatusRepository(Class<VPStatus> type, CouchDbConnector db) {
@@ -17,7 +17,7 @@ public class VPStatusRepository extends CouchDbRepositorySupport<VPStatus> {
         initStandardDesignDocument();
     }
 
-    @View( name="byUserId", map = "function(doc) { if (doc.type == 'VPStatus') { emit(doc.timeUpdated, doc) } }")
+    @View( name="byUserId", map = "function(doc) { if (doc.type == 'VPStatus') { emit(doc.userId, doc) } }")
     public VPStatus findByUserId(String userId) {
         try {
             ViewQuery query = createQuery("byUserId")

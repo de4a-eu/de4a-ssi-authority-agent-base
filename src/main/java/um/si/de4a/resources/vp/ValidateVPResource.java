@@ -4,6 +4,7 @@ package um.si.de4a.resources.vp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,6 +18,7 @@ import javax.ws.rs.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 
 @Path("/validate-vp")
@@ -64,7 +66,10 @@ public class ValidateVPResource {
 
                     // signature check
                     if (jsonVP.containsKey("verifiableCredential")) {
-                        boolean vcCheck = ariesUtil.validateVCProof(new ValidateVCRequest(jsonVP.get("verifiableCredential").toString()));
+                        JSONArray credentials = (JSONArray) jsonVP.get("verifiableCredential");
+                        System.out.println("[VALIDATE VP] VC: " + credentials.get(0));
+                        boolean vcCheck = ariesUtil.validateVCProof(new ValidateVCRequest(credentials.get(0).toString()));
+                        System.out.println("Signature check: " + vcCheck);
                         if (vcCheck == true)
                             signatureCheck = 1;
                         else
@@ -73,14 +78,17 @@ public class ValidateVPResource {
 
                     // holder check
                     if (jsonEIDAS.get("userId") != null) {
-                        subjectCheckResult = checkSubject(jsonVP.get("holder").toString(), jsonEIDAS.get("userId").toString());
+                        subjectCheckResult = checkSubject(jsonVP.get("holder").toString().trim(), jsonEIDAS.get("userId").toString().trim());
+                        System.out.println(subjectCheckResult);
                     }
 
                     validationObj = new ValidationObj(subjectCheckResult, 1, 1, signatureCheck, userVPStatus.getVpName());
-                    if (subjectCheckResult == 1 && schemaCheckResult == 1 && issuerCheckResult == 1 && signatureCheck == 1){ //TODO replace with checking TIR/TSR
+                    if (validationObj.getSubjectCheck() == 1 && validationObj.getSchemaCheck() == 1 && validationObj.getIssuerCheck() == 1 && validationObj.getSignatureCheck() == 1){ //TODO replace with checking TIR/TSR
+                        System.out.println("[VALIDATE VP] Updating DB status to VALID...");
                         dbUtil.updateVPStatus(userId, VPStatusEnum.VP_VALID);
                     }
                     else {
+                        System.out.println("[VALIDATE VP] Updating DB status to INVALID...");
                         dbUtil.updateVPStatus(userId,VPStatusEnum.VP_NOT_VALID);
                     }
                 }
