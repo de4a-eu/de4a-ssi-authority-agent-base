@@ -124,7 +124,11 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-
+    <servlet>
+        <servlet-name>EBSIConnector</servlet-name>
+        <servlet-class>um.si.de4a.StartServletListener</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
   <!-- The JSP page compiler and execution servlet, which is the mechanism  -->
   <!-- used by Tomcat to support JSP pages.  Traditionally, this servlet    -->
   <!-- is mapped to the URL pattern "*.jsp".  This servlet supports the     -->
@@ -4762,5 +4766,5 @@
         <welcome-file>index.htm</welcome-file>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
-
+   
 </web-app>

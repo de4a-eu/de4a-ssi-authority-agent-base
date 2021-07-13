@@ -4,12 +4,14 @@ public class ValidationObj {
     private int subjectCheck;
     private int schemaCheck;
     private int issuerCheck;
+    private int signatureCheck;
     private String vpName;
 
-    public ValidationObj(int subjectCheck, int schemaCheck, int issuerCheck, String vpName) {
+    public ValidationObj(int subjectCheck, int schemaCheck, int issuerCheck, int signatureCheck, String vpName) {
         this.subjectCheck = subjectCheck;
         this.schemaCheck = schemaCheck;
         this.issuerCheck = issuerCheck;
+        this.signatureCheck = signatureCheck;
         this.vpName = vpName;
     }
 
@@ -35,6 +37,14 @@ public class ValidationObj {
 
     public void setIssuerCheck(int issuerCheck) {
         this.issuerCheck = issuerCheck;
+    }
+
+    public int getSignatureCheck() {
+        return signatureCheck;
+    }
+
+    public void setSignatureCheck(int signatureCheck) {
+        this.signatureCheck = signatureCheck;
     }
 
     public String getVpName() {

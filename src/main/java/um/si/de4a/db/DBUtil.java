@@ -12,7 +12,9 @@ public class DBUtil {
     private DIDConnRepository didConnRepository = null;
     private VCStatusRepository vcStatusRepository = null;
     private VPStatusRepository vpStatusRepository = null;
+    private DIDRepository didRepository = null;
 
+    private List<DID> didList = null;
     private List<DIDConn> didConnList = null;
     private List<VCStatus> vcstatusList = null;
     private List<VPStatus> vpstatusList = null;
@@ -21,9 +23,33 @@ public class DBUtil {
         didConnRepository = new DIDConnRepository(DIDConn.class, db.dbConnector);
         vcStatusRepository = new VCStatusRepository(VCStatus.class, db.dbConnector);
         vpStatusRepository = new VPStatusRepository(VPStatus.class, db.dbConnector);
+        didRepository = new DIDRepository(DID.class, db.dbConnector);
+        didList = new ArrayList<>();
         didConnList = new ArrayList<>();
         vcstatusList = new ArrayList<>();
         vpstatusList = new ArrayList<>();
+    }
+
+    public boolean saveDID(String value){
+        boolean dbStatus = false;
+        long time = System.currentTimeMillis();
+        DID did = new DID(null, null, value, "DID", time, -1); // -1 denotes NULL
+
+        try{
+            didRepository.add(did);
+            dbStatus = true;
+        }
+        catch (Exception e){
+            dbStatus = false;
+        }
+
+        return dbStatus;
+    }
+
+    public String getDID(){
+        String issuerDID = didRepository.getAll().get(0).getValue();
+        System.out.println("[DB] Issuer DID: " + issuerDID);
+        return issuerDID;
     }
 
     public boolean saveDIDConn(String userId, String invitationId, String invitationJSON, long statusChanged){
@@ -162,7 +188,7 @@ public class DBUtil {
         }
         return dbStatus;
     }
-    public List<VPStatus> findVPById(String vpId){
+    /*public List<VPStatus> findVPById(String vpId){
         ViewQuery query = new ViewQuery()
                 .designDocId("_design/VPStatus")
                 .viewName("by_vp_id")
@@ -177,5 +203,5 @@ public class DBUtil {
         System.out.println("[VPStatus] size: " + vpstatusList.size());
 
         return vpstatusList;
-    }
+    }*/
 }

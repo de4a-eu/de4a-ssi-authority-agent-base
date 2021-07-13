@@ -49,7 +49,7 @@ public class SendVCOfferResource {
             if(userDIDConn != null){
                 JSONObject jo = new JSONObject();
                 jo.put("evidence", jsonOffer.get("evidence").toString());
-                jo.put("publicDID", "did:ebsi:1234");
+                jo.put("publicDID", dbUtil.getDID());
                 jo.put("myDID", userDIDConn.getMyDID());
                 jo.put("theirDID", userDIDConn.getTheirDID());
 
@@ -69,7 +69,7 @@ public class SendVCOfferResource {
                     Instant now = clock.instant();
 
                     SignRequest jsonSignRequest = new SignRequest(now.toString(), generatedVC,
-                            didKey, signatureType);
+                            dbUtil.getDID(), signatureType);
 
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
                     SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);

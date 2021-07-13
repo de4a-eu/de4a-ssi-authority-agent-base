@@ -11,6 +11,7 @@ import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
+import um.si.de4a.model.json.SignedVerifiableCredential;
 
 import javax.ws.rs.*;
 import java.io.IOException;
@@ -25,8 +26,8 @@ public class ValidateVPResource {
     @Consumes("application/json")
     @Produces("application/json")
     @Path("{userId}")
-    public String validateVP(@PathParam("userId") String userId, String eidasMds) throws IOException {
-        int subjectCheckResult = -1, schemaCheckResult = -1, issuerCheckResult = -1; // not relevant for validation
+    public String validateVP(@PathParam("userId") String userId, String eidasMds) throws IOException, ParseException {
+        int subjectCheckResult = 0, schemaCheckResult = 0, issuerCheckResult = 0, signatureCheck = 0; // not valid
         DBUtil dbUtil = new DBUtil();
 
         JSONObject jsonEIDAS = null;
@@ -41,13 +42,13 @@ public class ValidateVPResource {
         // DONE: call database getVPStatus(userId): VPStatus object
         VPStatus userVPStatus = dbUtil.getVPStatus(userId);
 
-        ValidationObj validationObj = new ValidationObj(subjectCheckResult,schemaCheckResult,issuerCheckResult, "");
+        ValidationObj validationObj = new ValidationObj(subjectCheckResult,schemaCheckResult,issuerCheckResult, signatureCheck, "");
         if(!(userVPStatus.getVPStatusEnum() == VPStatusEnum.REQUEST_SENT) && !(userVPStatus.getVPStatusEnum() == VPStatusEnum.VP_REJECTED) ){
             // DONE: call Aries /verifiable/presentations: [presentation]
-            System.out.println("user vp: " + userVPStatus.getVpName());
+            System.out.println("[VALIDATE-VP] User VP name: " + userVPStatus.getVpName());
             AriesUtil ariesUtil = new AriesUtil();
             JSONObject jsonPresentation = ariesUtil.getPresentation(userVPStatus.getVpName());
-            if (jsonPresentation != null){
+            if (jsonPresentation != null) {
                 System.out.println("[VALIDATE VP] Presentation: " + jsonPresentation.toString());
 
                 String vpID = jsonPresentation.get("id").toString();
@@ -57,16 +58,29 @@ public class ValidateVPResource {
 
                 JSONObject jsonVP = ariesUtil.findPresentationByID(base64vpID);
 
-                if(jsonVP != null){
+                if (jsonVP != null) {
                     System.out.println("[VALIDATE VP] VP holder: " + jsonVP.get("holder"));
                     System.out.println("[VALIDATE VP] EIDAS user: " + jsonEIDAS.get("userId"));
-                    if(jsonEIDAS.get("userId") != null) {
+
+                    // signature check
+                    if (jsonVP.containsKey("verifiableCredential")) {
+                        boolean vcCheck = ariesUtil.validateVCProof(new ValidateVCRequest(jsonVP.get("verifiableCredential").toString()));
+                        if (vcCheck == true)
+                            signatureCheck = 1;
+                        else
+                            signatureCheck = 0;
+                    }
+
+                    // holder check
+                    if (jsonEIDAS.get("userId") != null) {
                         subjectCheckResult = checkSubject(jsonVP.get("holder").toString(), jsonEIDAS.get("userId").toString());
-                        validationObj = new ValidationObj(subjectCheckResult, 1, 1, userVPStatus.getVpName()); // invalid
-                        dbUtil.updateVPStatus(userId,VPStatusEnum.VP_VALID);
+                    }
+
+                    validationObj = new ValidationObj(subjectCheckResult, 1, 1, signatureCheck, userVPStatus.getVpName());
+                    if (subjectCheckResult == 1 && schemaCheckResult == 1 && issuerCheckResult == 1 && signatureCheck == 1){ //TODO replace with checking TIR/TSR
+                        dbUtil.updateVPStatus(userId, VPStatusEnum.VP_VALID);
                     }
                     else {
-                        validationObj = new ValidationObj(0, 0, 0, null); // invalid
                         dbUtil.updateVPStatus(userId,VPStatusEnum.VP_NOT_VALID);
                     }
                 }

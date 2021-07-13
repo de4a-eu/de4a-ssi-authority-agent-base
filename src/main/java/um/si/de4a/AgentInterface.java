@@ -6,4 +6,5 @@ import java.io.IOException;
 
 @ApplicationPath("/v1")
 public class AgentInterface extends Application {
+
 }

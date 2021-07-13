@@ -24,6 +24,7 @@ import um.si.de4a.resources.offer.SignRequest;
 import um.si.de4a.resources.vc.SendVCRequest;
 import um.si.de4a.resources.vp.NamesObj;
 import um.si.de4a.resources.vp.VPRequest;
+import um.si.de4a.resources.vp.ValidateVCRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -126,7 +127,7 @@ public class AriesUtil {
         try {
             HttpPost request = new HttpPost(baseUrl + "verifiable/signcredential");
             StringEntity input = new StringEntity(gson.toJson(vcCredential));
-           // System.out.println("Request VC: " + gson.toJson(vcCredential));
+            System.out.println("[Sign-credential] Request VC: " + gson.toJson(vcCredential));
 
             input.setContentType("application/json;charset=UTF-8");
             input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
@@ -487,6 +488,46 @@ public class AriesUtil {
         return presentation;
     }
 
+    public boolean validateVCProof(ValidateVCRequest vcRequest) throws IOException, ParseException {
+        boolean response = false;
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpResponse httpResponse = null;
+
+        Gson gson = new Gson();
+        try {
+            String url = baseUrl + "verifiable/credential/validate";
+            System.out.println("[ARIES VALIDATE VC] URL: " + url);
+
+            HttpPost request = new HttpPost(url);
+            StringEntity input = new StringEntity(gson.toJson(vcRequest));
+            System.out.println("[VALIDATE-VC] Request data: " + gson.toJson(vcRequest));
+            input.setContentType("application/json;charset=UTF-8");
+            input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
+            request.setEntity(input);
+            httpResponse = httpClient.execute(request);
+
+            if (httpResponse != null) {
+                InputStream in = httpResponse.getEntity().getContent(); //Get the data in the entity
+                String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
+
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+                System.out.println("[ARIES result] " + jsonObject.toString());
+
+                if (jsonObject.toString().equals("{}"))
+                    response = true;
+            }
+        }
+        catch (Exception ex) {
+            System.out.println("[ARIES validate-vc] Exception: " + ex.getMessage());
+        } finally {
+            httpClient.close();
+        }
+
+        return response;
+    }
 
     private String buildURL(String baseURL, String endpoint, String parameter, String method){
         return baseURL + endpoint + "/" + parameter + "/" + method;

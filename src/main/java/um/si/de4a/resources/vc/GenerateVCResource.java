@@ -19,7 +19,7 @@ public class GenerateVCResource {
     @Produces("application/json")
     public VerifiableCredential generateVC(String vcData) throws IOException, ParseException, java.text.ParseException {
         AppConfig appConfig = new AppConfig();
-        String didKey = appConfig.getProperties().getProperty("did.key");
+        //String didKey = appConfig.getProperties().getProperty("did.key");
 
         VerifiableCredential evidenceVC = null;
         JSONObject jsonObject = null;
@@ -36,7 +36,7 @@ public class GenerateVCResource {
             HigherEducationDiploma diploma = XMLtoJSONAdapter.convertXMLToPOJO(jsonObject.get("evidence").toString());
 
             if (diploma != null) {
-                evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, didKey);
+                evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, jsonObject.get("publicDID").toString());
                 System.out.println("evidence vc: " + evidenceVC);
             }
         }
