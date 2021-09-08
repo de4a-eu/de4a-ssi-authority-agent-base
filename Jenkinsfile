@@ -1,9 +1,5 @@
 pipeline {
   stages{
-      stage('Checkout'){
-        
-        git 'https://github.com/de4a-wp5/de4a-ssi-authority-agent-base'
-      }
     
       stage('Build'){
          when {
