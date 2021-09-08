@@ -21,9 +21,7 @@ pipeline {
       }
     
       stage('Docker'){
-            when {
-                branch 'master'
-            }
+            
             agent { label 'master' }
             steps {
                 script{
