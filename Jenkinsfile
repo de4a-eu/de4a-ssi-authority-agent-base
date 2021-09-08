@@ -1,11 +1,8 @@
 pipeline {
   stages{
       stage('Checkout'){
+        
         git 'https://github.com/de4a-wp5/de4a-ssi-authority-agent-base'
-      }
-
-      stage('Test'){
-
       }
     
       stage('Build'){
@@ -26,8 +23,23 @@ pipeline {
       }
     
       stage('Docker'){
-        sh 'mvn package'
-      }
+            when {
+                branch 'master'
+            }
+            agent { label 'master' }
+            steps {
+                script{
+                    def img
+                    env.VERSION = readMavenPom().getVersion()
+                    img = docker.build('de4a-ssi-authority-agent-base',".")
+                    docker.withRegistry('','docker-hub-token') {
+                    img.push('latest')
+                    img.push("${env.VERSION}")
+                        }
+                    }
+                sh 'docker system prune -f'
+            }
+        }
     
   }
 }
