@@ -42,14 +42,16 @@ pipeline {
             agent { label 'master' }
             steps {
                 script{
-                    def img
-                    env.VERSION = readMavenPom().getVersion()
-                    img = docker.build('de4a-ssi-authority-agent-base/base-image',".")
-                    docker.withRegistry('','docker-hub-token') {
-                    img.push('latest')
-                    img.push("${env.VERSION}")
-                        }
-                    }
+                  if (env.BRANCH_NAME == 'master') {
+                      def img
+                      env.VERSION = readMavenPom().getVersion()
+                      img = docker.build('de4a-ssi-authority-agent-base/base-image',".")
+                      docker.withRegistry('','docker-hub-token') {
+                      img.push('latest')
+                      img.push("${env.VERSION}")
+                          }
+                      }
+                }
                 sh 'docker system prune -f'
             }
         }
