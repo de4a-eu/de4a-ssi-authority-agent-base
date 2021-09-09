@@ -1,6 +1,6 @@
 FROM tomcat:9-jdk11
 
-ARG WAR_NAME=/out/artifacts/de4a_agent/de4a-agent.war
+ARG WAR_NAME=de4a-agent.war
 
 #create tc webapp folder
 WORKDIR $CATALINA_HOME/webapps
