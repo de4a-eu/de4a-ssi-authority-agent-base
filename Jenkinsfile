@@ -46,7 +46,7 @@ pipeline {
                       def img
                       env.VERSION = readMavenPom().getVersion()
                       img = docker.build('de4a-ssi-authority-agent-base/base-image',".")
-                      docker.withRegistry('','martina') {
+                      docker.withRegistry('','docker-hub-token') {
                       img.push('latest')
                       img.push("${env.VERSION}")
                           }
