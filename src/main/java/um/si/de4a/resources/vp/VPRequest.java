@@ -47,11 +47,13 @@ public class VPRequest {
 
 class RequestPresentationObj {
 
+    private String comment;
     private ArrayList<Format> formats;
     @SerializedName("request_presentations~attach")
     private ArrayList<RequestVPAttach> requestVPAttaches;
 
-    public RequestPresentationObj(ArrayList<Format> formats, ArrayList<RequestVPAttach> requestVPAttaches) {
+    public RequestPresentationObj(String comment, ArrayList<Format> formats, ArrayList<RequestVPAttach> requestVPAttaches) {
+        this.comment = comment;
         this.formats = formats;
         this.requestVPAttaches = requestVPAttaches;
     }
@@ -72,6 +74,13 @@ class RequestPresentationObj {
         this.requestVPAttaches = requestVPAttaches;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     /*@SerializedName("@type")
     private String type;

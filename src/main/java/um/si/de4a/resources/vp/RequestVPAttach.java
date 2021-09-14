@@ -2,17 +2,24 @@ package um.si.de4a.resources.vp;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RequestVPAttach {
     @SerializedName("@id")
     private String id;
+    private Data data;
+    @SerializedName("lastmod_time")
+    private String lastModTime;
     @SerializedName("mime-type")
     private String mimeType;
-    private Data data;
 
-    public RequestVPAttach(String id, String mimeType, Data data) {
+
+    public RequestVPAttach(String id, Data data, String lastModTime, String mimeType) {
         this.id = id;
-        this.mimeType = mimeType;
         this.data = data;
+        this.lastModTime = lastModTime;
+        this.mimeType = mimeType;
     }
 
     public String getId() {
@@ -37,5 +44,13 @@ public class RequestVPAttach {
 
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
+    }
+
+    public String getLastModTime() {
+        return lastModTime;
+    }
+
+    public void setLastModTime(String lastModTime) {
+        this.lastModTime = lastModTime;
     }
 }

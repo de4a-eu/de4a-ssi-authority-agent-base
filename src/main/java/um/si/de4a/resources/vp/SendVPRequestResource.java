@@ -1,5 +1,7 @@
 package um.si.de4a.resources.vp;
 
+import com.google.gson.Gson;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -13,9 +15,9 @@ import javax.ws.rs.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.UUID;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -38,26 +40,27 @@ public class SendVPRequestResource {
         try {
             jsonRequest = (JSONObject) jsonParser.parse(vpRequest);
             logRecordInfo.setMessage("Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DR", "Evidence portal DE", "01001"};
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01001"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         } catch (ParseException e) {
             logRecordSevere.setMessage("Error parsing input eIDAS data.");
-            Object[] params = new Object[]{"Authority Agent DR", "Evidence portal DE", "1001"};
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         if(jsonRequest != null) {
 
-            String userID = "";
+            String userID = "", presentationFormat = "";
             try{
-                jsonRequest.get("userId").toString();
+                userID = jsonRequest.get("userId").toString();
+                presentationFormat = jsonRequest.get("presentationFormat").toString();
             }
             catch(Exception ex){
                 logRecordSevere.setMessage("Error parsing input parameters.");
-                Object[] params = new Object[]{"Authority Agent DR", "Evidence Portal DE", "1005"};
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1005"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -69,7 +72,7 @@ public class SendVPRequestResource {
             }
             catch(Exception ex){
                 logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
-                Object[] params = new Object[]{"Authority Agent DR", "Evidence Portal DE", "1010"};
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -99,37 +102,69 @@ public class SendVPRequestResource {
                     VPRequest vpRequestObj = new VPRequest(userDIDConn.getMyDID(), new RequestPresentationObj(rpaList), userDIDConn.getTheirDID());
                     */
 
+                    DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
+
+                    String outputLastModTime = "";
+                    try {
+                        Calendar cal = Calendar.getInstance();
+                        outputLastModTime = outputFormat.format(cal.getTime());
+                    } catch (Exception ex) {
+                        logRecordSevere.setMessage("Object conversion error on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1008"};
+                        logRecordSevere.setParameters(params);
+                        logger.log(logRecordSevere);
+                    }
+                    String lastModTime = outputLastModTime;
                     String randomID = UUID.randomUUID().toString();
                     ArrayList<Format> formats = new ArrayList<Format>(){{add(new Format(randomID, "dif/presentation-exchange/definition@v1.0"));}};
 
-                    RequestVPAttach vpAttach = null;
+                    ArrayList<Schema> schemas = new ArrayList<>();
+                    schemas.add(new Schema("https://www.w3.org/2018/credentials/v1"));
+                    schemas.add(new Schema("https://www.w3.org/2018/credentials/examples/v1"));
+
+                    ArrayList<Constraint> constraints = new ArrayList<>();
+                    ArrayList<String> paths = new ArrayList<>();
+                    paths.add("$.type");
+
+                    Filter filter = new Filter("string", presentationFormat);
+                    constraints.add(new Constraint(new ArrayList<Field>(){{
+                        add(new Field(paths, filter));
+                    }}));
+
+                    VPAttachment vpAttachment = new VPAttachment(new Option(UUID.randomUUID().toString(), "de4a.eu/VerifiablePresentation"),
+                            new PresentationDefinition(new ArrayList<InputDescriptor>(){{
+                                add(new InputDescriptor("vp_type", "VP Type", schemas, constraints));
+                            }}));
+
+                    Gson gson = new Gson();
+                    ArrayList<RequestVPAttach> vpAttachList = null;
                     try{
-                        vpAttach = new RequestVPAttach(randomID, "application/json", new Data(Base64.getEncoder().encodeToString("credential".toString().getBytes(StandardCharsets.UTF_8))));
+                        vpAttachList = new ArrayList<RequestVPAttach>(){{
+                            add(new RequestVPAttach(randomID,  new Data(Base64.getEncoder().encodeToString(gson.toJson(vpAttachment).getBytes(StandardCharsets.UTF_8))), lastModTime, "application/octet-stream"));
+                        }};
                     }
-                    catch(Exception ex){
-                        logRecordSevere.setMessage("Object conversion error on Authority Agent DT.");
-                        Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
+                    catch (Exception ex){
+                        logRecordSevere.setMessage("Object conversion error on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1008"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
 
-                    RequestVPAttach finalVpAttach = vpAttach;
-                    ArrayList<RequestVPAttach> vpAttaches = new ArrayList<RequestVPAttach>(){{add(finalVpAttach);}};
-                    RequestPresentationObj requestPresentationObj = new RequestPresentationObj(formats, vpAttaches);
+                    RequestPresentationObj requestPresentationObj = new RequestPresentationObj("Request DE4A UC3 presentation.", formats, vpAttachList);
                     VPRequest vpRequestObj = new VPRequest(userDIDConn.getMyDID(), requestPresentationObj, userDIDConn.getTheirDID());
 
                     // DONE: call Aries /presentproof/send-request-presentation(VPRequest):  PIID
                     AriesUtil ariesUtil = new AriesUtil();
                     String piid = "";
                     try{
-                        ariesUtil.sendRequest(vpRequestObj);
+                        piid = ariesUtil.sendRequest(vpRequestObj);
                         if (piid != "") {
                             //System.out.println("[SEND VP REQUEST] Received PIID: " + piid);
 
                             // DONE: call database saveVPStatus(userId, PIID, status: request_sent): boolean
                             boolean response = false;
                             try{
-                                dbUtil.saveVPStatus(userID, piid, null, VPStatusEnum.REQUEST_SENT);
+                                response = dbUtil.saveVPStatus(userID, piid, null, VPStatusEnum.REQUEST_SENT);
                                 logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
                                 Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
                                 logRecordInfo.setParameters(params);

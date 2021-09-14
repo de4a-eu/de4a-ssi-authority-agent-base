@@ -87,7 +87,7 @@ public class SendVCResource {
             }
             catch(Exception ex){
                 logRecordSevere.setMessage( "Object conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "1008"};
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -101,7 +101,7 @@ public class SendVCResource {
             }
             catch(Exception ex){
                 logRecordSevere.setMessage( "Object conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "1008"};
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }

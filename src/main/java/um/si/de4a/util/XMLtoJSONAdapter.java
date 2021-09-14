@@ -1,10 +1,6 @@
 package um.si.de4a.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import jdk.nashorn.internal.parser.DateParser;
-import org.json.simple.JSONObject;
+import com.sun.xml.internal.ws.util.Pool;
 import um.si.de4a.model.json.*;
 import um.si.de4a.model.json.assessment.Assessment;
 import um.si.de4a.model.json.assessment.AssessmentReferences;
@@ -30,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -50,6 +47,8 @@ public class XMLtoJSONAdapter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        String utfXML = xml.getBytes(StandardCharsets.UTF_8).toString();
+
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
@@ -59,7 +58,7 @@ public class XMLtoJSONAdapter {
             jaxbContext = JAXBContext.newInstance(HigherEducationDiploma.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            diploma = (HigherEducationDiploma) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+            diploma = (HigherEducationDiploma) jaxbUnmarshaller.unmarshal(new StringReader(utfXML));
         } catch (JAXBException e) {
             logRecordSevere.setMessage("Error parsing input parameters.");
             Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};
@@ -142,8 +141,8 @@ public class XMLtoJSONAdapter {
                 new Title(new Text("text/plain", "en", modeOfStudy))));
         LearningOpportunityReferences lor = new LearningOpportunityReferences(opportunity);
 
-        CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue().toString(),
-                diploma.getHolderOfAchievement().getGivenNames().getText().getValue().toString(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(),learningAchievement, lsr, ar, awr, lr,
+        CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
+                diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(),learningAchievement, lsr, ar, awr, lr,
                 agentReferences, lor);
 
       /*  CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue().toString(),
@@ -153,7 +152,7 @@ public class XMLtoJSONAdapter {
         //CredentialSchema schema = new CredentialSchema("https://essif.europa.eu/tsr-123/verifiableattestation.json", "JsonSchemaValidator2018");
        // Evidence evidence = new Evidence("https://essif.europa.eu/evidence/f2aeec97-fc0d-42bf-8ca7-0548192d4231", new String[]{"eIDAS"}, "https://essif.europa.eu/issuers/48", new String[]{"eIDAS identifier"});
 
-        VerifiableCredential vc = new VerifiableCredential(context, "http://example.edu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
+        VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
         logRecordInfo.setMessage("Generated JSON-LD Verifiable Credential.");
         Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01005"};
         logRecordInfo.setParameters(params);
