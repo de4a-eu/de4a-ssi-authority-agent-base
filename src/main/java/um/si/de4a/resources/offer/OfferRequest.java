@@ -8,15 +8,15 @@ import um.si.de4a.model.json.VerifiableCredential;
 public class OfferRequest {
     @SerializedName("my_did")
     private String myDID;
+    @SerializedName("offer_credential")
+    private OfferCredential credential;
     @SerializedName("their_did")
     private String theirDID;
-    @SerializedName("offer_credential")
-    private SignedVerifiableCredential credential;
 
-    public OfferRequest(String myDID, String theirDID, SignedVerifiableCredential credential) {
+    public OfferRequest(String myDID, OfferCredential credential, String theirDID) {
         this.myDID = myDID;
-        this.theirDID = theirDID;
         this.credential = credential;
+        this.theirDID = theirDID;
     }
 
     public String getMyDID() {
@@ -27,19 +27,19 @@ public class OfferRequest {
         this.myDID = myDID;
     }
 
+    public OfferCredential getCredential() {
+        return credential;
+    }
+
+    public void setCredential(OfferCredential credential) {
+        this.credential = credential;
+    }
+
     public String getTheirDID() {
         return theirDID;
     }
 
     public void setTheirDID(String theirDID) {
         this.theirDID = theirDID;
-    }
-
-    public SignedVerifiableCredential getCredential() {
-        return credential;
-    }
-
-    public void setCredential(SignedVerifiableCredential credential) {
-        this.credential = credential;
     }
 }

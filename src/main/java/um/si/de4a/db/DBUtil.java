@@ -19,7 +19,7 @@ public class DBUtil {
     private List<VCStatus> vcstatusList = null;
     private List<VPStatus> vpstatusList = null;
 
-    public DBUtil() throws MalformedURLException {
+    public DBUtil() throws IOException {
         didConnRepository = new DIDConnRepository(DIDConn.class, db.dbConnector);
         vcStatusRepository = new VCStatusRepository(VCStatus.class, db.dbConnector);
         vpStatusRepository = new VPStatusRepository(VPStatus.class, db.dbConnector);
@@ -48,7 +48,6 @@ public class DBUtil {
 
     public String getDID(){
         String issuerDID = didRepository.getAll().get(0).getValue();
-        System.out.println("[DB] Issuer DID: " + issuerDID);
         return issuerDID;
     }
 

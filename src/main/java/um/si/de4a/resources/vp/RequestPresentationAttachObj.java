@@ -1,20 +1,18 @@
 package um.si.de4a.resources.vp;
 
-import com.google.gson.annotations.SerializedName;
-
 
 public class RequestPresentationAttachObj {
-    private DataObj data;
+    private Data data;
 
-    public RequestPresentationAttachObj(DataObj data) {
+    public RequestPresentationAttachObj(Data data) {
         this.data = data;
     }
 
-    public DataObj getData() {
+    public Data getData() {
         return data;
     }
 
-    public void setData(DataObj data) {
+    public void setData(Data data) {
         this.data = data;
     }
 }

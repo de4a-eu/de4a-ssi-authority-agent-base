@@ -46,7 +46,43 @@ public class VPRequest {
 }
 
 class RequestPresentationObj {
-    @SerializedName("@type")
+
+    private String comment;
+    private ArrayList<Format> formats;
+    @SerializedName("request_presentations~attach")
+    private ArrayList<RequestVPAttach> requestVPAttaches;
+
+    public RequestPresentationObj(String comment, ArrayList<Format> formats, ArrayList<RequestVPAttach> requestVPAttaches) {
+        this.comment = comment;
+        this.formats = formats;
+        this.requestVPAttaches = requestVPAttaches;
+    }
+
+    public ArrayList<Format> getFormats() {
+        return formats;
+    }
+
+    public void setFormats(ArrayList<Format> formats) {
+        this.formats = formats;
+    }
+
+    public ArrayList<RequestVPAttach> getRequestVPAttaches() {
+        return requestVPAttaches;
+    }
+
+    public void setRequestVPAttaches(ArrayList<RequestVPAttach> requestVPAttaches) {
+        this.requestVPAttaches = requestVPAttaches;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    /*@SerializedName("@type")
     private String type;
     private String comment;
     private ArrayList<Format> formats;
@@ -96,6 +132,8 @@ class RequestPresentationObj {
     public void setRequestPresentationAttachObjs(ArrayList<RequestPresentationAttachObj> requestPresentationAttachObjs) {
         this.requestPresentationAttachObjs = requestPresentationAttachObjs;
     }
+
+     */
 }
 
 class Format {

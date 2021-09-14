@@ -9,10 +9,14 @@ import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
+import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 @Path("/check-request-vp-response")
 public class CheckRequestVPStatusResource {
@@ -22,16 +26,27 @@ public class CheckRequestVPStatusResource {
     @Produces("application/json")
     @Path("{userId}")
     public int getStatus(@PathParam("userId") String userId) throws IOException {
+        Logger logger = DE4ALogger.getLogger();
+        LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
+        LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
+
         int vpRequestStatus = 0;
         DBUtil dbUtil = new DBUtil();
         // DONE: call database getVPStatus(userID): VPStatus object
-        VPStatus vpStatus = dbUtil.getVPStatus(userId);
-
+        VPStatus vpStatus = null;
+        try{
+            vpStatus = dbUtil.getVPStatus(userId);
+        }
+        catch(Exception ex){
+            logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
         // if (VPStatus == null): return -1 (request was never sent)
         if(vpStatus == null)
             vpRequestStatus = -1; // return -1 (request was never sent)
         else{
-            System.out.println("[CHECK-REQUEST-VP-RESPONSE] VP PIID: " + vpStatus.getPiid());
 
             if (vpStatus.getVPStatusEnum() == VPStatusEnum.VP_RECEIVED)
                 vpRequestStatus = 1; // return 1 (VP received)
@@ -43,28 +58,57 @@ public class CheckRequestVPStatusResource {
                 try {
                     JSONObject action = ariesUtil.getActionVP(vpStatus.getPiid());
                     if (action != null){
-                        System.out.println("[CHECK REQUEST VP STATUS] Action: " + action.toJSONString());
                         JSONObject msg = (JSONObject) action.get("Msg");
-
 
                         if(msg.get("@type").equals("https://didcomm.org/present-proof/2.0/presentation") && msg.get("description") == null){
                             boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new NamesObj(new String[]{"vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid()}));
                             if(acceptResult == true){
-                                boolean updateStatus = dbUtil.updateVPStatus(userId, "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(),VPStatusEnum.VP_RECEIVED);
-                                if(updateStatus == true)
-                                    vpRequestStatus = 1; // (vp received)
+                                boolean updateStatus = false;
+                                if(ariesUtil.getPresentation("vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid()) != null) {
+                                    try {
+                                        updateStatus = dbUtil.updateVPStatus(userId, "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(), VPStatusEnum.VP_RECEIVED);
+                                        logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
+                                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                        logRecordInfo.setParameters(params);
+                                        logger.log(logRecordInfo);
+                                    } catch (Exception ex) {
+                                        logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
+                                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                        logRecordSevere.setParameters(params);
+                                        logger.log(logRecordSevere);
+                                    }
+
+                                    if (updateStatus == true)
+                                        vpRequestStatus = 1; // (vp received)
+                                }
                             }
                         }
                         else {
                             JSONObject description = (JSONObject) msg.get("description");
                             if (description.get("code").equals("rejected")) {
-                                dbUtil.updateVPStatus(userId, VPStatusEnum.VP_REJECTED);
+                                try{
+                                    dbUtil.updateVPStatus(userId, VPStatusEnum.VP_REJECTED);
+                                    logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
+                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                    logRecordInfo.setParameters(params);
+                                    logger.log(logRecordInfo);
+                                }
+                                catch(Exception ex){
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
+                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                    logRecordSevere.setParameters(params);
+                                    logger.log(logRecordSevere);
+                                }
                                 vpRequestStatus = -2; // return -2 (vp rejected)
                             }
                         }
                     }
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    logRecordSevere.setMessage( "Error on response from the Aries Government Agent.");
+                    Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1002"};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
                 }
             }
         }

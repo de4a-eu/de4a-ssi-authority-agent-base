@@ -1,8 +1,7 @@
-package um.si.de4a.resources.vc;
-
-import um.si.de4a.model.json.SignedVerifiableCredential;
+package um.si.de4a.resources.vp;
 
 public class Data {
+
     private String base64;
 
     public Data(String base64) {
