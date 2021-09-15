@@ -11,7 +11,6 @@ ENV CATALINA_OPTS="$CATALINA_OPTS -Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_EN
 COPY out/artifacts/de4a_agent/${WAR_NAME} ./
 COPY conf/web.xml ./../conf
 COPY conf/service-matrix.properties ./../conf
-COPY conf/de4a-metrics-log.txt ./../conf
 COPY ${CONNECTOR_NAME} ./
 
 RUN rm -fr manager host-manager docs examples ROOT && \

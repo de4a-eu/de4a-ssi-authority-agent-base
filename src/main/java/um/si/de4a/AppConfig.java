@@ -10,7 +10,7 @@ public class AppConfig {
     private Properties properties;
 
     public AppConfig() throws IOException {
-        String propFile = new File("conf/app.properties").getAbsolutePath();
+        String propFile = new File("/usr/local/tomcat/conf/app.properties").getAbsolutePath();
 
         FileInputStream inputStream = new FileInputStream(propFile);
         properties = new Properties();
