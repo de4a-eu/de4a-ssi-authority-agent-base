@@ -1,6 +1,5 @@
 package um.si.de4a.db;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.ektorp.support.CouchDbDocument;
@@ -9,11 +8,9 @@ import org.ektorp.support.TypeDiscriminator;
 @JsonIgnoreProperties({"id", "revision"})
 public class VCStatus extends CouchDbDocument {
     @JsonProperty("_id")
-    @Ignore
     private String id;
 
     @JsonProperty("_rev")
-    @Ignore
     private String revision;
 
     private String userId;

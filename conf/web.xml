@@ -111,6 +111,11 @@
   <!--                       only valid for GET requests. [true]            -->
 
     <servlet>
+	<servlet>
+        	<servlet-name>EBSIConnector</servlet-name>
+        	<servlet-class>um.si.de4a.StartServletListener</servlet-class>
+        	<load-on-startup>1</load-on-startup>
+    	</servlet>
         <servlet-name>default</servlet-name>
         <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
         <init-param>
@@ -121,14 +126,10 @@
             <param-name>listings</param-name>
             <param-value>false</param-value>
         </init-param>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
-    <servlet>
-        <servlet-name>EBSIConnector</servlet-name>
-        <servlet-class>um.si.de4a.StartServletListener</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    
   <!-- The JSP page compiler and execution servlet, which is the mechanism  -->
   <!-- used by Tomcat to support JSP pages.  Traditionally, this servlet    -->
   <!-- is mapped to the URL pattern "*.jsp".  This servlet supports the     -->
