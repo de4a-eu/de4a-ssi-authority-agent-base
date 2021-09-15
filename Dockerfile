@@ -1,4 +1,5 @@
-FROM tomcat:8.5.71-jdk16-openjdk
+FROM tomcat:10.0-jdk16
+#8.5.71-jdk16-openjdk
 
 ARG WAR_NAME=de4a-agent.war
 ARG CONNECTOR_NAME=DE4AEBSIConnector-0.1-launcher.jar
