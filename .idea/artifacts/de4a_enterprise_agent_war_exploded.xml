@@ -1,13 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="exploded-war" build-on-make="true" name="de4a-enterprise-agent:war exploded">
-    <output-path>$PROJECT_DIR$/target/DE4AEnterpriseAgent-0.1</output-path>
-    <properties id="maven-jee-properties">
-      <options>
-        <exploded>true</exploded>
-        <module>de4a-enterprise-agent</module>
-        <packaging>war</packaging>
-      </options>
-    </properties>
+    <output-path>$PROJECT_DIR$/out/artifacts/de4a_enterprise_agent_war_exploded</output-path>
     <root id="root">
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
@@ -66,9 +59,6 @@
           <element id="library" level="project" name="Maven: joda-time:joda-time:2.10.10" />
           <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.10" />
         </element>
-      </element>
-      <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/target/DE4AEnterpriseAgent-0.1/META-INF/MANIFEST.MF" />
       </element>
       <element id="javaee-facet-resources" facet="de4a-enterprise-agent/web/Web" />
     </root>
