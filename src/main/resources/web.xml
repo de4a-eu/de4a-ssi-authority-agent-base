@@ -110,22 +110,9 @@
   <!--                       that RFC 7233 clarified that Range headers are -->
   <!--                       only valid for GET requests. [true]            -->
 
-    <servlet>
-        <servlet-name>default</servlet-name>
-        <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
-        <init-param>
-            <param-name>debug</param-name>
-            <param-value>0</param-value>
-        </init-param>
-        <init-param>
-            <param-name>listings</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
 
     <servlet>
-        <servlet-name>EBSIConnector</servlet-name>
+        <servlet-name>default</servlet-name>
         <servlet-class>um.si.de4a.StartServletListener</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
