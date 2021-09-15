@@ -1,6 +1,5 @@
 package um.si.de4a.util;
 
-import com.sun.xml.internal.ws.util.Pool;
 import um.si.de4a.model.json.*;
 import um.si.de4a.model.json.assessment.Assessment;
 import um.si.de4a.model.json.assessment.AssessmentReferences;

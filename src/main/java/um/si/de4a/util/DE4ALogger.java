@@ -17,7 +17,7 @@ public final class DE4ALogger {
 
         FileHandler fileHandler = null;
         try {
-            fileHandler = new FileHandler("logs/de4a-metrics-log.txt", true);
+            fileHandler = new FileHandler("/usr/local/tomcat/logs/de4a-metrics-log.txt", true);
         } catch (IOException e) {
             e.printStackTrace();
         }
