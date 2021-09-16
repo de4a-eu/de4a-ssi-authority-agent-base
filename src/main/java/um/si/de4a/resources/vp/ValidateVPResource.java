@@ -37,7 +37,7 @@ public class ValidateVPResource {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
-        int subjectCheckResult = 0, schemaCheckResult = 0, issuerCheckResult = 0, signatureCheck = 0; // not valid
+        int subjectCheckResult = -1, schemaCheckResult = -1, issuerCheckResult = -1, signatureCheck = -1; // not valid
         DBUtil dbUtil = new DBUtil();
 
         JSONObject jsonEIDAS = null, inputDecodedEIDAS = null;
