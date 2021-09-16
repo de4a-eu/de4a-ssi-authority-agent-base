@@ -142,6 +142,7 @@ public class ValidateVPResource {
                     try {
                         subjectCheckResult = checkSubject(new eIDASObject(inputDecodedEIDAS.get("personIdentifier").toString().trim(), inputDecodedEIDAS.get("currentGivenName").toString().trim(), inputDecodedEIDAS.get("currentFamilyName").toString().trim(), inputDecodedEIDAS.get("dateOfBirth").toString().trim()),
                                 new eIDASObject(subject.get("personIdentifier").toString().trim(), subject.get("currentGivenName").toString().trim(), subject.get("currentFamilyName").toString().trim(), subject.get("dateOfBirth").toString().trim()));
+
                         logRecordInfo.setMessage("[VALIDATE-VP] Checked the subject of VP.");
                         Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01011"};
                         logRecordInfo.setParameters(params);
@@ -202,7 +203,15 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-        if(inputData.equals(vcData))
+        System.out.println("1- " + inputData.getDateOfBirth());
+        System.out.println("2- " + vcData.getDateOfBirth());
+        System.out.println("1- " + inputData.getPersonIdentifier());
+        System.out.println("2- " + vcData.getPersonIdentifier());
+        System.out.println("1- " + inputData.getCurrentFamilyName());
+        System.out.println("2- " + vcData.getCurrentFamilyName());
+        System.out.println("1- " + inputData.getCurrentGivenName());
+        System.out.println("2- " + vcData.getCurrentGivenName());
+        if(inputData.getPersonIdentifier().equals(vcData.getPersonIdentifier()) && inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;
     }
