@@ -203,14 +203,6 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-        System.out.println("1- " + inputData.getDateOfBirth());
-        System.out.println("2- " + vcData.getDateOfBirth());
-        System.out.println("1- " + inputData.getPersonIdentifier());
-        System.out.println("2- " + vcData.getPersonIdentifier());
-        System.out.println("1- " + inputData.getCurrentFamilyName());
-        System.out.println("2- " + vcData.getCurrentFamilyName());
-        System.out.println("1- " + inputData.getCurrentGivenName());
-        System.out.println("2- " + vcData.getCurrentGivenName());
         if(inputData.getPersonIdentifier().equals(vcData.getPersonIdentifier()) && inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;

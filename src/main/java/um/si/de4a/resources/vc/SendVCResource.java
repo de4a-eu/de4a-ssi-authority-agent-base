@@ -109,7 +109,7 @@ public class SendVCResource {
                 try {
                     Data data = null;
                     try {
-                        data = new Data(Base64.getEncoder().encodeToString(credential.toString().getBytes(StandardCharsets.UTF_8)));
+                        data = new Data(Base64.getEncoder().encodeToString(gson.toJson(credential).getBytes(StandardCharsets.UTF_8)));
                     }
                     catch(Exception ex){
                         logRecordSevere.setMessage("Object conversion error on Authority Agent DT.");
