@@ -1,6 +1,5 @@
 package um.si.de4a.util;
 
-import com.sun.xml.internal.ws.util.Pool;
 import um.si.de4a.model.json.*;
 import um.si.de4a.model.json.assessment.Assessment;
 import um.si.de4a.model.json.assessment.AssessmentReferences;
@@ -47,7 +46,6 @@ public class XMLtoJSONAdapter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String utfXML = xml.getBytes(StandardCharsets.UTF_8).toString();
 
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
@@ -58,7 +56,7 @@ public class XMLtoJSONAdapter {
             jaxbContext = JAXBContext.newInstance(HigherEducationDiploma.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            diploma = (HigherEducationDiploma) jaxbUnmarshaller.unmarshal(new StringReader(utfXML));
+            diploma = (HigherEducationDiploma) jaxbUnmarshaller.unmarshal(new StringReader(xml));
         } catch (JAXBException e) {
             logRecordSevere.setMessage("Error parsing input parameters.");
             Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};

@@ -37,7 +37,7 @@ public class ValidateVPResource {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
-        int subjectCheckResult = 0, schemaCheckResult = 0, issuerCheckResult = 0, signatureCheck = 0; // not valid
+        int subjectCheckResult = -1, schemaCheckResult = -1, issuerCheckResult = -1, signatureCheck = -1; // not valid
         DBUtil dbUtil = new DBUtil();
 
         JSONObject jsonEIDAS = null, inputDecodedEIDAS = null;
@@ -142,6 +142,7 @@ public class ValidateVPResource {
                     try {
                         subjectCheckResult = checkSubject(new eIDASObject(inputDecodedEIDAS.get("personIdentifier").toString().trim(), inputDecodedEIDAS.get("currentGivenName").toString().trim(), inputDecodedEIDAS.get("currentFamilyName").toString().trim(), inputDecodedEIDAS.get("dateOfBirth").toString().trim()),
                                 new eIDASObject(subject.get("personIdentifier").toString().trim(), subject.get("currentGivenName").toString().trim(), subject.get("currentFamilyName").toString().trim(), subject.get("dateOfBirth").toString().trim()));
+
                         logRecordInfo.setMessage("[VALIDATE-VP] Checked the subject of VP.");
                         Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01011"};
                         logRecordInfo.setParameters(params);
@@ -202,7 +203,7 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-        if(inputData.equals(vcData))
+        if(inputData.getPersonIdentifier().equals(vcData.getPersonIdentifier()) && inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;
     }

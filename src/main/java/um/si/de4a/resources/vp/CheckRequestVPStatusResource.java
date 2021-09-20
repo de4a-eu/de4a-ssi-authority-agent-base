@@ -64,23 +64,22 @@ public class CheckRequestVPStatusResource {
                             boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new NamesObj(new String[]{"vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid()}));
                             if(acceptResult == true){
                                 boolean updateStatus = false;
-                                if(ariesUtil.getPresentation("vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid()) != null) {
-                                    try {
-                                        updateStatus = dbUtil.updateVPStatus(userId, "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(), VPStatusEnum.VP_RECEIVED);
-                                        logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
-                                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
-                                        logRecordInfo.setParameters(params);
-                                        logger.log(logRecordInfo);
-                                    } catch (Exception ex) {
-                                        logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
-                                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
-                                        logRecordSevere.setParameters(params);
-                                        logger.log(logRecordSevere);
-                                    }
-
-                                    if (updateStatus == true)
-                                        vpRequestStatus = 1; // (vp received)
+                                try {
+                                    updateStatus = dbUtil.updateVPStatus(userId, "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(), VPStatusEnum.VP_RECEIVED);
+                                    logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
+                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                    logRecordInfo.setParameters(params);
+                                    logger.log(logRecordInfo);
+                                } catch (Exception ex) {
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
+                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                    logRecordSevere.setParameters(params);
+                                    logger.log(logRecordSevere);
                                 }
+
+                                if (updateStatus == true)
+                                    vpRequestStatus = 1; // (vp received)
+
                             }
                         }
                         else {
