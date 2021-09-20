@@ -1,18 +1,23 @@
 version: "3"
 
 services:
-    
-    authority.agent.api.de4a.eu:
-        container_name: ${AUTHORITY_AGENT_API_CONTAINER_NAME}
-        image: ${AUTHORITY_AGENT_API_IMAGE}:${AUTHORITY_AGENT_API_IMAGE_TAG}
+
+    government.agent.api.de4a.eu:
+        container_name: ${AGENT_API_CONTAINER_NAME}
+        image: ${AGENT_API_IMAGE}:${AGENT_API_IMAGE_TAG}
         ports:
-            - 0.0.0.0:${AUTHORITY_AGENT_API_PORT}:8080
+            - 0.0.0.0:${AGENT_API_PORT}:8080
         volumes:
-            - ./out/artifacts/de4a_agent:/usr/local/tomcat/webapps
-            - ./src/main/resources/web.xml:/usr/local/tomcat/conf/web.xml
-            - ./src/main/resources/app.properties:/usr/local/tomcat/conf/app.properties  
-       
+            - ./app.properties:/usr/local/tomcat/conf/app.properties
+        networks:
+            - agent_de4a_net
+
 volumes:
     db_data: {}
+
+networks:
+    agent_de4a_net:
+        external: true
+
 
 
