@@ -33,10 +33,14 @@ public class CheckOfferVCResponseResource {
         VCStatus vcStatus = null;
         try {
             vcStatus = dbUtil.getVCStatus(userID);
+            logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Received user VCStatus status data.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0104"};
+            logRecordInfo.setParameters(params);
+            logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+            logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Error accessing data on Authority Agent DT.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -64,14 +68,14 @@ public class CheckOfferVCResponseResource {
                         try {
                             dbUtil.updateVCStatus(userID, VCStatusEnum.OFFER_ACCEPTED);
 
-                            logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                            logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Stored current state in the Authority Agent DT internal database.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
                             logRecordInfo.setParameters(params);
                             logger.log(logRecordInfo);
                         }
                         catch(Exception ex){
-                            logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                            logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Error saving data on Authority Agent DT.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
@@ -84,14 +88,14 @@ public class CheckOfferVCResponseResource {
                                 try {
                                     dbUtil.updateVCStatus(userID, VCStatusEnum.VC_REJECTED);
 
-                                    logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                                    logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Stored current state in the Authority Agent DT internal database.");
+                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                    logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Error saving data on Authority Agent DT.");
+                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -101,14 +105,14 @@ public class CheckOfferVCResponseResource {
                                 try {
                                     dbUtil.updateVCStatus(userID, VCStatusEnum.OFFER_REJECTED);
 
-                                    logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                                    logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Stored current state in the Authority Agent DT internal database.");
+                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                    logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Error saving data on Authority Agent DT.");
+                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -119,14 +123,14 @@ public class CheckOfferVCResponseResource {
                             try {
                                 dbUtil.updateVCStatus(userID, VCStatusEnum.VC_ACCEPTED);
 
-                                logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                                logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Stored current state in the Authority Agent DT internal database.");
+                                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             }
                             catch(Exception ex){
-                                logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Error saving data on Authority Agent DT.");
+                                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
                                 logRecordSevere.setParameters(params);
                                 logger.log(logRecordSevere);
                             }

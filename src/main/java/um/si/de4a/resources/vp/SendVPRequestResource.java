@@ -39,13 +39,13 @@ public class SendVPRequestResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonRequest = (JSONObject) jsonParser.parse(vpRequest);
-            logRecordInfo.setMessage("Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01001"};
+            logRecordInfo.setMessage("SEND-VP-REQUEST: Received input eIDAS user data.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0201"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         } catch (ParseException e) {
-            logRecordSevere.setMessage("Error parsing input eIDAS data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
+            logRecordSevere.setMessage("SEND-VP-REQUEST: Object conversion error on Authority Agent DR.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20005"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
             //e.printStackTrace();
@@ -57,10 +57,15 @@ public class SendVPRequestResource {
             try{
                 userID = jsonRequest.get("userId").toString();
                 presentationFormat = jsonRequest.get("presentationFormat").toString();
+
+                logRecordInfo.setMessage("SEND-VP-REQUEST: Received input userId data.");
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0202"};
+                logRecordInfo.setParameters(params);
+                logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("Error parsing input parameters.");
-                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1005"};
+                logRecordSevere.setMessage("SEND-VP-REQUEST: Object conversion error on Authority Agent DR.");
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20005"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -69,10 +74,15 @@ public class SendVPRequestResource {
             DIDConn userDIDConn = null;
             try {
                 userDIDConn = dbUtil.getDIDConnStatus(userID);
+
+                logRecordInfo.setMessage("SEND-VP-REQUEST: Received user VPStatus status data.");
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0104"};
+                logRecordInfo.setParameters(params);
+                logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
-                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                logRecordSevere.setMessage( "SEND-VP-REQUEST: Error accessing data on Authority Agent DR.");
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -109,8 +119,8 @@ public class SendVPRequestResource {
                         Calendar cal = Calendar.getInstance();
                         outputLastModTime = outputFormat.format(cal.getTime());
                     } catch (Exception ex) {
-                        logRecordSevere.setMessage("Object conversion error on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1008"};
+                        logRecordSevere.setMessage("SEND-VP-REQUEST: Object conversion error on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "20005"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -144,8 +154,8 @@ public class SendVPRequestResource {
                         }};
                     }
                     catch (Exception ex){
-                        logRecordSevere.setMessage("Object conversion error on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1008"};
+                        logRecordSevere.setMessage("SEND-VP-REQUEST: Object conversion error on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "20005"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -165,14 +175,14 @@ public class SendVPRequestResource {
                             boolean response = false;
                             try{
                                 response = dbUtil.saveVPStatus(userID, piid, null, VPStatusEnum.REQUEST_SENT);
-                                logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
-                                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                logRecordInfo.setMessage("SEND-VP-REQUEST: Stored current state in the Authority Agent DT internal database.");
+                                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0103"};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             }
                             catch(Exception ex){
-                                logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
-                                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
+                                logRecordSevere.setMessage( "SEND-VP-REQUEST: Error saving data on Authority Agent DR.");
+                                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
                                 logRecordSevere.setParameters(params);
                                 logger.log(logRecordSevere);
                             }
@@ -182,8 +192,8 @@ public class SendVPRequestResource {
                         }
                     }
                    catch(Exception ex){
-                       logRecordSevere.setMessage( "Error on response from the Aries Government Agent.");
-                       Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1002"};
+                       logRecordSevere.setMessage("SEND-VP-REQUEST: Object conversion error on Authority Agent DR.");
+                       Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20005"};
                        logRecordSevere.setParameters(params);
                        logger.log(logRecordSevere);
                    }
