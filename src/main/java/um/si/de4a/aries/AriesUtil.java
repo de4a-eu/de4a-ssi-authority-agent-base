@@ -229,7 +229,8 @@ public class AriesUtil {
                 }
                 try {
                     signedVC = gson.fromJson(gson.toJson(jsonSignedCredential), SignedVerifiableCredential.class);
-                    logRecordInfo.setMessage("SEND-OFFER: Signed a Verifiable Credential.");
+
+                    logRecordInfo.setMessage("SEND-OFFER: Signed a Verifiable Credential." + signedVC);
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0205"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);

@@ -86,7 +86,7 @@ public class SendVCOfferResource {
             }
             catch (Exception ex){
                 logRecordSevere.setMessage("SEND-OFFER: Arguments missing or invalid at Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "10705"};
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "10702"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -96,9 +96,24 @@ public class SendVCOfferResource {
             String myDID = "", publicDID = "", theirDID = "";
             if(userDIDConn != null){
                 try{
+
                     myDID = userDIDConn.getMyDID();
+                    logRecordInfo.setMessage("SEND-OFFER myDID: " + myDID);
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+
                     publicDID = dbUtil.getDID();
+                    logRecordInfo.setMessage("SEND-OFFER publicDID: " + publicDID);
+                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+
                     theirDID = userDIDConn.getTheirDID();
+                    logRecordInfo.setMessage("SEND-OFFER theirDID: " + theirDID);
+                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
                     logRecordSevere.setMessage( "SEND-OFFER: Error accessing data on Authority Agent DT.");
@@ -133,6 +148,7 @@ public class SendVCOfferResource {
 
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
                     SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
+
 
                     if(credential != null) {
 
@@ -170,6 +186,7 @@ public class SendVCOfferResource {
                         try {
                             offersAttach = new OffersAttach(new Data(Base64.getEncoder().encodeToString(gson.toJson(credential).getBytes(StandardCharsets.UTF_8))), outputLastModTime);
                             offersAttaches.add(offersAttach);
+                            System.out.println("Offer: " + offersAttach.getData());
                         }
                         catch(Exception ex){
                             logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
