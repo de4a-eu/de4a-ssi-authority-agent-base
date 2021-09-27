@@ -195,7 +195,7 @@ public class SendVCOfferResource {
                             logger.log(logRecordSevere);
                         }
 
-                        OfferCredential offerCredential = new OfferCredential(credentialPreview,offersAttaches);
+                        OfferCredential offerCredential = new OfferCredential("Please respond to the offered credential representing your diploma.",credentialPreview,offersAttaches);
                         OfferRequest offer = new OfferRequest(userDIDConn.getMyDID(),offerCredential,userDIDConn.getTheirDID());
 
                         String piid = "";
