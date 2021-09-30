@@ -119,7 +119,8 @@ public class CheckOfferVCResponseResource {
                                 vcStatusCode = -2; // return -1 (offer rejected)
                             }
                         }
-                        else if(description.get("code").equals("internal") || description.get("code").equals("accepted")){
+                        else if(msg.get("@type").equals("https://didcomm.org/issue-credential/2.0/ack")){
+                        //description.get("code").equals("internal") || description.get("code").equals("accepted")){
                             try {
                                 dbUtil.updateVCStatus(userID, VCStatusEnum.VC_ACCEPTED);
 
