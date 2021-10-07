@@ -49,14 +49,14 @@ public class ValidateVPResource {
             jsonEIDAS = (JSONObject) jsonParser.parse(eidasMdsInput);
 
             eidasMds = new String(Base64.getDecoder().decode(jsonEIDAS.get("eidas").toString()));
-            logRecordInfo.setMessage("VALIDATE-VP: Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0201"};
+            logRecordInfo.setMessage("Received input eIDAS user data.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01001"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
 
         } catch (ParseException e) {
-            logRecordSevere.setMessage("VALIDATE-VP: Object conversion error on Authority Agent DR.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20005"};
+            logRecordSevere.setMessage("Error parsing input eIDAS data.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
            // e.printStackTrace();
@@ -64,14 +64,14 @@ public class ValidateVPResource {
 
         try {
             inputDecodedEIDAS = (JSONObject) jsonParser.parse(eidasMds);
-            logRecordInfo.setMessage("VALIDATE-VP: Decoded input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0208"};
+            logRecordInfo.setMessage("Decoded input eIDAS user data.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01009"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("VALIDATE-VP: Object conversion error on Authority Agent DR.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20005"};
+            logRecordSevere.setMessage( "Object conversion error on Authority Agent DR.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1008"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -81,15 +81,10 @@ public class ValidateVPResource {
         VPStatus userVPStatus = null;
         try{
             userVPStatus = dbUtil.getVPStatus(userId);
-
-            logRecordInfo.setMessage("VALIDATE-VP: Received user VPStatus status data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0104"};
-            logRecordInfo.setParameters(params);
-            logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "VALIDATE-VP: Error accessing data on Authority Agent DR.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -104,8 +99,8 @@ public class ValidateVPResource {
                 jsonPresentation = ariesUtil.getPresentation(userVPStatus.getVpName());
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "VALIDATE-VP: Error accessing data on Authority Agent DR.");
-                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
+                logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -121,15 +116,10 @@ public class ValidateVPResource {
 
                         vc = (JSONObject) credentials.get(0);
                         subject = (JSONObject) vc.get("credentialSubject");
-
-                        logRecordInfo.setMessage("VALIDATE-VP: Processing the JSON response received from /get-vp.");
-                        Object[] params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0102"};
-                        logRecordInfo.setParameters(params);
-                        logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "VALIDATE-VP: Error on response from the Aries Government Agent.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "10704"};
+                        logRecordSevere.setMessage( "Error on response from the Aries Government Agent.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1002"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -140,8 +130,8 @@ public class ValidateVPResource {
                     else
                         signatureCheck = 0;
 
-                    logRecordInfo.setMessage("VALIDATE-VP: Validated the digital signature of the submitted Verifiable Presentation.");
-                    Object[] params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0209"};
+                    logRecordInfo.setMessage("[VALIDATE-VP] Checked the digital signature of VP.");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01010"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
@@ -153,14 +143,14 @@ public class ValidateVPResource {
                         subjectCheckResult = checkSubject(new eIDASObject(inputDecodedEIDAS.get("personIdentifier").toString().trim(), inputDecodedEIDAS.get("currentGivenName").toString().trim(), inputDecodedEIDAS.get("currentFamilyName").toString().trim(), inputDecodedEIDAS.get("dateOfBirth").toString().trim()),
                                 new eIDASObject(subject.get("personIdentifier").toString().trim(), subject.get("currentGivenName").toString().trim(), subject.get("currentFamilyName").toString().trim(), subject.get("dateOfBirth").toString().trim()));
 
-                        logRecordInfo.setMessage("VALIDATE-VP: Validated the subject of the submitted Verifiable Presentation.");
-                        Object[] params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0210"};
+                        logRecordInfo.setMessage("[VALIDATE-VP] Checked the subject of VP.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01011"};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "VALIDATE-VP: Error accessing data on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
+                        logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -172,14 +162,14 @@ public class ValidateVPResource {
                     try {
                         dbUtil.updateVPStatus(userId, VPStatusEnum.VP_VALID);
 
-                        logRecordInfo.setMessage("VALIDATE-VP: Stored current state in the Authority Agent DT internal database.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0103"};
+                        logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "VALIDATE-VP: Error saving data on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
+                        logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -189,14 +179,14 @@ public class ValidateVPResource {
                     try {
                         dbUtil.updateVPStatus(userId, VPStatusEnum.VP_NOT_VALID);
 
-                        logRecordInfo.setMessage("VALIDATE-VP: Stored current state in the Authority Agent DT internal database.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "0103"};
+                        logRecordInfo.setMessage("Stored current state in the Authority Agent DR database.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "VALIDATE-VP: Error saving data on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "20006"};
+                        logRecordSevere.setMessage("Error saving data on Authority Agent DR.");
+                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }

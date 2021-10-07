@@ -36,14 +36,10 @@ public class DIDConnStatusResource {
         DBUtil dbUtil = new DBUtil();
         try {
             userDidConn =  dbUtil.getDIDConnStatus(userID);
-            logRecordInfo.setMessage("DID-CONN-STATUS: Received user DIDCon status data.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0104"};
-            logRecordInfo.setParameters(params);
-            logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "DID-CONN-STATUS: Error accessing data on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
             //System.out.println("[DID-CONN-STATUS] Exception: " + ex.getMessage());
@@ -52,6 +48,11 @@ public class DIDConnStatusResource {
         if(userDidConn != null) {
             // DONE: case "status == connection_established": return 1
             if (userDidConn.getStatus() == DIDConnStatusEnum.CONNECTION_ESTABLISHED) {
+                logRecordInfo.setMessage("DID Connection has been established.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
+                logRecordInfo.setParameters(params);
+                logger.log(logRecordInfo);
+
                 connectionStatusCode = 1; // return 1 (connection has been established)
             }
             // case "status == invitation_generated":
@@ -73,19 +74,24 @@ public class DIDConnStatusResource {
                                 try {
                                     dbUtil.updateDIDConnection(userDidConn.getUserId(), conn.get("MyDID").toString(),
                                             conn.get("TheirDID").toString(), connectionID, DIDConnStatusEnum.CONNECTION_ESTABLISHED);
-                                    logRecordInfo.setMessage("DID-CONN-STATUS: Stored current state in the Authority Agent DT internal database.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
+                                    logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
+                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage( "DID-CONN-STATUS: Error saving data on Authority Agent DT.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
+                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
 
                                 connectionStatusCode = 1;// return 1 (Connection has been established)
+
+                                logRecordInfo.setMessage("DID Connection has been established.");
+                                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01009"};
+                                logRecordInfo.setParameters(params);
+                                logger.log(logRecordInfo);
                             }
                         }
                     }

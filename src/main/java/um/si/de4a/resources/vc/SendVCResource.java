@@ -43,29 +43,26 @@ public class SendVCResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonRequest = (JSONObject) jsonParser.parse(user);
-            logRecordInfo.setMessage("SEND-VC: Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+            logRecordInfo.setMessage("Received input eIDAS user data.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01001"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         } catch (ParseException e) {
-            logRecordSevere.setMessage("SEND-VC: Object conversion error on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+            logRecordSevere.setMessage("Error parsing input eIDAS data.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
+            e.printStackTrace();
         }
 
         if(jsonRequest != null) {
             String userID = "";
             try {
                 userID = jsonRequest.get("userId").toString();
-                logRecordInfo.setMessage("SEND-VC: Received input userId data.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0202"};
-                logRecordInfo.setParameters(params);
-                logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("SEND-VC: Object conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                logRecordSevere.setMessage("Error parsing input parameters.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "1005"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -73,16 +70,12 @@ public class SendVCResource {
             // DONE: call database getVCStatus(userID): status, piid
             try {
                 vcStatus = dbUtil.getVCStatus(userID);
-
-                logRecordInfo.setMessage("SEND-VC: Received user VCStatus status data.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0104"};
-                logRecordInfo.setParameters(params);
-                logger.log(logRecordInfo);
             } catch (Exception ex) {
-                logRecordSevere.setMessage( "SEND-VC: Error accessing data on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+                logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "1010"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
+                //System.out.println("[SEND-VC] Exception: " + ex.getMessage());
             }
 
             AriesUtil ariesUtil = new AriesUtil();
@@ -93,8 +86,8 @@ public class SendVCResource {
                 credential = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("SEND-VC: Object conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                logRecordSevere.setMessage( "Object conversion error on Authority Agent DT.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -107,8 +100,8 @@ public class SendVCResource {
                 outputLastModTime = outputFormat.format(cal.getTime());
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("SEND-VC: Object conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                logRecordSevere.setMessage( "Object conversion error on Authority Agent DT.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -119,8 +112,8 @@ public class SendVCResource {
                         data = new Data(Base64.getEncoder().encodeToString(gson.toJson(credential).getBytes(StandardCharsets.UTF_8)));
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage("SEND-VC: Object conversion error on Authority Agent DT.");
-                        Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                        logRecordSevere.setMessage("Object conversion error on Authority Agent DT.");
+                        Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -135,8 +128,8 @@ public class SendVCResource {
                         vcAcceptStatus = ariesUtil.acceptRequest(vcStatus.getPiid(), request);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "SEND-VC: Error on response from the Aries Government Agent.");
-                        Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                        logRecordSevere.setMessage( "Error on response from the Aries Government Agent.");
+                        Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "1002"};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -145,14 +138,14 @@ public class SendVCResource {
                     if (vcAcceptStatus == true) {
                         try {
                             dbUtil.updateVCStatus(userID, VCStatusEnum.VC_SENT);
-                            logRecordInfo.setMessage("SEND-VC: Stored current state in the Authority Agent DT internal database.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
+                            logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
                             logRecordInfo.setParameters(params);
                             logger.log(logRecordInfo);
                         }
                         catch(Exception ex){
-                            logRecordSevere.setMessage( "SEND-VC: Error saving data on Authority Agent DT.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+                            logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
@@ -160,8 +153,8 @@ public class SendVCResource {
                     }
 
                 } catch (Exception ex) {
-                    logRecordSevere.setMessage("SEND-VC: Object conversion error on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                    logRecordSevere.setMessage("Error on Authority Agent DT.");
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1011"};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                     //System.out.println("[SEND-VC] Exception: " + ex.getMessage());

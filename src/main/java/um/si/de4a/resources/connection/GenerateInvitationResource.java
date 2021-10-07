@@ -32,14 +32,14 @@ public class GenerateInvitationResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonUserID = (JSONObject) jsonParser.parse(user);
-            logRecordInfo.setMessage("GENERATE-INVITATION: Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+            logRecordInfo.setMessage("Received input eIDAS user data.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01001"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
 
         } catch (ParseException e) {
-            logRecordSevere.setMessage("GENERATE-INVITATION: Object conversion error on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+            logRecordSevere.setMessage("Error parsing input eIDAS data.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
 
@@ -51,15 +51,10 @@ public class GenerateInvitationResource {
             String userID = "";
             try {
                 userID = jsonUserID.get("userId").toString();
-                logRecordInfo.setMessage("GENERATE-INVITATION: Received input userId data.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0202"};
-                logRecordInfo.setParameters(params);
-                logger.log(logRecordInfo);
-
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("GENERATE-INVITATION: Object conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                logRecordSevere.setMessage("Error parsing input parameters.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "1005"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -71,14 +66,10 @@ public class GenerateInvitationResource {
             if (invitation != null) {
                 try {
                     invitationJson = invitation.get("invitation").toString();
-                    logRecordInfo.setMessage("GENERATE-INVITATION: Processing the JSON response received from /generate-invitation.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0102"};
-                    logRecordInfo.setParameters(params);
-                    logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage("GENERATE-INVITATION: Object conversion error on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                    logRecordSevere.setMessage("Error parsing received JSON response.");
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "1005"};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
@@ -90,13 +81,13 @@ public class GenerateInvitationResource {
                 DBUtil dbUtil = new DBUtil();
                 try {
                     dbStored = dbUtil.saveDIDConn(userID, jsonObjectInv.get("@id").toString(), invitation.toString(), currentTime);
-                    logRecordInfo.setMessage("GENERATE-INVITATION: Stored current state in the Authority Agent DT internal database.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
+                    logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "01006"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 } catch (Exception ex) {
-                    logRecordSevere.setMessage( "GENERATE-INVITATION: Error saving data on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+                    logRecordSevere.setMessage( "Error storing current state in internal database.");
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "1006"};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                     //System.out.println("[GENERATE-INVITATION] Exception: " + ex.getMessage());
