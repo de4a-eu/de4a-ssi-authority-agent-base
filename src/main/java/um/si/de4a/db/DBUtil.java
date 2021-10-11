@@ -47,8 +47,14 @@ public class DBUtil {
     }
 
     public String getDID(){
-        String issuerDID = didRepository.getAll().get(0).getValue();
-        return issuerDID;
+        String did = "";
+        List<DID> didList = didRepository.getAll();
+        for (DID d:
+             didList) {
+            if(d.getTimeUntil() == -1)
+                did = d.getValue();
+        }
+        return did;
     }
 
     public boolean saveDIDConn(String userId, String invitationId, String invitationJSON, long statusChanged){
