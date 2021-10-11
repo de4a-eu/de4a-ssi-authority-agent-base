@@ -12,6 +12,10 @@ COPY out/artifacts/de4a_agent/${WAR_NAME} ./ROOT.war
 COPY conf/web.xml ./../conf
 COPY conf/service-matrix.properties ./../conf
 COPY ${CONNECTOR_NAME} ./
+COPY lib/WaltID-ServiceMatrix-1.0.1.jar ./../lib
+COPY lib/waltid-ssi-kit-1.0-20211006.180057-61.jar ./../lib
+COPY lib/waltid-ssikit-vclib-1.4.9.jar ./../lib
+
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]

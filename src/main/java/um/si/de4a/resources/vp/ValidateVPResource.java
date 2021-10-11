@@ -3,7 +3,8 @@ package um.si.de4a.resources.vp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import id.walt.model.TrustedIssuer;
+import id.walt.services.essif.TrustedIssuerClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -156,7 +157,22 @@ public class ValidateVPResource {
                     }
                 }
 
-                validationObj = new ValidationObj(subjectCheckResult, 1, 1, signatureCheck, userVPStatus.getVpName());
+                try {
+                    issuerCheckResult = checkIssuer(dbUtil.getDID());
+                    logRecordInfo.setMessage("[VALIDATE-VP] Checked the issuer of V for DID " + dbUtil.getDID() + ".");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01012"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                    logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
+
+                validationObj = new ValidationObj(subjectCheckResult, 1, issuerCheckResult, signatureCheck, userVPStatus.getVpName());
                 if (validationObj.getSubjectCheck() == 1 && validationObj.getSchemaCheck() == 1 && validationObj.getIssuerCheck() == 1 && validationObj.getSignatureCheck() == 1){ //TODO replace with checking TIR/TSR
                     //System.out.println("[VALIDATE VP] Updating DB status to VALID...");
                     try {
@@ -204,6 +220,20 @@ public class ValidateVPResource {
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
         if(inputData.getPersonIdentifier().equals(vcData.getPersonIdentifier()) && inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
+            result = 1;
+        return result;
+    }
+
+   private int checkIssuer(String did){
+        int result = 0;
+        TrustedIssuer issuerRecord = null;
+        try{
+            issuerRecord = TrustedIssuerClient.INSTANCE.getIssuer(did);
+        }
+        catch(Exception ex){
+            result = 0;
+        }
+        if(issuerRecord != null)
             result = 1;
         return result;
     }

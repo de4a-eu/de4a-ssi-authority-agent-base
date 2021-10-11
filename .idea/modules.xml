@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/de4a-enterprise-agent.iml" filepath="$PROJECT_DIR$/.idea/de4a-enterprise-agent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DE4AEnterpriseAgent.iml" filepath="$PROJECT_DIR$/DE4AEnterpriseAgent.iml" />
     </modules>
   </component>
 </project>
