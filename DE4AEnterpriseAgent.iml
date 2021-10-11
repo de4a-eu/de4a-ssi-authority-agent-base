@@ -10,7 +10,11 @@
       </configuration>
     </facet>
   </component>
+<<<<<<< HEAD
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_15">
+=======
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_X">
+>>>>>>> 31cf0664de392906ae2c6385a6559e1ed233602f
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -126,7 +130,11 @@
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.14.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.14.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-slf4j18-impl:2.14.1" level="project" />
+<<<<<<< HEAD
     <orderEntry type="library" exported="" scope="PROVIDED" name="Maven: id.walt:waltid-ssi-kit:1.0-SNAPSHOT" level="project" />
+=======
+    <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt:waltid-ssi-kit:1.0-SNAPSHOT" level="project" />
+>>>>>>> 31cf0664de392906ae2c6385a6559e1ed233602f
     <orderEntry type="library" scope="PROVIDED" name="Maven: info.weboftrust:ld-signatures-java:0.5-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: io.github.erdtman:java-json-canonicalization:1.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: decentralized-identity:jsonld-common-java:0.2.0" level="project" />
@@ -246,11 +254,19 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sksamuel.hoplite:hoplite-yaml:1.4.7" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.28" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sksamuel.hoplite:hoplite-hikaricp:1.4.7" level="project" />
+<<<<<<< HEAD
     <orderEntry type="library" exported="" scope="PROVIDED" name="Maven: id.walt.servicematrix:WaltID-ServiceMatrix:1.0.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.5.20" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sksamuel.hoplite:hoplite-hocon:1.4.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.typesafe:config:1.4.1" level="project" />
     <orderEntry type="library" exported="" scope="PROVIDED" name="Maven: id.walt:waltid-ssikit-vclib:1.4.7" level="project" />
+=======
+    <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt.servicematrix:WaltID-ServiceMatrix:1.0.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.5.20" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.sksamuel.hoplite:hoplite-hocon:1.4.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.typesafe:config:1.4.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt:waltid-ssikit-vclib:1.4.7" level="project" />
+>>>>>>> 31cf0664de392906ae2c6385a6559e1ed233602f
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.victools:jsonschema-generator:4.18.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml:classmate:1.5.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.pwall.json:json-kotlin-schema:0.23" level="project" />
