@@ -27,7 +27,9 @@ public class DIDConn extends CouchDbDocument {
 
     private DIDConnStatusEnum didConnStatusEnum;
 
-    private long timeUpdated;
+    private long timeCreated;
+
+    private long timeDeleted;
 
     @TypeDiscriminator
     private String type;
@@ -35,7 +37,7 @@ public class DIDConn extends CouchDbDocument {
     public DIDConn() {
     }
 
-    public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, DIDConnStatusEnum didConnStatusEnum, String type, long timeUpdated) {
+    public DIDConn(String id, String revision, String userId, String myDID, String theirDID, String invitationId, String invitationJSON, String connectionId, DIDConnStatusEnum didConnStatusEnum, String type, long timeCreated, long timeDeleted) {
         this.id = id;
         this.revision = revision;
         this.userId = userId;
@@ -46,7 +48,8 @@ public class DIDConn extends CouchDbDocument {
         this.connectionId = connectionId;
         this.didConnStatusEnum = didConnStatusEnum;
         this.type = type;
-        this.timeUpdated = timeUpdated;
+        this.timeCreated = timeCreated;
+        this.timeDeleted = timeDeleted;
     }
 
     public String getId() {
@@ -129,12 +132,20 @@ public class DIDConn extends CouchDbDocument {
         this.type = type;
     }
 
-    public long getTimeUpdated() {
-        return timeUpdated;
+    public long getTimeCreated() {
+        return timeCreated;
     }
 
-    public void setTimeUpdated(long timeUpdated) {
-        this.timeUpdated = timeUpdated;
+    public void setTimeCreated(long timeCreated) {
+        this.timeCreated = timeCreated;
+    }
+
+    public long getTimeDeleted() {
+        return timeDeleted;
+    }
+
+    public void setTimeDeleted(long timeDeleted) {
+        this.timeDeleted = timeDeleted;
     }
 }
 

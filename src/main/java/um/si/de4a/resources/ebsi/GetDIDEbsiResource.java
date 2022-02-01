@@ -1,9 +1,6 @@
 package um.si.de4a.resources.ebsi;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.databind.ObjectMapper;
-=======
->>>>>>> 31cf0664de392906ae2c6385a6559e1ed233602f
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.aries.AriesUtil;
@@ -31,15 +28,10 @@ public class GetDIDEbsiResource {
         DBUtil dbUtil = new DBUtil();
         String did = "";
 
-<<<<<<< HEAD
         DIDEbsiObject didEbsiObject = null;
         try {
             did = dbUtil.getDID();
             didEbsiObject = new DIDEbsiObject(did);
-=======
-        try {
-            did = dbUtil.getDID();
->>>>>>> 31cf0664de392906ae2c6385a6559e1ed233602f
         }
         catch(Exception ex){
             logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
@@ -48,12 +40,8 @@ public class GetDIDEbsiResource {
             logger.log(logRecordSevere);
         }
 
-<<<<<<< HEAD
         ObjectMapper mapper = new ObjectMapper();
         String jsonDIDObject = mapper.writeValueAsString(didEbsiObject);
         return jsonDIDObject;
-=======
-        return did;
->>>>>>> 31cf0664de392906ae2c6385a6559e1ed233602f
     }
 }

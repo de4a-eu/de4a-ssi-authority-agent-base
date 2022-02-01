@@ -82,6 +82,7 @@ public class SendVCOfferResource {
             String userID = "", evidence = "";
             try{
                 userID = jsonOffer.get("userId").toString();
+                System.out.println("SEND-OFFER userId: " + userID);
                 evidence = jsonOffer.get("evidence").toString();
             }
             catch (Exception ex){
@@ -92,10 +93,12 @@ public class SendVCOfferResource {
             }
 
             // DONE: call database getDIDConnStatus(userID): DIDConn
-            DIDConn userDIDConn = dbUtil.getDIDConnStatus(userID);
+            DIDConn userDIDConn = dbUtil.getCurrentDIDConnStatus(userID);
+
             String myDID = "", publicDID = "", theirDID = "";
             if(userDIDConn != null){
                 try{
+                    System.out.println("SEND-OFFER Current Invitation ID: " + userDIDConn.getInvitationId());
 
                     myDID = userDIDConn.getMyDID();
                     logRecordInfo.setMessage("SEND-OFFER myDID: " + myDID);
