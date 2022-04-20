@@ -6,6 +6,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
 import um.si.de4a.model.json.VerifiableCredential;
+import um.si.de4a.model.json.VerifiableCredentialUpdated;
 import um.si.de4a.model.xml.HigherEducationDiploma;
 import um.si.de4a.util.DE4ALogger;
 import um.si.de4a.util.XMLtoJSONAdapter;

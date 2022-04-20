@@ -68,7 +68,7 @@ public class SendVPRequestResource {
             // DONE: call database getDIDConnStatus(userID): DIDConn object
             DIDConn userDIDConn = null;
             try {
-                userDIDConn = dbUtil.getDIDConnStatus(userID);
+                userDIDConn = dbUtil.getCurrentDIDConnStatus(userID);
             }
             catch(Exception ex){
                 logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");

@@ -2,7 +2,6 @@ package um.si.de4a.resources.offer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.lang3.SerializationUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
@@ -12,16 +11,15 @@ import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.model.json.VerifiableCredential;
+import um.si.de4a.model.json.VerifiableCredentialUpdated;
 import um.si.de4a.resources.vc.Data;
 import um.si.de4a.resources.vc.GenerateVCResource;
 import org.json.simple.parser.JSONParser;
 import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -51,8 +49,8 @@ public class SendVCOfferResource {
             signatureType = appConfig.getProperties().getProperty("signature.type");
         }
         catch (Exception ex){
-            logRecordSevere.setMessage( "Error reading configuration properties.");
-            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "3001"};
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent DT.");
+            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "30017"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -65,14 +63,16 @@ public class SendVCOfferResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonOffer = (JSONObject) jsonParser.parse(inputOffer);
-            logRecordInfo.setMessage("Received input evidence data.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01005"};
+            //jsonOffer = (JSONObject) jsonParser.parse(new InputStreamReader(new ByteArrayInputStream(inputOffer.getBytes(StandardCharsets.UTF_8)), "UTF-8"));
+            logRecordInfo.setMessage("SEND-OFFER: Received input eIDAS user data.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
+
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("Error parsing input parameters.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};
+            logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
+            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -82,27 +82,51 @@ public class SendVCOfferResource {
             String userID = "", evidence = "";
             try{
                 userID = jsonOffer.get("userId").toString();
-                evidence = jsonOffer.get("evidence").toString();
+                System.out.println("SEND-OFFER userId: " + userID);
+                //ByteBuffer buffer = StandardCharsets.UTF_8.encode(jsonOffer.get("evidence").toString());
+                //evidence = jsonOffer.get("evidence").toString();
+                byte[] evidenceBytes = Base64.getDecoder().decode(jsonOffer.get("evidence").toString());
+                //evidence = jsonOffer.get("evidence").toString();
+                evidence = new String(evidenceBytes, "ISO-8859-1");
+
+                 System.out.println("[SEND-OFFER-DEBUG] Evidence: " + evidence);
             }
             catch (Exception ex){
-                logRecordSevere.setMessage("Error parsing input parameters.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};
+                logRecordSevere.setMessage("SEND-OFFER: Arguments missing or invalid at Authority Agent DT.");
+                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "10702"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
 
             // DONE: call database getDIDConnStatus(userID): DIDConn
-            DIDConn userDIDConn = dbUtil.getDIDConnStatus(userID);
+            DIDConn userDIDConn = dbUtil.getCurrentDIDConnStatus(userID);
+
             String myDID = "", publicDID = "", theirDID = "";
             if(userDIDConn != null){
                 try{
+                    System.out.println("SEND-OFFER Current Invitation ID: " + userDIDConn.getInvitationId());
+
                     myDID = userDIDConn.getMyDID();
+                    logRecordInfo.setMessage("SEND-OFFER myDID: " + myDID);
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+
                     publicDID = dbUtil.getDID();
+                    logRecordInfo.setMessage("SEND-OFFER publicDID: " + publicDID);
+                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+
                     theirDID = userDIDConn.getTheirDID();
+                    logRecordInfo.setMessage("SEND-OFFER theirDID: " + theirDID);
+                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                    logRecordSevere.setMessage( "SEND-OFFER: Error accessing data on Authority Agent DT.");
+                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
@@ -113,7 +137,7 @@ public class SendVCOfferResource {
                 jo.put("theirDID", theirDID);
 
                 String jsonRequest = jo.toJSONString();
-                // System.out.println("[SEND-VC-OFFER] JSON request: " + jsonRequest);
+                //System.out.println("[SEND-OFFER-DEBUG] JSON request: " + jsonRequest);
 
                 // DONE: call generateVC(evidence, myDID, theirDID) method: VC
                 GenerateVCResource generateVCResource = new GenerateVCResource();
@@ -134,6 +158,7 @@ public class SendVCOfferResource {
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
                     SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
 
+
                     if(credential != null) {
 
                         //String prettyJson = gson.toJson(credential);
@@ -146,20 +171,20 @@ public class SendVCOfferResource {
                             Calendar cal = Calendar.getInstance();
                             outputLastModTime = outputFormat.format(cal.getTime());
                         } catch (Exception ex) {
-                            logRecordSevere.setMessage("Object conversion error on Authority Agent DT.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "1008"};
+                            logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
 
                         ArrayList<Attribute> attributes = new ArrayList<Attribute>() {
                             {
-                                add(new Attribute("text/plain", "credentialSubject.currentFamilyName", Base64.getEncoder().encodeToString(credential.getCredentialSubject().getCurrentFamilyName().getBytes(StandardCharsets.UTF_8))));
-                                add(new Attribute("text/plain", "credentialSubject.currentGivenName", Base64.getEncoder().encodeToString(credential.getCredentialSubject().getCurrentGivenName().getBytes(StandardCharsets.UTF_8))));
-                                add(new Attribute("text/plain", "credentialSubject.agentReferences.organisation.preferredName.text.#text", Base64.getEncoder().encodeToString(credential.getCredentialSubject().getAgentReferences().getOrganisation().getPreferredName().getText().getText().getBytes(StandardCharsets.UTF_8))));
-                                add(new Attribute("text/plain", "credentialSubject.learningAchievement.title.text.#text", Base64.getEncoder().encodeToString(credential.getCredentialSubject().getLearningAchievement().getTitle().getText().getText().getBytes(StandardCharsets.UTF_8))));
-                                add(new Attribute("text/plain", "credentialSubject.learningSpecificationReferences.qualification.title.text.#text", Base64.getEncoder().encodeToString(credential.getCredentialSubject().getLearningSpecificationReferences().getQualification().getTitle().getText().getText().getBytes(StandardCharsets.UTF_8))));
-                                add(new Attribute("text/plain", "issuanceDate", Base64.getEncoder().encodeToString(credential.getIssuanceDate().getBytes(StandardCharsets.UTF_8))));
+                                add(new Attribute("text/plain", "credentialSubject.currentFamilyName", "Current Family Name"));
+                                add(new Attribute("text/plain", "credentialSubject.currentGivenName", "Current Given Name"));
+                                add(new Attribute("text/plain", "credentialSubject.agentReferences.organisation.preferredName.text.#text", "Institution Name"));
+                                add(new Attribute("text/plain", "credentialSubject.learningAchievement.title.text.#text", "Title"));
+                                add(new Attribute("text/plain", "credentialSubject.learningSpecificationReferences.qualification.title.text.#text", "Degree"));
+                                add(new Attribute("text/plain", "issuanceDate", "Date of Issuance"));
 
                             }
                         };
@@ -172,13 +197,13 @@ public class SendVCOfferResource {
                             offersAttaches.add(offersAttach);
                         }
                         catch(Exception ex){
-                            logRecordSevere.setMessage("Object conversion error on Authority Agent DT.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
+                            logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
 
-                        OfferCredential offerCredential = new OfferCredential(credentialPreview,offersAttaches);
+                        OfferCredential offerCredential = new OfferCredential("Please respond to the offered credential representing your diploma.",credentialPreview,offersAttaches);
                         OfferRequest offer = new OfferRequest(userDIDConn.getMyDID(),offerCredential,userDIDConn.getTheirDID());
 
                         String piid = "";
@@ -186,8 +211,8 @@ public class SendVCOfferResource {
                             piid = ariesUtil.sendOffer(offer);
                         }
                         catch(Exception ex){
-                            logRecordSevere.setMessage("Error on response from the Aries Government Agent");
-                            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "1002"};
+                            logRecordSevere.setMessage( "SEND-OFFER: Error on response from the Aries Government Agent.");
+                            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
@@ -196,13 +221,13 @@ public class SendVCOfferResource {
                             try {
                                 dbUtil.saveVCStatus(userID, piid, gson.toJson(credential), VCStatusEnum.OFFER_SENT);
 
-                                logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                                logRecordInfo.setMessage("SEND-OFFER: Stored current state in the Authority Agent DT internal database.");
+                                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             } catch (Exception ex) {
-                                logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
+                                logRecordSevere.setMessage( "SEND-OFFER: Error saving data on Authority Agent DT.");
+                                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
                                 logRecordSevere.setParameters(params);
                                 logger.log(logRecordSevere);
                                 //System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());

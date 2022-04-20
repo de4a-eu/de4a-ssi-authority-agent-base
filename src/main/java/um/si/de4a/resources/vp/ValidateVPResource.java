@@ -1,9 +1,13 @@
 package um.si.de4a.resources.vp;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.ValidationMessage;
+import id.walt.model.TrustedIssuer;
+import id.walt.services.essif.TrustedIssuerClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,13 +18,17 @@ import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.util.DE4ALogger;
+import um.si.de4a.util.JsonSchemaValidator;
 
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -107,7 +115,8 @@ public class ValidateVPResource {
 
             if (jsonPresentation != null) {
 
-                JSONObject vc, subject = null;
+                JSONObject vc = null, subject = null;
+                String issuer = "";
                 // signature check
                 if (jsonPresentation.containsKey("verifiableCredential")) {
                     JSONArray credentials = null;
@@ -116,6 +125,8 @@ public class ValidateVPResource {
 
                         vc = (JSONObject) credentials.get(0);
                         subject = (JSONObject) vc.get("credentialSubject");
+                        issuer = vc.get("issuer").toString();
+                        System.out.println("VALIDATE-VP - Issuer: " + issuer);
                     }
                     catch(Exception ex){
                         logRecordSevere.setMessage( "Error on response from the Aries Government Agent.");
@@ -156,8 +167,38 @@ public class ValidateVPResource {
                     }
                 }
 
-                validationObj = new ValidationObj(subjectCheckResult, 1, 1, signatureCheck, userVPStatus.getVpName());
-                if (validationObj.getSubjectCheck() == 1 && validationObj.getSchemaCheck() == 1 && validationObj.getIssuerCheck() == 1 && validationObj.getSignatureCheck() == 1){ //TODO replace with checking TIR/TSR
+                try {
+                    issuerCheckResult = checkIssuer(issuer);
+                    logRecordInfo.setMessage("[VALIDATE-VP] Checked the issuer of VC for DID " + issuer + ".");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01012"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                    logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
+
+                try {
+                    schemaCheckResult = checkSchema(vc);
+                    logRecordInfo.setMessage("[VALIDATE-VP] Checked the VC schema.");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01013"};
+                    logRecordInfo.setParameters(params);
+                    logger.log(logRecordInfo);
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                    logRecordSevere.setMessage("Error accessing data on Authority Agent DR.");
+                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
+
+                validationObj = new ValidationObj(subjectCheckResult, schemaCheckResult, issuerCheckResult, signatureCheck, userVPStatus.getVpName());
+                if (validationObj.getSubjectCheck() == 1 && validationObj.getSchemaCheck() == 1 && validationObj.getIssuerCheck() == 1 && validationObj.getSignatureCheck() == 1 && validationObj.getSchemaCheck() == 1){ //TODO replace with checking TIR/TSR
                     //System.out.println("[VALIDATE VP] Updating DB status to VALID...");
                     try {
                         dbUtil.updateVPStatus(userId, VPStatusEnum.VP_VALID);
@@ -205,6 +246,47 @@ public class ValidateVPResource {
         int result = 0;
         if(inputData.getPersonIdentifier().equals(vcData.getPersonIdentifier()) && inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
+        return result;
+    }
+
+   private int checkIssuer(String did){
+        int result = 0;
+        TrustedIssuer issuerRecord = null;
+        try{
+            issuerRecord = TrustedIssuerClient.INSTANCE.getIssuer(did);
+        }
+        catch(Exception ex){
+            result = 0;
+        }
+        if(issuerRecord != null)
+            result = 1;
+        return result;
+    }
+
+    private int checkSchema(JSONObject vc) throws IOException {
+        int result = 0;
+
+        JsonSchemaValidator validator = new JsonSchemaValidator();
+        JsonNode schemaNode = validator.getJsonNodeFromStringContent(
+                "{\"$schema\": \"http://json-schema.org/draft-06/schema#\", \"properties\": { \"id\": {\"type\": \"number\"}}}");
+        JsonSchema schema = validator.getJsonSchemaFromJsonNodeAutomaticVersion(schemaNode);
+
+        schema.initializeValidators();
+
+        JsonNode node = null;
+        try {
+            node = validator.getJsonNodeFromStringContent("{\"id\": 2}");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Set<ValidationMessage> errors = schema.validate(node);
+        System.out.println("Schema validation result - no of errors: " + errors.size());
+
+        Iterator<ValidationMessage> it = errors.iterator();
+        while(it.hasNext())
+            System.out.println("Schema error: " + it.next().getMessage());
+
         return result;
     }
 }

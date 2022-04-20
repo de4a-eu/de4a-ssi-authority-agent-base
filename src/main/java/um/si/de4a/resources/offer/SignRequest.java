@@ -2,6 +2,7 @@ package um.si.de4a.resources.offer;
 
 
 import um.si.de4a.model.json.VerifiableCredential;
+import um.si.de4a.model.json.VerifiableCredentialUpdated;
 
 public class SignRequest {
     private String created;

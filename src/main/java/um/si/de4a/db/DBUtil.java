@@ -47,14 +47,20 @@ public class DBUtil {
     }
 
     public String getDID(){
-        String issuerDID = didRepository.getAll().get(0).getValue();
-        return issuerDID;
+        String did = "";
+        List<DID> didList = didRepository.getAll();
+        for (DID d:
+             didList) {
+            if(d.getTimeUntil() == -1)
+                did = d.getValue();
+        }
+        return did;
     }
 
     public boolean saveDIDConn(String userId, String invitationId, String invitationJSON, long statusChanged){
         boolean dbStatus = false;
         DIDConn didConn = new DIDConn(null, null, userId, null, null,
-                invitationId, invitationJSON, null, DIDConnStatusEnum.INVITATION_GENERATED, "DIDConn", statusChanged);
+                invitationId, invitationJSON, null, DIDConnStatusEnum.INVITATION_GENERATED, "DIDConn", statusChanged, -1);
 
         try {
             didConnRepository.add(didConn);
@@ -66,28 +72,67 @@ public class DBUtil {
         return dbStatus;
     }
 
-    public DIDConn getDIDConnStatus(String userId){
+    public DIDConn getCurrentDIDConnStatus(String userId){
+        DIDConn conn = null;
+        List<DIDConn> didConnList = didConnRepository.findByUserId(userId);
+        if(didConnList != null){
+            for (DIDConn d:
+                    didConnList) {
+                if(d.getTimeDeleted() == -1)
+                    conn = d;
+            }
+        }
+        return conn;
+    }
+
+    public List<DIDConn> getDIDConnStatuses(String userId){
 
         return didConnRepository.findByUserId(userId);
     }
 
-    public boolean updateDIDConnection(String userID, String myDID, String theirDID, String connectionID, DIDConnStatusEnum status){
+    public boolean updateDIDConnectionStatus(String userID, String myDID, String theirDID, String connectionID, DIDConnStatusEnum status){
+        boolean dbStatus = false;
+        DIDConn didConnToUpdate = getCurrentDIDConnStatus(userID);
+        if(didConnToUpdate != null){
+            didConnToUpdate.setMyDID(myDID);
+            didConnToUpdate.setTheirDID(theirDID);
+            didConnToUpdate.setConnectionId(connectionID);
+            didConnToUpdate.setStatus(status);
+            try {
+                didConnRepository.update(didConnToUpdate);
+                dbStatus = true;
+            } catch (Exception ex) {
+                dbStatus = false;
+            }
+
+        }
+        return dbStatus;
+    }
+
+    public boolean updateOldDIDConnections(String userID, String myDID, String theirDID, String connectionID, DIDConnStatusEnum status){
         boolean dbStatus = false;
 
-        DIDConn userDIDConn = getDIDConnStatus(userID);
-        userDIDConn.setMyDID(myDID);
-        userDIDConn.setTheirDID(theirDID);
-        userDIDConn.setConnectionId(connectionID);
-        userDIDConn.setStatus(status);
-        userDIDConn.setTimeUpdated(System.currentTimeMillis());
-        try {
-            didConnRepository.update(userDIDConn);
-            dbStatus = true;
-        }
-        catch (Exception ex) {
-            dbStatus = false;
+        List<DIDConn> userDIDConns = getDIDConnStatuses(userID);
+        List<DIDConn> didConnToUpdate = new ArrayList<>();
+        for (DIDConn d: userDIDConns) {
+            if(d.getTimeDeleted() == -1) {
+                didConnToUpdate.add(d);
+            }
         }
 
+        for (DIDConn userDIDConn: didConnToUpdate){
+            userDIDConn.setMyDID(myDID);
+            userDIDConn.setTheirDID(theirDID);
+            userDIDConn.setConnectionId(connectionID);
+            userDIDConn.setStatus(status);
+            userDIDConn.setTimeDeleted(System.currentTimeMillis());
+            try {
+                didConnRepository.update(userDIDConn);
+                dbStatus = true;
+            } catch (Exception ex) {
+                dbStatus = false;
+            }
+        }
         return dbStatus;
     }
 
@@ -95,7 +140,7 @@ public class DBUtil {
         boolean dbStatus = false;
         VCStatus vcStatus = null;
 
-        DIDConn userDIDConn = getDIDConnStatus(userID);
+        DIDConn userDIDConn = getCurrentDIDConnStatus(userID);
         if(userDIDConn != null){
             vcStatus = new VCStatus(null, null, userID, PIID, VC,
                     userDIDConn, status.OFFER_SENT,System.currentTimeMillis(),"VCStatus");
@@ -136,7 +181,7 @@ public class DBUtil {
         boolean dbStatus = false;
         VPStatus vpStatus = null;
 
-        DIDConn userDIDConn = getDIDConnStatus(userID);
+        DIDConn userDIDConn = getCurrentDIDConnStatus(userID);
         if(userDIDConn != null){
             vpStatus = new VPStatus(null, null, userID, PIID,
                     userDIDConn,status.REQUEST_SENT,vpName,System.currentTimeMillis(),"VPStatus");

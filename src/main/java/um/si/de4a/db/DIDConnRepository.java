@@ -8,6 +8,7 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.GenerateView;
 import org.ektorp.support.View;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,13 +21,14 @@ public class DIDConnRepository extends CouchDbRepositorySupport<DIDConn> {
     }
 
     @View( name="byUserId", map = "function(doc) { if (doc.type == 'DIDConn') { emit(doc.userId, doc) } }")
-    public DIDConn findByUserId(String userId) {
+    public List<DIDConn> findByUserId(String userId) {
         try {
             ViewQuery query = createQuery("byUserId")
                     .key(userId);
             List<DIDConn> result = db.queryView(query, DIDConn.class);
+            System.out.println("Number of DIDConns in DB: " + result.size());
             if (result.size() > 0) {
-                return result.get(0);
+                return result;
             }
         } catch (DocumentNotFoundException e) {
             return null;

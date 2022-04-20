@@ -76,6 +76,105 @@ public class XMLtoJSONAdapter {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
+        /*String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
+        String[] type = {"VerifiableCredential", "UniversityDegreeCredential"};
+        String issuer = didKey;
+
+        String id = "http://de4a.eu/credentials/" + UUID.randomUUID();
+        CredentialSchema credentialSchema = new CredentialSchema("https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema", "FullJsonSchemaValidator2021");
+
+        DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
+
+        String inputIssueDate = diploma.getDateOfIssue();
+        String inputBirthDate = diploma.getHolderOfAchievement().getDateOfBirth();
+
+        Date dateIssued = inputFormat.parse(inputIssueDate);
+        String outputDateIssued = outputFormat.format(dateIssued);
+
+        Date dateBirth = inputFormat.parse(inputBirthDate);
+        String outputDateBirth = outputFormat.format(dateBirth);
+
+        Calendar cal = Calendar.getInstance();
+        String validFrom = outputFormat.format(cal.getTime());
+        cal.add(Calendar.YEAR, 1);
+        String expirationDate = outputFormat.format(cal.getTime());
+
+        ArrayList<WasDerivedFromUpdated> wasDerivedFrom = new ArrayList<>();
+        wasDerivedFrom.add(new WasDerivedFromUpdated("urn:epass:assessment:1", "Overall Diploma Assessment", "excellent (10)", inputIssueDate));
+
+        ArrayList<SpecifiedByUpdated> specifiedBy = new ArrayList<>();
+        specifiedBy.add(new SpecifiedByUpdated("urn:epass:qualification:1", diploma.getTitle().getText().getValue(), diploma.getDurationOfEducation(), new String[]{ "urn:epass:code:123"},
+                Integer.valueOf(diploma.getScope())));
+        WasAwardedByUpdated wasAwardedBy = new WasAwardedByUpdated("urn:epass:awardingProcess:1", new String[]{diploma.getInstitutionName().getValue()}, outputDateIssued, new String[]{diploma.getPlaceOfIssue().getName().getText().getValue()});
+        LearningAchievementUpdated learningAchievement = new LearningAchievementUpdated("urn:epass:learningAchievement:1", diploma.getTitle().getText().getValue(),
+                wasAwardedBy, specifiedBy, wasDerivedFrom, "urn:epass:learningopportunity:1");
+
+        ArrayList<LearningAchievementUpdated> achieved = new ArrayList<>();
+        achieved.add(learningAchievement);
+
+        CredentialSubjectUpdated credentialSubject = new CredentialSubjectUpdated(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
+                diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(), achieved);
+
+        /*LearningAchievement learningAchievement = new LearningAchievement("urn:epass:learningAchievement:1",
+                new Title(new Text(diploma.getTitle().getText().getContentType(), diploma.getTitle().getText().getLang(), diploma.getTitle().getText().getValue())), new SpecifiedBy("urn:epass:qualification:1"), new WasDerivedFrom("urn:epass:assessment:1"),
+                new WasAwardedBy("urn:epass:awardingprocess:1"), new AssociatedLearningOpportunity("urn:epass:learningopportunity:1")
+        );
+
+        Qualification qualification = new Qualification("urn:epass:qualification:1",new Title(new Text(diploma.getTitle().getText().getContentType(), diploma.getTitle().getText().getLang(), diploma.getTitle().getText().getValue())),
+                new VolumeOfLearning(new Duration(diploma.getDurationOfEducation())),new ISCEDFCode(new Code("123")),new ECTSCreditPoints(new NumericScore(diploma.getScope())));
+        LearningSpecificationReferences lsr = new LearningSpecificationReferences(qualification);
+
+        Assessment assessment = new Assessment("urn:epass:assessment:1", new Title(new Text(diploma.getStudyProgramme().getContentType(), diploma.getStudyProgramme().getLang(), diploma.getStudyProgramme().getValue())), new SpecifiedBy("urn:epass:assessmentspec:1"), new IssuedDate(new DateTime(diploma.getDateOfIssue())));
+        AssessmentReferences ar = new AssessmentReferences(assessment);
+
+        AwardingProcess awardingProcess = new AwardingProcess("urn:epass:awardingprocess:1", new IssuedDate(new DateTime(diploma.getDateOfIssue())), new AwardingLocation("urn:epass:location:1"), new AwardingBody("urn:epass:organisation:1"));
+        AwardingProcessReferences awr = new AwardingProcessReferences(awardingProcess);
+
+        String countryCode = "", countryName = "";
+        if(diploma.getPlaceOfIssue().getName().getText().getValue().equals("Maribor") || diploma.getPlaceOfIssue().getName().getText().getValue().equals("Ljubljana")){
+            countryCode = "SLO";
+            countryName = "Slovenia";
+        }
+        else{
+            countryCode = "PT";
+            countryName = "Portugal";
+        }
+
+        String modeOfStudy = "";
+        if(diploma.getModeOfStudy().equals("http://data.europa.eu/europass/learningScheduleType/fullTime"))
+            modeOfStudy = "Full time (more then 30 hours)";
+        else
+            modeOfStudy = "Part time";
+*/
+
+
+        /*Location location = new Location("urn:epass:location:1", new Title(new Text(diploma.getPlaceOfIssue().getName().getText().getContentType(), diploma.getPlaceOfIssue().getName().getText().getLang(), diploma.getPlaceOfIssue().getName().getText().getValue())),
+                new SpatialCode("http://publications.europa.eu/resource/authority/country", countryCode, "http://publications.europa.eu/resource/authority/country/" + countryCode,
+                        new Title(new Text("text/plain", "en", "Countries Named Authority List")), new Title(new Text("text/plain", "en", countryName))));
+        LocationReferences lr = new LocationReferences(location);
+
+        Organisation organisation = new Organisation("urn:epass:organisation:1", new Title(new Text(diploma.getInstitutionName().getContentType(), diploma.getInstitutionName().getLang(), diploma.getInstitutionName().getValue())));
+        AgentReferences agentReferences = new AgentReferences(organisation);
+
+        LearningOpportunity opportunity = new LearningOpportunity( "urn:epass:learningopportunity:1", new LearningSchedule("http://publications.europa.eu/resource/dataset/learning-schedule", "learning-schedule",
+                "http://publications.europa.eu/resource/dataset/learning-schedule/note_e69f39d050", new Title(new Text("text/plain", "en", "Europass Standard List of Learning Schedule Types")),
+                new Title(new Text("text/plain", "en", modeOfStudy))));
+        LearningOpportunityReferences lor = new LearningOpportunityReferences(opportunity);
+
+        CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
+                diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(),learningAchievement, lsr, ar, awr, lr,
+                agentReferences, lor);
+
+      /*  CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue().toString(),
+                diploma.getHolderOfAchievement().getGivenNames().getText().getValue().toString(), outputDateBirth,diploma.getHolderOfAchievement().getNationalId());
+*/
+        //CredentialStatus status = new CredentialStatus("https://essif.europa.eu/status/43", "CredentialsStatusList2020");
+        //CredentialSchema schema = new CredentialSchema("https://essif.europa.eu/tsr-123/verifiableattestation.json", "JsonSchemaValidator2018");
+       // Evidence evidence = new Evidence("https://essif.europa.eu/evidence/f2aeec97-fc0d-42bf-8ca7-0548192d4231", new String[]{"eIDAS"}, "https://essif.europa.eu/issuers/48", new String[]{"eIDAS identifier"});
+
+        //VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
+
         String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
         String[] type = {"VerifiableCredential", "UniversityDegreeCredential"};
         LearningAchievement learningAchievement = new LearningAchievement("urn:epass:learningAchievement:1",
@@ -142,15 +241,9 @@ public class XMLtoJSONAdapter {
         CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
                 diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(),learningAchievement, lsr, ar, awr, lr,
                 agentReferences, lor);
-
-      /*  CredentialSubject subject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue().toString(),
-                diploma.getHolderOfAchievement().getGivenNames().getText().getValue().toString(), outputDateBirth,diploma.getHolderOfAchievement().getNationalId());
-*/
-        //CredentialStatus status = new CredentialStatus("https://essif.europa.eu/status/43", "CredentialsStatusList2020");
-        //CredentialSchema schema = new CredentialSchema("https://essif.europa.eu/tsr-123/verifiableattestation.json", "JsonSchemaValidator2018");
-       // Evidence evidence = new Evidence("https://essif.europa.eu/evidence/f2aeec97-fc0d-42bf-8ca7-0548192d4231", new String[]{"eIDAS"}, "https://essif.europa.eu/issuers/48", new String[]{"eIDAS identifier"});
-
         VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
+
+        //VerifiableCredentialUpdated vc = new VerifiableCredentialUpdated(context, id, type, issuer, outputDateIssued, outputDateIssued, validFrom, expirationDate, credentialSubject, credentialSchema);
         logRecordInfo.setMessage("Generated JSON-LD Verifiable Credential.");
         Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01005"};
         logRecordInfo.setParameters(params);
