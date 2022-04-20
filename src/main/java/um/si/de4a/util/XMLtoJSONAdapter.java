@@ -67,7 +67,7 @@ public class XMLtoJSONAdapter {
         return diploma;
     }
 
-    public static VerifiableCredential convertPOJOtoJSON(HigherEducationDiploma diploma, String didKey) throws ParseException {
+    public static VerifiableCredentialUpdated convertPOJOtoJSON(HigherEducationDiploma diploma, String didKey) throws ParseException {
         try {
             logger = DE4ALogger.getLogger();
         } catch (IOException e) {
@@ -76,12 +76,13 @@ public class XMLtoJSONAdapter {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
-        /*String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
+        String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
         String[] type = {"VerifiableCredential", "UniversityDegreeCredential"};
         String issuer = didKey;
 
         String id = "http://de4a.eu/credentials/" + UUID.randomUUID();
-        CredentialSchema credentialSchema = new CredentialSchema("https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema", "FullJsonSchemaValidator2021");
+        CredentialSchema credentialSchema = new CredentialSchema("http://de4a-dev.informatika.uni-mb.si:9099/de4a-diploma-schema.json", "FullJsonSchemaValidator2021");
+        // generic EBSI schema link: https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema
 
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
@@ -175,7 +176,9 @@ public class XMLtoJSONAdapter {
 
         //VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
 
+        /* OLD VC:
         String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
+
         String[] type = {"VerifiableCredential", "UniversityDegreeCredential"};
         LearningAchievement learningAchievement = new LearningAchievement("urn:epass:learningAchievement:1",
                 new Title(new Text(diploma.getTitle().getText().getContentType(), diploma.getTitle().getText().getLang(), diploma.getTitle().getText().getValue())), new SpecifiedBy("urn:epass:qualification:1"), new WasDerivedFrom("urn:epass:assessment:1"),
@@ -242,8 +245,9 @@ public class XMLtoJSONAdapter {
                 diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(),learningAchievement, lsr, ar, awr, lr,
                 agentReferences, lor);
         VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
+        */
+        VerifiableCredentialUpdated vc = new VerifiableCredentialUpdated(context, id, type, issuer, outputDateIssued, outputDateIssued, validFrom, expirationDate, credentialSubject, credentialSchema);
 
-        //VerifiableCredentialUpdated vc = new VerifiableCredentialUpdated(context, id, type, issuer, outputDateIssued, outputDateIssued, validFrom, expirationDate, credentialSubject, credentialSchema);
         logRecordInfo.setMessage("Generated JSON-LD Verifiable Credential.");
         Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01005"};
         logRecordInfo.setParameters(params);

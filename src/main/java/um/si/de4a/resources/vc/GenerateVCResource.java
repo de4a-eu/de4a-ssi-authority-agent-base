@@ -22,12 +22,12 @@ public class GenerateVCResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public VerifiableCredential generateVC(String vcData) throws IOException, ParseException, java.text.ParseException {
+    public VerifiableCredentialUpdated generateVC(String vcData) throws IOException, ParseException, java.text.ParseException {
         Logger logger = DE4ALogger.getLogger();
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
-        VerifiableCredential evidenceVC = null;
+        VerifiableCredentialUpdated evidenceVC = null;
         JSONObject jsonObject = null;
 
         JSONParser jsonParser = new JSONParser();
