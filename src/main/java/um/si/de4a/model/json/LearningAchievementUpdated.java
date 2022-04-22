@@ -1,13 +1,19 @@
 package um.si.de4a.model.json;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 public class LearningAchievementUpdated {
     private String id;
     private String title;
+    @SerializedName("wasAwardedBy")
     private WasAwardedByUpdated wasAwardedBy;
+    @SerializedName("specifiedBy")
     private ArrayList<SpecifiedByUpdated> specifiedBy;
+    @SerializedName("wasDerivedFrom")
     private ArrayList<WasDerivedFromUpdated> wasDerivedFrom;
+    @SerializedName("associatedLearningOpportunity")
     private String associatedLearningOpportunity;
 
     public LearningAchievementUpdated(String id, String title, WasAwardedByUpdated wasAwardedBy, ArrayList<SpecifiedByUpdated> specifiedBy, ArrayList<WasDerivedFromUpdated> wasDerivedFrom, String associatedLearningOpportunity) {

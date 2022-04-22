@@ -49,184 +49,75 @@ public class TestCheckSchemaResource {
 
         //evidence = jsonOffer.get("evidence").toString();
         String evidence = "{\n" +
+                "  \"@context\": [\n" +
+                "    \"https://www.w3.org/2018/credentials/v1\",\n" +
+                "    \"https://www.w3.org/2018/credentials/examples/v1\"\n" +
+                "  ],\n" +
+                "  \"id\": \"http://de4a.eu/credentials/eb1c7f2a-3bd8-4b4e-8a10-eb032abe15ff\",\n" +
+                "  \"type\": [\n" +
+                "    \"VerifiableCredential\",\n" +
+                "    \"UniversityDegreeCredential\"\n" +
+                "  ],\n" +
+                "  \"issuer\": \"did:ebsi:zZBL9v9AhqUde1ZryUzogcw\",\n" +
+                "  \"issuanceDate\": \"2021-01-31T00:00:00.000Z\",\n" +
+                "  \"issued\": \"2021-01-31T00:00:00.000Z\",\n" +
+                "  \"validFrom\": \"2022-04-22T08:05:53.537Z\",\n" +
+                "  \"expirationDate\": \"2023-04-22T08:05:53.537Z\",\n" +
                 "  \"credentialSubject\": {\n" +
                 "    \"currentFamilyName\": \"Alves\",\n" +
                 "    \"currentGivenName\": \"Alice\",\n" +
                 "    \"dateOfBirth\": \"1997-01-01T00:00:00.000Z\",\n" +
                 "    \"personIdentifier\": \"123456789\",\n" +
-                "    \"learningAchievement\": {\n" +
-                "      \"@id\": \"urn:epass:learningAchievement:1\",\n" +
-                "      \"title\": {\n" +
-                "        \"text\": {\n" +
-                "          \"@content-type\": \"text/html\",\n" +
-                "          \"@lang\": \"pt\",\n" +
-                "          \"#text\": \"Mestrado em Engenharia Inform�tica e de Computadores\"\n" +
-                "        }\n" +
-                "      },\n" +
-                "      \"specifiedBy\": {\n" +
-                "        \"@idref\": \"urn:epass:qualification:1\"\n" +
-                "      },\n" +
-                "      \"wasDerivedFrom\": {\n" +
-                "        \"@idref\": \"urn:epass:assessment:1\"\n" +
-                "      },\n" +
-                "      \"wasAwardedBy\": {\n" +
-                "        \"@idref\": \"urn:epass:awardingprocess:1\"\n" +
-                "      },\n" +
-                "      \"associatedLearningOpportunity\": {\n" +
-                "        \"@idref\": \"urn:epass:learningopportunity:1\"\n" +
+                "    \"achieved\": [\n" +
+                "      {\n" +
+                "        \"id\": \"urn:epass:learningAchievement:1\",\n" +
+                "        \"title\": \"Mestrado em Engenharia Informática e de Computadores\",\n" +
+                "        \"wasAwardedBy\": {\n" +
+                "          \"id\": \"urn:epass:awardingProcess:1\",\n" +
+                "          \"awardingBody\": [\n" +
+                "            \"Instituto Superior Técnico\"\n" +
+                "          ],\n" +
+                "          \"awardingDate\": \"2021-01-31T00:00:00.000Z\",\n" +
+                "          \"awardingLocation\": [\n" +
+                "            \"http://locations.org/lisboa-portugal\"\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        \"specifiedBy\": [\n" +
+                "          {\n" +
+                "            \"id\": \"urn:epass:qualification:1\",\n" +
+                "            \"title\": \"Mestrado em Engenharia Informática e de Computadores\",\n" +
+                "            \"volumeOfLearning\": \"P2Y\",\n" +
+                "            \"iSCEDFCode\": [\n" +
+                "              \"urn:epass:code:123\"\n" +
+                "            ],\n" +
+                "            \"eCTSCreditPoints\": 120\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"wasDerivedFrom\": [\n" +
+                "          {\n" +
+                "            \"id\": \"urn:epass:assessment:1\",\n" +
+                "            \"title\": \"Overall Diploma Assessment\",\n" +
+                "            \"grade\": \"excellent (10)\",\n" +
+                "            \"issuedDate\": \"2021-01-31\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"associatedLearningOpportunity\": \"urn:epass:learningopportunity:1\"\n" +
                 "      }\n" +
-                "    },\n" +
-                "    \"learningSpecificationReferences\": {\n" +
-                "      \"qualification\": {\n" +
-                "        \"@id\": \"urn:epass:qualification:1\",\n" +
-                "        \"title\": {\n" +
-                "          \"text\": {\n" +
-                "            \"@content-type\": \"text/html\",\n" +
-                "            \"@lang\": \"pt\",\n" +
-                "            \"#text\": \"Mestrado em Engenharia Inform�tica e de Computadores\"\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"volumeOfLearning\": {\n" +
-                "          \"duration\": {\n" +
-                "            \"#duration\": \"P2Y\"\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"ISCEDFCode\": {\n" +
-                "          \"code\": {\n" +
-                "            \"#code\": \"123\"\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"ECTSCreditPoints\": {\n" +
-                "          \"numericScore\": {\n" +
-                "            \"#numericScore\": \"120\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    },\n" +
-                "    \"assessmentReferences\": {\n" +
-                "      \"assessment\": {\n" +
-                "        \"@id\": \"urn:epass:assessment:1\",\n" +
-                "        \"title\": {\n" +
-                "          \"text\": {\n" +
-                "            \"@content-type\": \"text/html\",\n" +
-                "            \"@lang\": \"pt\",\n" +
-                "            \"#text\": \"Mestrado em Engenharia Inform�tica e de Computadores\"\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"specifiedBy\": {\n" +
-                "          \"@idref\": \"urn:epass:assessmentspec:1\"\n" +
-                "        },\n" +
-                "        \"issuedDate\": {\n" +
-                "          \"dateTime\": {\n" +
-                "            \"#dateTime\": \"2021-01-31\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    },\n" +
-                "    \"awardingProcessReferences\": {\n" +
-                "      \"awardingProcess\": {\n" +
-                "        \"@id\": \"urn:epass:awardingprocess:1\",\n" +
-                "        \"awardingDate\": {\n" +
-                "          \"dateTime\": {\n" +
-                "            \"#dateTime\": \"2021-01-31\"\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"awardingLocation\": {\n" +
-                "          \"@idref\": \"urn:epass:location:1\"\n" +
-                "        },\n" +
-                "        \"awardingBody\": {\n" +
-                "          \"@idref\": \"urn:epass:organisation:1\"\n" +
-                "        }\n" +
-                "      }\n" +
-                "    },\n" +
-                "    \"locationReferences\": {\n" +
-                "      \"location\": {\n" +
-                "        \"@id\": \"urn:epass:location:1\",\n" +
-                "        \"geographicName\": {\n" +
-                "          \"text\": {\n" +
-                "            \"@content-type\": \"text/html\",\n" +
-                "            \"@lang\": \"pt\",\n" +
-                "            \"#text\": \"Lisboa - Portugal\"\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"spatialCode\": {\n" +
-                "          \"@targetFrameworkUrl\": \"http://publications.europa.eu/resource/authority/country\",\n" +
-                "          \"@targetNotation\": \"PT\",\n" +
-                "          \"@uri\": \"http://publications.europa.eu/resource/authority/country/PT\",\n" +
-                "          \"targetFrameworkName\": {\n" +
-                "            \"text\": {\n" +
-                "              \"@content-type\": \"text/plain\",\n" +
-                "              \"@lang\": \"en\",\n" +
-                "              \"#text\": \"Countries Named Authority List\"\n" +
-                "            }\n" +
-                "          },\n" +
-                "          \"targetName\": {\n" +
-                "            \"text\": {\n" +
-                "              \"@content-type\": \"text/plain\",\n" +
-                "              \"@lang\": \"en\",\n" +
-                "              \"#text\": \"Portugal\"\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    },\n" +
-                "    \"agentReferences\": {\n" +
-                "      \"organisation\": {\n" +
-                "        \"id\": \"urn:epass:organisation:1\",\n" +
-                "        \"preferredName\": {\n" +
-                "          \"text\": {\n" +
-                "            \"@content-type\": \"text/html\",\n" +
-                "            \"@lang\": \"pt\",\n" +
-                "            \"#text\": \"Instituto Superior T�cnico\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    },\n" +
-                "    \"learningOpportunityReferences\": {\n" +
-                "      \"learningOpportunity\": {\n" +
-                "        \"id\": \"urn:epass:learningopportunity:1\",\n" +
-                "        \"learningSchedule\": {\n" +
-                "          \"@targetFrameworkUrl\": \"http://publications.europa.eu/resource/dataset/learning-schedule\",\n" +
-                "          \"@targetNotation\": \"learning-schedule\",\n" +
-                "          \"@uri\": \"http://publications.europa.eu/resource/dataset/learning-schedule/note_e69f39d050\",\n" +
-                "          \"targetFrameworkName\": {\n" +
-                "            \"text\": {\n" +
-                "              \"@content-type\": \"text/plain\",\n" +
-                "              \"@lang\": \"en\",\n" +
-                "              \"#text\": \"Europass Standard List of Learning Schedule Types\"\n" +
-                "            }\n" +
-                "          },\n" +
-                "          \"targetName\": {\n" +
-                "            \"text\": {\n" +
-                "              \"@content-type\": \"text/plain\",\n" +
-                "              \"@lang\": \"en\",\n" +
-                "              \"#text\": \"Full time (more then 30 hours)\"\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
+                "    ]\n" +
                 "  },\n" +
-                "  \"issuanceDate\": \"2021-01-31T00:00:00.000Z\",\n" +
-                "  \"validFrom\": \"2022-02-16T07:32:08.686Z\",\n" +
-                "  \"expirationDate\": \"2023-02-16T07:32:08.686Z\",\n" +
-                "  \"id\": \"http://de4a.eu/credentials/d0b7145e-741a-4335-a602-2aee98f0ff7e\",\n" +
+                "  \"credentialSchema\": [\n" +
+                "    {\n" +
+                "      \"id\": \"http://de4a-dev-schema.informatika.uni-mb.si:9099/de4a-diploma-schema.json\",\n" +
+                "      \"type\": \"FullJsonSchemaValidator2021\"\n" +
+                "    }\n" +
+                "  ],\n" +
                 "  \"proof\": {\n" +
-                "    \"created\": \"2022-02-16T07:32:08.68748279Z\",\n" +
-                "    \"jws\": \"eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..mXCipHdq4ephIbel-zpjYO_-4xSIfAc6pnRRi6fDWkwo8glxhcoIZgEIGJuDk9OWAKqQ8IkI9oOZM_VZO9o4AA\",\n" +
+                "    \"created\": \"2022-04-22T08:05:53.657378402Z\",\n" +
+                "    \"jws\": \"eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..zdHlxmw0gAwR8EajFRYFGSydj-pGEZmLhCfAYULCshcVL_xTZaZhnm4v3wwRuDOO9-uRnEtMW3qt9NnIT4z6DQ\",\n" +
                 "    \"proofPurpose\": \"assertionMethod\",\n" +
                 "    \"type\": \"Ed25519Signature2018\",\n" +
-                "    \"verificationMethod\": \"did:ebsi:zbsVd4GeCWaUpN4uZSQgeL6#b509306e45704e21a0e4662f556d487c\"\n" +
-                "  },\n" +
-                "  \"type\": [\n" +
-                "    \"VerifiableCredential\",\n" +
-                "    \"UniversityDegreeCredential\"\n" +
-                "  ],\n" +
-                "  \"@context\": [\n" +
-                "    \"https://www.w3.org/2018/credentials/v1\",\n" +
-                "    \"https://www.w3.org/2018/credentials/examples/v1\"\n" +
-                "  ],\n" +
-                "  \"issuer\": \"did:ebsi:zbsVd4GeCWaUpN4uZSQgeL6\"\n" +
+                "    \"verificationMethod\": \"did:ebsi:zZBL9v9AhqUde1ZryUzogcw#a4f8879be9d04b66a26cffa807de04df\"\n" +
+                "  }\n" +
                 "}";
 
         /*try {
@@ -260,7 +151,7 @@ public class TestCheckSchemaResource {
 
         JsonSchemaValidator validator = new JsonSchemaValidator();
         //JsonSchema schema = validator.getJsonSchemaFromUrl("https://ec.europa.eu/digital-building-blocks/code/projects/EBSI/repos/json-schema/raw/schemas/ebsi-attestation/2022-02/schema.json?at=refs%2Fheads%2Fmain");
-        String jsonObject = readJsonFromUrl("http://172.21.0.2:9099/de4a-diploma-schema.json");
+        String jsonObject = readJsonFromUrl("http://de4a-dev-schema.informatika.uni-mb.si:9099/de4a-diploma-schema.json");
         //String jsonObject = readJsonFromUrl("https://ec.europa.eu/digital-building-blocks/code/projects/EBSI/repos/json-schema/raw/schemas/ebsi-attestation/2022-02/schema.json?at=refs%2Fheads%2Fmain");
 
         String schemaJSON = StringEscapeUtils.escapeJava(jsonObject);

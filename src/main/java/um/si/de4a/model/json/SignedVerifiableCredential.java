@@ -3,6 +3,7 @@ package um.si.de4a.model.json;
 import com.google.gson.annotations.SerializedName;
 
 public class SignedVerifiableCredential {
+    @SerializedName("credentialSubject")
     private CredentialSubject credentialSubject;
     private String issuanceDate;
     private String validFrom;

@@ -1,5 +1,6 @@
 package um.si.de4a.model.json;
 
+import com.google.gson.annotations.SerializedName;
 import um.si.de4a.model.json.assessment.AssessmentReferences;
 import um.si.de4a.model.json.awardingprocess.AwardingProcessReferences;
 import um.si.de4a.model.json.location.LocationReferences;
@@ -10,10 +11,15 @@ import um.si.de4a.model.json.qualification.LearningSpecificationReferences;
 import java.util.ArrayList;
 
 public class CredentialSubjectUpdated {
+    @SerializedName("currentFamilyName")
     private String currentFamilyName;
+    @SerializedName("currentGivenName")
     private String currentGivenName;
+    @SerializedName("dateOfBirth")
     private String dateOfBirth;
+    @SerializedName("personIdentifier")
     private String personIdentifier;
+    @SerializedName("achieved")
     private ArrayList<LearningAchievementUpdated> achieved;
 
     public CredentialSubjectUpdated(String currentFamilyName, String currentGivenName, String dateOfBirth, String personIdentifier, ArrayList<LearningAchievementUpdated> achieved) {

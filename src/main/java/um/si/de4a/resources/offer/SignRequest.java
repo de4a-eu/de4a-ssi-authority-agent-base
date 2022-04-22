@@ -7,6 +7,7 @@ import um.si.de4a.model.json.VerifiableCredentialUpdated;
 public class SignRequest {
     private String created;
     private VerifiableCredentialUpdated credential;
+    //private VerifiableCredential credential;
     private String did;
     private String signatureType;
 

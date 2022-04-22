@@ -7,7 +7,9 @@ import com.google.gson.Gson;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import id.walt.model.TrustedIssuer;
+import id.walt.model.TrustedIssuerRegistry;
 import id.walt.services.essif.TrustedIssuerClient;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,6 +34,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import static um.si.de4a.resources.vp.TestCheckSchemaResource.readJsonFromUrl;
 
 @Path("/validate-vp")
 public class ValidateVPResource {
@@ -249,14 +253,22 @@ public class ValidateVPResource {
         return result;
     }
 
-   private int checkIssuer(String did){
+   private int checkIssuer(String did) throws IOException {
+       Logger logger = DE4ALogger.getLogger();
+       LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
+       LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
+
         int result = 0;
+
         TrustedIssuer issuerRecord = null;
         try{
             issuerRecord = TrustedIssuerClient.INSTANCE.getIssuer(did);
         }
         catch(Exception ex){
-            result = 0;
+            logRecordSevere.setMessage("Error validating diploma issuer.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1012"};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
         }
         if(issuerRecord != null)
             result = 1;
@@ -266,26 +278,47 @@ public class ValidateVPResource {
     private int checkSchema(JSONObject vc) throws IOException {
         int result = 0;
 
+        Logger logger = DE4ALogger.getLogger();
+        LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
+        LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
+
         JsonSchemaValidator validator = new JsonSchemaValidator();
-        JsonNode schemaNode = validator.getJsonNodeFromStringContent(
-                "{\"$schema\": \"http://json-schema.org/draft-06/schema#\", \"properties\": { \"id\": {\"type\": \"number\"}}}");
+        String jsonObject = readJsonFromUrl("http://de4a-dev-schema.informatika.uni-mb.si:9099/de4a-diploma-schema.json");
+
+        String schemaJSON = StringEscapeUtils.escapeJava(jsonObject);
+
+        JsonNode schemaNode = validator.getJsonNodeFromStringContent(jsonObject);
+
         JsonSchema schema = validator.getJsonSchemaFromJsonNodeAutomaticVersion(schemaNode);
 
         schema.initializeValidators();
 
         JsonNode node = null;
         try {
-            node = validator.getJsonNodeFromStringContent("{\"id\": 2}");
+            node = validator.getJsonNodeFromStringContent(vc.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Set<ValidationMessage> errors = schema.validate(node);
-        System.out.println("Schema validation result - no of errors: " + errors.size());
+
+        Set<ValidationMessage> errors = null;
+        try {
+            errors = schema.validate(node);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+            logRecordSevere.setMessage("Error validating JSON schema.");
+            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1011"};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+        System.out.println("[VALIDATE-VP] Schema validation result - no of errors: " + errors.size());
 
         Iterator<ValidationMessage> it = errors.iterator();
         while(it.hasNext())
-            System.out.println("Schema error: " + it.next().getMessage());
+            System.out.println("[VALIDATE-VP] Schema error: " + it.next().getMessage());
+        if(errors.size() == 0)
+            result = 1;
 
         return result;
     }

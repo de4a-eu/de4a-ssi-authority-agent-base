@@ -10,6 +10,7 @@ import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
+import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.model.json.VerifiableCredential;
 import um.si.de4a.model.json.VerifiableCredentialUpdated;
 import um.si.de4a.resources.vc.Data;
@@ -157,7 +158,7 @@ public class SendVCOfferResource {
                             dbUtil.getDID(), signatureType);
 
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
-                    SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
+                    SignedVerifiableCredentialUpdated credential = ariesUtil.signCredential(jsonSignRequest);
 
 
                     if(credential != null) {
