@@ -142,7 +142,7 @@ public class SendVCOfferResource {
                 // DONE: call generateVC(evidence, myDID, theirDID) method: VC
                 GenerateVCResource generateVCResource = new GenerateVCResource();
 
-                VerifiableCredential generatedVC = generateVCResource.generateVC(jsonRequest);
+                VerifiableCredentialUpdated generatedVC = generateVCResource.generateVC(jsonRequest);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
                 //System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));

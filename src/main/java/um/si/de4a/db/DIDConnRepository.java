@@ -36,4 +36,20 @@ public class DIDConnRepository extends CouchDbRepositorySupport<DIDConn> {
 
         return null;
     }
+
+    @View( name="byInvitationId", map = "function(doc) { if (doc.type == 'DIDConn') { emit(doc.invitationId, doc) } }")
+    public DIDConn findByInvitationId(String invitationId) {
+        try {
+            ViewQuery query = createQuery("byInvitationId")
+                    .key(invitationId);
+            List<DIDConn> result = db.queryView(query, DIDConn.class);
+            if (result.size() > 0) {
+                return result.get(result.size()-1);
+            }
+        } catch (DocumentNotFoundException e) {
+            return null;
+        }
+
+        return null;
+    }
 }

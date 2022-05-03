@@ -6,6 +6,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
+import um.si.de4a.model.webhook.MessageFactory;
+import um.si.de4a.model.webhook.WebhookMessage;
 import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
@@ -28,11 +30,19 @@ public class WebHookResource {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
-        System.out.println("Received webhook message: " + contents.toString());
+       // System.out.println("Received webhook message: " + contents.toString());
         JSONParser jsonParser = new JSONParser();
 
         JSONObject jsonContents = (JSONObject) jsonParser.parse(contents);
-        System.out.println("Topic name: " + jsonContents.get("topic"));
+        String topicName = jsonContents.get("topic").toString();
+        String msgContent = jsonContents.get("message").toString();
+        System.out.println("[WEBHOOK LISTENER] Topic name: " + topicName);
+
+
+        MessageFactory msgFactory = new MessageFactory();
+        WebhookMessage webhookMessage = msgFactory.getMessageHandler(topicName);
+
+        webhookMessage.updateStatus(msgContent);
 
         //appConfig = new AppConfig();
 

@@ -90,6 +90,11 @@ public class DBUtil {
         return didConnRepository.findByUserId(userId);
     }
 
+    public DIDConn getDIDConnbyInvitationID(String invitationID){
+        DIDConn didConn = didConnRepository.findByInvitationId(invitationID);
+        return didConn;
+    }
+
     public boolean updateDIDConnectionStatus(String userID, String myDID, String theirDID, String connectionID, DIDConnStatusEnum status){
         boolean dbStatus = false;
         DIDConn didConnToUpdate = getCurrentDIDConnStatus(userID);
