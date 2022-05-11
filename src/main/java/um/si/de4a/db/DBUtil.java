@@ -165,6 +165,10 @@ public class DBUtil {
         return vcStatusRepository.findByUserId(userID);
     }
 
+    public VCStatus getVCStatusByPiid(String piid){
+        return vcStatusRepository.findByPiid(piid);
+    }
+
     public boolean updateVCStatus(String userID, VCStatusEnum status){
         boolean dbStatus = false;
 
@@ -203,6 +207,10 @@ public class DBUtil {
 
     public VPStatus getVPStatus(String userID){
         return vpStatusRepository.findByUserId(userID);
+    }
+
+    public VPStatus getVPStatusByPiid(String piid){
+        return vpStatusRepository.findByPiid(piid);
     }
 
     public boolean updateVPStatus(String userID, VPStatusEnum status){

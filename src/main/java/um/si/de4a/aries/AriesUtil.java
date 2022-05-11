@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.model.json.SignedVerifiableCredential;
+import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.resources.offer.OfferRequest;
 import um.si.de4a.resources.offer.SignRequest;
 import um.si.de4a.resources.vc.SendVCRequest;
@@ -181,12 +182,12 @@ public class AriesUtil {
         return connectionList;
     }
 
-    public SignedVerifiableCredential signCredential(SignRequest vcCredential) throws IOException, ParseException {
+    public SignedVerifiableCredentialUpdated signCredential(SignRequest vcCredential) throws IOException, ParseException {
         JSONObject jsonSignedCredential = null;
 
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         HttpResponse response = null;
-        SignedVerifiableCredential signedVC = null;
+        SignedVerifiableCredentialUpdated signedVC = null;
 
         Gson gson = new Gson();
         try {
@@ -231,7 +232,7 @@ public class AriesUtil {
                     logger.log(logRecordSevere);
                 }
                 try {
-                    signedVC = gson.fromJson(gson.toJson(jsonSignedCredential), SignedVerifiableCredential.class);
+                    signedVC = gson.fromJson(gson.toJson(jsonSignedCredential), SignedVerifiableCredentialUpdated.class);
 
                     logRecordInfo.setMessage("SEND-OFFER: Signed a Verifiable Credential." + signedVC.getId());
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0205"};

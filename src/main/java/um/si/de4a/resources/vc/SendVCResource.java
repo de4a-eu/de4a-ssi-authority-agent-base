@@ -10,6 +10,7 @@ import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VCStatus;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
+import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
@@ -29,7 +30,7 @@ public class SendVCResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public boolean sendVC(String user) throws IOException, java.text.ParseException {
+    public boolean sendVC(String user) throws IOException {
         Logger logger = DE4ALogger.getLogger();
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
@@ -81,9 +82,9 @@ public class SendVCResource {
             AriesUtil ariesUtil = new AriesUtil();
             Gson gson = new Gson();
 
-            SignedVerifiableCredential credential = null;
+            SignedVerifiableCredentialUpdated credential = null;
             try {
-                credential = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class);
+                credential = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredentialUpdated.class);
             }
             catch(Exception ex){
                 logRecordSevere.setMessage( "Object conversion error on Authority Agent DT.");

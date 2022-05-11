@@ -8,30 +8,39 @@ import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.DIDConnStatusEnum;
-import um.si.de4a.resources.webhook.EventNotifierResource;
+import um.si.de4a.resources.websocket.EventBean;
 import um.si.de4a.util.DE4ALogger;
 
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class DIDConnMessage extends WebhookMessage {
+@SessionScoped
+public class DIDConnMessage extends WebhookMessage  implements Serializable {
+
+    @Inject
+    EventBean eventBean;
 
     @Override
     public int updateStatus(String inputMessage) throws IOException {
+        Gson gson = new Gson();
 
         Logger logger = DE4ALogger.getLogger();
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
+       // EventNotifierResource eventNotifierResource = new EventNotifierResource();
+
         int connectionStatusCode = 0;
         DIDConn userDidConn = null;
         DBUtil dbUtil = new DBUtil();
         AriesUtil ariesUtil = new AriesUtil();
-        EventNotifierResource eventNotifierResource = new EventNotifierResource();
 
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonMessage = null;
@@ -100,14 +109,50 @@ public class DIDConnMessage extends WebhookMessage {
 
                                 connectionStatusCode = 1;// return 1 (Connection has been established)
 
-                                Event event = new Event("did-exchange",userDidConn.getUserId(), invitationID, connectionStatusCode);
-                                Gson gson = new Gson();
-                                eventNotifierResource.sendEventNotification(gson.toJson(event));
-
                                 logRecordInfo.setMessage("DID Connection has been established.");
                                 Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01009"};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
+
+                                SocketEvent event = new SocketEvent("did-exchange",userDidConn.getUserId(), invitationID, connectionStatusCode);
+
+
+
+                                try {
+                                    System.out.println("Going to push notification......");
+                                    System.out.println("Event: " + gson.toJson(eventBean.getEvent()));
+                                    eventBean.getEvent().fire(event);
+
+                                    logRecordInfo.setMessage("Event notification was successfully sent.");
+                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01009"};
+                                    logRecordInfo.setParameters(params);
+                                    logger.log(logRecordInfo);
+                                }
+                                catch(Exception ex){
+                                    System.out.println(ex.getMessage());
+
+                                    logRecordSevere.setMessage("Event notification could not be sent.");
+                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                    logRecordSevere.setParameters(params);
+                                    logger.log(logRecordSevere);
+                                }
+
+                                /*Gson gson = new Gson();
+                                boolean notificationSent = eventNotifierResource.sendEventNotification(gson.toJson(event));
+
+                                if(notificationSent == false){
+                                    logRecordSevere.setMessage("Event notification could not be sent.");
+                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                    logRecordSevere.setParameters(params);
+                                    logger.log(logRecordSevere);
+                                }
+                                else{
+                                    logRecordInfo.setMessage("Event notification was successfully sent.");
+                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01009"};
+                                    logRecordInfo.setParameters(params);
+                                    logger.log(logRecordInfo);
+                                }
+*/
                             }
                         }
                     }
