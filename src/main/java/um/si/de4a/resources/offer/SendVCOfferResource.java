@@ -83,14 +83,14 @@ public class SendVCOfferResource {
             String userID = "", evidence = "";
             try{
                 userID = jsonOffer.get("userId").toString();
-                System.out.println("SEND-OFFER userId: " + userID);
+
                 //ByteBuffer buffer = StandardCharsets.UTF_8.encode(jsonOffer.get("evidence").toString());
                 //evidence = jsonOffer.get("evidence").toString();
                 byte[] evidenceBytes = Base64.getDecoder().decode(jsonOffer.get("evidence").toString());
                 //evidence = jsonOffer.get("evidence").toString();
                 evidence = new String(evidenceBytes, "ISO-8859-1");
 
-                 System.out.println("[SEND-OFFER-DEBUG] Evidence: " + evidence);
+                 //System.out.println("[SEND-OFFER-DEBUG] Evidence: " + evidence);
             }
             catch (Exception ex){
                 logRecordSevere.setMessage("SEND-OFFER: Arguments missing or invalid at Authority Agent DT.");
@@ -105,22 +105,22 @@ public class SendVCOfferResource {
             String myDID = "", publicDID = "", theirDID = "";
             if(userDIDConn != null){
                 try{
-                    System.out.println("SEND-OFFER Current Invitation ID: " + userDIDConn.getInvitationId());
+                    System.out.println("SEND-OFFER: Current Invitation ID: " + userDIDConn.getInvitationId());
 
                     myDID = userDIDConn.getMyDID();
-                    logRecordInfo.setMessage("SEND-OFFER myDID: " + myDID);
+                    logRecordInfo.setMessage("SEND-OFFER: myDID: " + myDID);
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
 
                     publicDID = dbUtil.getDID();
-                    logRecordInfo.setMessage("SEND-OFFER publicDID: " + publicDID);
+                    logRecordInfo.setMessage("SEND-OFFER: publicDID: " + publicDID);
                     params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
 
                     theirDID = userDIDConn.getTheirDID();
-                    logRecordInfo.setMessage("SEND-OFFER theirDID: " + theirDID);
+                    logRecordInfo.setMessage("SEND-OFFER: theirDID: " + theirDID);
                     params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
@@ -146,7 +146,7 @@ public class SendVCOfferResource {
                 VerifiableCredentialUpdated generatedVC = generateVCResource.generateVC(jsonRequest);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                //System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
+               // System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
                 if(generatedVC != null) {
                     // DONE: call Aries /verifiable/sign-credential(vc) : boolean
                     Clock clock = Clock.systemDefaultZone();
@@ -182,10 +182,10 @@ public class SendVCOfferResource {
                             {
                                 add(new Attribute("text/plain", "credentialSubject.currentFamilyName", "Current Family Name"));
                                 add(new Attribute("text/plain", "credentialSubject.currentGivenName", "Current Given Name"));
-                                add(new Attribute("text/plain", "credentialSubject.agentReferences.organisation.preferredName.text.#text", "Institution Name"));
-                                add(new Attribute("text/plain", "credentialSubject.learningAchievement.title.text.#text", "Title"));
-                                add(new Attribute("text/plain", "credentialSubject.learningSpecificationReferences.qualification.title.text.#text", "Degree"));
-                                add(new Attribute("text/plain", "issuanceDate", "Date of Issuance"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].wasAwardedBy.awardingBody[0]", "Institution Name"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].title", "Title"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].title", "Degree"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].wasAwardedBy.awardingDate", "Date of Issuance"));
 
                             }
                         };

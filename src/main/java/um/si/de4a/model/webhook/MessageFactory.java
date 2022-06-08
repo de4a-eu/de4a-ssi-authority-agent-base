@@ -1,7 +1,9 @@
 package um.si.de4a.model.webhook;
 
+import java.io.IOException;
+
 public class MessageFactory {
-    public WebhookMessage getMessageHandler(String messageType){
+    public WebhookMessage getMessageHandler(String messageType) throws IOException {
         if(messageType == null)
             return null;
         if(messageType.equalsIgnoreCase("didexchange_states")){

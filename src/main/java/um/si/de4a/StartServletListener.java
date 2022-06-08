@@ -1,25 +1,12 @@
 package um.si.de4a;
 
-import com.google.gson.Gson;
-import um.si.de4a.model.webhook.SocketEvent;
-import um.si.de4a.util.DE4ALogger;
-
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import javax.servlet.http.HttpServlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 @SuppressWarnings("serial")
 public class StartServletListener extends HttpServlet {
-
-    //@Inject
-    //Event<SocketEvent> socketEvent;
-
 
     public void init() {
         System.out.println("=============================================");
@@ -85,5 +72,4 @@ public class StartServletListener extends HttpServlet {
 
 
     }
-
 }

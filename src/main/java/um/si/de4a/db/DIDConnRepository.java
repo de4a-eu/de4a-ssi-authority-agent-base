@@ -26,7 +26,7 @@ public class DIDConnRepository extends CouchDbRepositorySupport<DIDConn> {
             ViewQuery query = createQuery("byUserId")
                     .key(userId);
             List<DIDConn> result = db.queryView(query, DIDConn.class);
-            System.out.println("Number of DIDConns in DB: " + result.size());
+
             if (result.size() > 0) {
                 return result;
             }

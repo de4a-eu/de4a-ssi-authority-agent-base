@@ -26,9 +26,6 @@ public class WebHookResource {
     @Consumes({"application/json", "text/plain", "text/html", "application/x-www-form-urlencoded", "*/*"})
     @Produces({"application/json", "text/plain", "text/html", "application/x-www-form-urlencoded", "*/*"})
     public void receiveWebhookInfo(String contents) throws IOException, ParseException {
-        Logger logger = DE4ALogger.getLogger();
-        LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
-        LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
        // System.out.println("Received webhook message: " + contents.toString());
         JSONParser jsonParser = new JSONParser();
@@ -36,8 +33,6 @@ public class WebHookResource {
         JSONObject jsonContents = (JSONObject) jsonParser.parse(contents);
         String topicName = jsonContents.get("topic").toString();
         String msgContent = jsonContents.get("message").toString();
-        System.out.println("[WEBHOOK LISTENER] Topic name: " + topicName);
-
 
         MessageFactory msgFactory = new MessageFactory();
         WebhookMessage webhookMessage = msgFactory.getMessageHandler(topicName);

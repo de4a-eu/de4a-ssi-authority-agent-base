@@ -433,10 +433,10 @@ public class AriesUtil {
                     if (resultsArray.size() > 0) {
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject actionObj = (JSONObject) resultsArray.get(i);
-                            logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
+                            /*logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
                             params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0102"};
                             logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
+                            logger.log(logRecordInfo);*/
 
                             if(actionObj.get("PIID").equals(piid)){
                                 action = actionObj;

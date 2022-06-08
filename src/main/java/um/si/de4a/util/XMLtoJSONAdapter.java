@@ -1,5 +1,6 @@
 package um.si.de4a.util;
 
+import um.si.de4a.AppConfig;
 import um.si.de4a.model.json.*;
 import um.si.de4a.model.json.assessment.Assessment;
 import um.si.de4a.model.json.assessment.AssessmentReferences;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
 
 public class XMLtoJSONAdapter {
     private static Logger logger = null;
+    private static AppConfig appConfig = null;
 
     public static HigherEducationDiploma convertXMLToPOJO(String xml){
         try {
@@ -58,7 +60,7 @@ public class XMLtoJSONAdapter {
 
             diploma = (HigherEducationDiploma) jaxbUnmarshaller.unmarshal(new StringReader(xml));
         } catch (JAXBException e) {
-            logRecordSevere.setMessage("Error parsing input parameters.");
+            logRecordSevere.setMessage("GENERATE-VC: Error parsing input parameters.");
             Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
@@ -67,7 +69,7 @@ public class XMLtoJSONAdapter {
         return diploma;
     }
 
-    public static VerifiableCredentialUpdated convertPOJOtoJSON(HigherEducationDiploma diploma, String didKey) throws ParseException {
+    public static VerifiableCredentialUpdated convertPOJOtoJSON(HigherEducationDiploma diploma, String didKey) throws ParseException, IOException {
         try {
             logger = DE4ALogger.getLogger();
         } catch (IOException e) {
@@ -76,12 +78,25 @@ public class XMLtoJSONAdapter {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
+        appConfig = new AppConfig();
+
+        String schemaURL = "";
+        try {
+            schemaURL = appConfig.getProperties().getProperty("vc.schema.url");
+        }
+        catch (Exception ex){
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent DT.");
+            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "30017"};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+
         String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
         String[] type = {"VerifiableCredential", "UniversityDegreeCredential"};
         String issuer = didKey;
 
         String id = "http://de4a.eu/credentials/" + UUID.randomUUID();
-        CredentialSchema credentialSchema = new CredentialSchema("http://de4a-dev.informatika.uni-mb.si:9099/de4a-diploma-schema.json", "FullJsonSchemaValidator2021");
+        CredentialSchema credentialSchema = new CredentialSchema(schemaURL, "JsonSchemaValidator2018");
         // EBSI schema link (generic): https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema
 
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -107,7 +122,9 @@ public class XMLtoJSONAdapter {
         ArrayList<SpecifiedByUpdated> specifiedBy = new ArrayList<>();
         specifiedBy.add(new SpecifiedByUpdated("urn:epass:qualification:1", diploma.getTitle().getText().getValue(), diploma.getDurationOfEducation(), new String[]{ "urn:epass:code:123"},
                 Integer.valueOf(diploma.getScope())));
-        WasAwardedByUpdated wasAwardedBy = new WasAwardedByUpdated("urn:epass:awardingProcess:1", new String[]{diploma.getInstitutionName().getValue()}, outputDateIssued, new String[]{diploma.getPlaceOfIssue().getName().getText().getValue()});
+
+        String awardingLocation = "urn:" + diploma.getPlaceOfIssue().getName().getText().getValue().replaceAll(" ", "");
+        WasAwardedByUpdated wasAwardedBy = new WasAwardedByUpdated("urn:epass:awardingProcess:1", new String[]{diploma.getInstitutionName().getValue()}, outputDateIssued, new String[]{awardingLocation});
         LearningAchievementUpdated learningAchievement = new LearningAchievementUpdated("urn:epass:learningAchievement:1", diploma.getTitle().getText().getValue(),
                 wasAwardedBy, specifiedBy, wasDerivedFrom, "urn:epass:learningopportunity:1");
 
@@ -247,7 +264,7 @@ public class XMLtoJSONAdapter {
                 agentReferences, lor);*/
         //VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
 
-        logRecordInfo.setMessage("Generated JSON-LD Verifiable Credential.");
+        logRecordInfo.setMessage("GENERATE-VC: Generated JSON-LD Verifiable Credential.");
         Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01005"};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);

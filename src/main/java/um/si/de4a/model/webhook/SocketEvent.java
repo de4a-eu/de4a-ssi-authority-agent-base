@@ -1,9 +1,7 @@
 package um.si.de4a.model.webhook;
 
-import javax.enterprise.context.Dependent;
 import java.io.Serializable;
 
-@Dependent
 public class SocketEvent implements Serializable {
 
     public String protocol;
