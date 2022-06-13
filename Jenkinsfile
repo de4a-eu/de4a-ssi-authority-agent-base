@@ -11,7 +11,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'maven:3-adoptopenjdk-11'
+                    image 'maven:8.5.71-jdk16-openjdk'
                     args '-v $HOME/.m2:/root/.m2 -e HOME="." --network docker-ci_default'
                 }
             }
@@ -28,7 +28,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'maven:3-adoptopenjdk-11'
+                    image 'maven:8.5.71-jdk16-openjdk'
                     args '-v $HOME/.m2:/root/.m2 -e HOME="." --network docker-ci_default'
                 }
             }
