@@ -52,7 +52,7 @@ pipeline {
                           }
                       }
                 
-                sh 'docker system prune -f --filter "label!=docker-ci_default"'
+                sh 'docker system prune -f'
             }
         }
     
