@@ -2,7 +2,6 @@ package um.si.de4a.resources.offer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.lang3.SerializationUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
@@ -11,17 +10,17 @@ import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
+import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.model.json.VerifiableCredential;
+import um.si.de4a.model.json.VerifiableCredentialUpdated;
 import um.si.de4a.resources.vc.Data;
 import um.si.de4a.resources.vc.GenerateVCResource;
 import org.json.simple.parser.JSONParser;
 import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -65,10 +64,12 @@ public class SendVCOfferResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonOffer = (JSONObject) jsonParser.parse(inputOffer);
+            //jsonOffer = (JSONObject) jsonParser.parse(new InputStreamReader(new ByteArrayInputStream(inputOffer.getBytes(StandardCharsets.UTF_8)), "UTF-8"));
             logRecordInfo.setMessage("SEND-OFFER: Received input eIDAS user data.");
             Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
+
         }
         catch(Exception ex){
             logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
@@ -82,8 +83,14 @@ public class SendVCOfferResource {
             String userID = "", evidence = "";
             try{
                 userID = jsonOffer.get("userId").toString();
-                System.out.println("SEND-OFFER userId: " + userID);
-                evidence = jsonOffer.get("evidence").toString();
+
+                //ByteBuffer buffer = StandardCharsets.UTF_8.encode(jsonOffer.get("evidence").toString());
+                //evidence = jsonOffer.get("evidence").toString();
+                byte[] evidenceBytes = Base64.getDecoder().decode(jsonOffer.get("evidence").toString());
+                //evidence = jsonOffer.get("evidence").toString();
+                evidence = new String(evidenceBytes, "ISO-8859-1");
+
+                 //System.out.println("[SEND-OFFER-DEBUG] Evidence: " + evidence);
             }
             catch (Exception ex){
                 logRecordSevere.setMessage("SEND-OFFER: Arguments missing or invalid at Authority Agent DT.");
@@ -98,22 +105,22 @@ public class SendVCOfferResource {
             String myDID = "", publicDID = "", theirDID = "";
             if(userDIDConn != null){
                 try{
-                    System.out.println("SEND-OFFER Current Invitation ID: " + userDIDConn.getInvitationId());
+                    System.out.println("SEND-OFFER: Current Invitation ID: " + userDIDConn.getInvitationId());
 
                     myDID = userDIDConn.getMyDID();
-                    logRecordInfo.setMessage("SEND-OFFER myDID: " + myDID);
+                    logRecordInfo.setMessage("SEND-OFFER: myDID: " + myDID);
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
 
                     publicDID = dbUtil.getDID();
-                    logRecordInfo.setMessage("SEND-OFFER publicDID: " + publicDID);
+                    logRecordInfo.setMessage("SEND-OFFER: publicDID: " + publicDID);
                     params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
 
                     theirDID = userDIDConn.getTheirDID();
-                    logRecordInfo.setMessage("SEND-OFFER theirDID: " + theirDID);
+                    logRecordInfo.setMessage("SEND-OFFER: theirDID: " + theirDID);
                     params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
@@ -131,15 +138,15 @@ public class SendVCOfferResource {
                 jo.put("theirDID", theirDID);
 
                 String jsonRequest = jo.toJSONString();
-                // System.out.println("[SEND-VC-OFFER] JSON request: " + jsonRequest);
+                //System.out.println("[SEND-OFFER-DEBUG] JSON request: " + jsonRequest);
 
                 // DONE: call generateVC(evidence, myDID, theirDID) method: VC
                 GenerateVCResource generateVCResource = new GenerateVCResource();
 
-                VerifiableCredential generatedVC = generateVCResource.generateVC(jsonRequest);
+                VerifiableCredentialUpdated generatedVC = generateVCResource.generateVC(jsonRequest);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                //System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
+               // System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
                 if(generatedVC != null) {
                     // DONE: call Aries /verifiable/sign-credential(vc) : boolean
                     Clock clock = Clock.systemDefaultZone();
@@ -150,7 +157,7 @@ public class SendVCOfferResource {
                             dbUtil.getDID(), signatureType);
 
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
-                    SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
+                    SignedVerifiableCredentialUpdated credential = ariesUtil.signCredential(jsonSignRequest);
 
 
                     if(credential != null) {
@@ -175,10 +182,10 @@ public class SendVCOfferResource {
                             {
                                 add(new Attribute("text/plain", "credentialSubject.currentFamilyName", "Current Family Name"));
                                 add(new Attribute("text/plain", "credentialSubject.currentGivenName", "Current Given Name"));
-                                add(new Attribute("text/plain", "credentialSubject.agentReferences.organisation.preferredName.text.#text", "Institution Name"));
-                                add(new Attribute("text/plain", "credentialSubject.learningAchievement.title.text.#text", "Title"));
-                                add(new Attribute("text/plain", "credentialSubject.learningSpecificationReferences.qualification.title.text.#text", "Degree"));
-                                add(new Attribute("text/plain", "issuanceDate", "Date of Issuance"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].wasAwardedBy.awardingBody[0]", "Institution Name"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].title", "Title"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].title", "Degree"));
+                                add(new Attribute("text/plain", "credentialSubject.achieved[0].wasAwardedBy.awardingDate", "Date of Issuance"));
 
                             }
                         };

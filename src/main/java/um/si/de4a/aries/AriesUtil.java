@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.model.json.SignedVerifiableCredential;
+import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.resources.offer.OfferRequest;
 import um.si.de4a.resources.offer.SignRequest;
 import um.si.de4a.resources.vc.SendVCRequest;
@@ -43,7 +44,7 @@ import java.util.logging.Logger;
 public class AriesUtil {
 
     private AppConfig appConfig = null;
-    private String baseUrl = "", alias = "";
+    private String baseUrl = "", alias = "", invitationURL = "";
     private Logger logger = null;
     private LogRecord logRecordInfo = null;
     private LogRecord logRecordSevere = null;
@@ -57,6 +58,7 @@ public class AriesUtil {
         try {
             baseUrl = appConfig.getProperties().getProperty("aries.enterprise.ip.address");
             alias = appConfig.getProperties().getProperty("alias");
+            invitationURL = appConfig.getProperties().getProperty("organization.img.url");
         }
         catch(Exception ex){
             logRecordSevere.setMessage( "Error reading configuration properties.");
@@ -97,6 +99,8 @@ public class AriesUtil {
             JSONParser jsonParser = new JSONParser();
             jsonObject = (JSONObject) jsonParser.parse(result);
 
+            if(jsonObject.containsKey("invitation_url"))
+                jsonObject.put("invitation_url", invitationURL);
             //jsonInvitation = (JSONObject) jsonObject.get("invitation");
             logRecordInfo.setMessage("GENERATE-INVITATION: Generated DID invitation for edge agent.");
             params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0203"};
@@ -178,12 +182,12 @@ public class AriesUtil {
         return connectionList;
     }
 
-    public SignedVerifiableCredential signCredential(SignRequest vcCredential) throws IOException, ParseException {
+    public SignedVerifiableCredentialUpdated signCredential(SignRequest vcCredential) throws IOException, ParseException {
         JSONObject jsonSignedCredential = null;
 
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         HttpResponse response = null;
-        SignedVerifiableCredential signedVC = null;
+        SignedVerifiableCredentialUpdated signedVC = null;
 
         Gson gson = new Gson();
         try {
@@ -228,7 +232,7 @@ public class AriesUtil {
                     logger.log(logRecordSevere);
                 }
                 try {
-                    signedVC = gson.fromJson(gson.toJson(jsonSignedCredential), SignedVerifiableCredential.class);
+                    signedVC = gson.fromJson(gson.toJson(jsonSignedCredential), SignedVerifiableCredentialUpdated.class);
 
                     logRecordInfo.setMessage("SEND-OFFER: Signed a Verifiable Credential." + signedVC.getId());
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0205"};
@@ -429,10 +433,10 @@ public class AriesUtil {
                     if (resultsArray.size() > 0) {
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject actionObj = (JSONObject) resultsArray.get(i);
-                            logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
+                            /*logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
                             params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0102"};
                             logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
+                            logger.log(logRecordInfo);*/
 
                             if(actionObj.get("PIID").equals(piid)){
                                 action = actionObj;

@@ -46,7 +46,7 @@ public class DIDConnStatusResource {
         }
 
         if(userDidConn != null) {
-            System.out.println("DID-CONN-STATUS Current user DIDCon ID: " + userDidConn.getConnectionId());
+            //System.out.println("DID-CONN-STATUS: Current user DIDConn connection ID: " + userDidConn.getConnectionId());
             // DONE: case "status == connection_established": return 1
             if (userDidConn.getStatus() == DIDConnStatusEnum.CONNECTION_ESTABLISHED) {
                 logRecordInfo.setMessage("DID Connection has been established.");

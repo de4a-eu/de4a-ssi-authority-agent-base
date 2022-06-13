@@ -2,14 +2,15 @@ package um.si.de4a.resources.offer;
 
 
 import um.si.de4a.model.json.VerifiableCredential;
+import um.si.de4a.model.json.VerifiableCredentialUpdated;
 
 public class SignRequest {
     private String created;
-    private VerifiableCredential credential;
+    private VerifiableCredentialUpdated credential;
     private String did;
     private String signatureType;
 
-    public SignRequest(String created, VerifiableCredential credential, String did, String signatureType) {
+    public SignRequest(String created, VerifiableCredentialUpdated credential, String did, String signatureType) {
         this.created = created;
         this.credential = credential;
         this.did = did;
@@ -24,11 +25,11 @@ public class SignRequest {
         this.created = created;
     }
 
-    public VerifiableCredential getCredential() {
+    public VerifiableCredentialUpdated getCredential() {
         return credential;
     }
 
-    public void setCredential(VerifiableCredential credential) {
+    public void setCredential(VerifiableCredentialUpdated credential) {
         this.credential = credential;
     }
 

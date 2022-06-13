@@ -4,6 +4,7 @@ package um.si.de4a.resources.connection;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.AppConfig;
 import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
@@ -11,6 +12,7 @@ import um.si.de4a.util.CustomDE4ALogFormatter;
 import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.*;
@@ -34,13 +36,13 @@ public class GenerateInvitationResource {
         JSONParser jsonParser = new JSONParser();
         try {
             jsonUserID = (JSONObject) jsonParser.parse(user);
-            logRecordInfo.setMessage("Received input eIDAS user data.");
+            logRecordInfo.setMessage("GENERATE-INVITATION: Received input eIDAS user data.");
             Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01001"};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
 
         } catch (ParseException e) {
-            logRecordSevere.setMessage("Error parsing input eIDAS data.");
+            logRecordSevere.setMessage("GENERATE-INVITATION: Error parsing input eIDAS data.");
             Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
@@ -55,7 +57,7 @@ public class GenerateInvitationResource {
                 userID = jsonUserID.get("userId").toString();
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("Error parsing input parameters.");
+                logRecordSevere.setMessage("GENERATE-INVITATION: Error parsing input parameters.");
                 Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "1005"};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
@@ -70,7 +72,7 @@ public class GenerateInvitationResource {
                     invitationJson = invitation.get("invitation").toString();
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage("Error parsing received JSON response.");
+                    logRecordSevere.setMessage("GENERATE-INVITATION: Error parsing received JSON response.");
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "1005"};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
@@ -82,10 +84,13 @@ public class GenerateInvitationResource {
                 // DONE: saveDIDConn(userID, invitationID, invitationJSON, status: invitation_generated): boolean
                 DBUtil dbUtil = new DBUtil();
                 try {
-                    System.out.println("GENERATE-INVITATION: Current DIDConn: " + dbUtil.getCurrentDIDConnStatus(userID));
+                    //System.out.println("GENERATE-INVITATION: Current DIDConn: " + dbUtil.getCurrentDIDConnStatus(userID));
 
                     if(dbUtil.getCurrentDIDConnStatus(userID) != null){ // there is an existing DIDConn
-                        System.out.println("GENERATE-INVITATION: Current DIDConn Invitation ID: " + dbUtil.getCurrentDIDConnStatus(userID).getInvitationId());
+                        logRecordInfo.setMessage("GENERATE-INVITATION: Overwriting current DID connection with ID: " + dbUtil.getCurrentDIDConnStatus(userID).getInvitationId() + ".");
+                        Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "01020"};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
 
                         List<DIDConn> didConnList = dbUtil.getDIDConnStatuses(userID);
                         for (DIDConn didConn: didConnList){
@@ -97,12 +102,12 @@ public class GenerateInvitationResource {
                     }
 
                     dbStored = dbUtil.saveDIDConn(userID, jsonObjectInv.get("@id").toString(), invitation.toString(), currentTime);
-                    logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
+                    logRecordInfo.setMessage("GENERATE-INVITATION: Stored current state in the Authority Agent DT database.");
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "01006"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 } catch (Exception ex) {
-                    logRecordSevere.setMessage( "Error storing current state in internal database.");
+                    logRecordSevere.setMessage( "GENERATE-INVITATION: Error storing current state in internal database.");
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "1006"};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
