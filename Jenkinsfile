@@ -26,6 +26,7 @@ pipeline {
                     branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
                 }
             }
+
             agent {
                 docker {
                     image 'maven:3-adoptopenjdk-11'
