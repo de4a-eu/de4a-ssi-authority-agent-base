@@ -46,7 +46,7 @@ pipeline {
                 script{
                   
                       def img
-			    if (env.BRANCH_NAME == 'master') {
+			    if (env.BRANCH_NAME == 'main') {
                       	env.VERSION = readMavenPom().getVersion()
                       	img = docker.build('de4a/de4a-ssi-authority-agent-base',".")
                       	docker.withRegistry('','docker-hub-token') {
