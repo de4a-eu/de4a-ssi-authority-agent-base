@@ -99,13 +99,8 @@ public class XMLtoJSONAdapter {
         CredentialSchema credentialSchema = new CredentialSchema(schemaURL, "JsonSchemaValidator2018");
         // EBSI schema link (generic): https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema
 
-<<<<<<< HEAD
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
         DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-=======
-        DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
->>>>>>> 93a2763700e8c1137c625aae9f9fcd79fa2a3687
 
         String inputIssueDate = diploma.getDateOfIssue();
         String inputBirthDate = diploma.getHolderOfAchievement().getDateOfBirth();
