@@ -23,7 +23,9 @@ pipeline {
       stage('Build'){
          when {
                     anyOf{
-                        branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
+                        branch 'main'; 
+				branch 'master';
+				branch pattern: 'iteration\\d+', comparator: 'REGEXP'
                     }
                 }
                 agent {
@@ -38,19 +40,23 @@ pipeline {
       }
     
       stage('Docker'){
-
-            agent { label 'main' }
+		when {
+                branch 'main'
+            }
+            agent { label 'master' }
             steps {
                 script{
                   
                       def img
-                      env.VERSION = readMavenPom().getVersion()
-                      img = docker.build('de4a/de4a-ssi-authority-agent-base',".")
-                      docker.withRegistry('','docker-hub-token') {
-                      img.push('latest')
-                      img.push("${env.VERSION}")
-                          }
+			    if (env.BRANCH_NAME == 'main') {
+                      	env.VERSION = readMavenPom().getVersion()
+                      	img = docker.build('de4a/de4a-ssi-authority-agent-base',".")
+                     	docker.withRegistry('','docker-hub-token') {
+                      		img.push('latest')
+                      		img.push("${env.VERSION}")
+                        }
                       }
+			}
                 
                 sh 'docker system prune -f'
             }
