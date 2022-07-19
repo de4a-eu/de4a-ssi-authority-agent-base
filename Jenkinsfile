@@ -39,7 +39,7 @@ pipeline {
     
       stage('Docker'){
 
-            agent { label 'master' }
+            agent { label 'main' }
             steps {
                 script{
                   
