@@ -38,10 +38,8 @@ pipeline {
       }
     
       stage('Docker'){
-            when {
-                branch 'main'
-            }
-            agent { label 'main' }
+
+            agent { label 'master' }
             steps {
                 script{
                   
