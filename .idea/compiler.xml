@@ -10,7 +10,11 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+<<<<<<< HEAD
       <module name="DE4AEnterpriseAgent" target="15" />
+=======
+      <module name="DE4AEnterpriseAgent" target="16" />
+>>>>>>> 93a2763700e8c1137c625aae9f9fcd79fa2a3687
     </bytecodeTargetLevel>
   </component>
 </project>

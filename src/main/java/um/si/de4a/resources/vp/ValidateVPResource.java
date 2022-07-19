@@ -261,7 +261,10 @@ public class ValidateVPResource {
         }
         catch(Exception ex){
             result = 0;
+<<<<<<< HEAD
             ex.printStackTrace();
+=======
+>>>>>>> 93a2763700e8c1137c625aae9f9fcd79fa2a3687
         }
         if(issuerRecord != null)
             result = 1;
