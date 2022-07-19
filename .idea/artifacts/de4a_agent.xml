@@ -1,8 +1,8 @@
 <component name="ArtifactManager">
-  <artifact type="war" build-on-make="true" name="de4a-agent">
+  <artifact type="war" name="de4a-agent">
     <output-path>$PROJECT_DIR$/out/artifacts/de4a_agent</output-path>
     <root id="archive" name="de4a-agent.war">
-      <element id="artifact" artifact-name="de4a-enterprise-agent:war exploded" />
+      <element id="artifact" artifact-name="DE4AEnterpriseAgent:war exploded" />
     </root>
   </artifact>
 </component>

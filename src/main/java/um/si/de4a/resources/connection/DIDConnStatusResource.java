@@ -35,7 +35,7 @@ public class DIDConnStatusResource {
         // DONE: call database getDIDConn (userID): invitationID, connectionID, status
         DBUtil dbUtil = new DBUtil();
         try {
-            userDidConn =  dbUtil.getDIDConnStatus(userID);
+            userDidConn =  dbUtil.getCurrentDIDConnStatus(userID);
         }
         catch(Exception ex){
             logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
@@ -46,6 +46,7 @@ public class DIDConnStatusResource {
         }
 
         if(userDidConn != null) {
+            //System.out.println("DID-CONN-STATUS: Current user DIDConn connection ID: " + userDidConn.getConnectionId());
             // DONE: case "status == connection_established": return 1
             if (userDidConn.getStatus() == DIDConnStatusEnum.CONNECTION_ESTABLISHED) {
                 logRecordInfo.setMessage("DID Connection has been established.");
@@ -72,7 +73,7 @@ public class DIDConnStatusResource {
 
                             if(invitationID.equals(userDidConn.getInvitationId())) {
                                 try {
-                                    dbUtil.updateDIDConnection(userDidConn.getUserId(), conn.get("MyDID").toString(),
+                                    dbUtil.updateDIDConnectionStatus(userDidConn.getUserId(), conn.get("MyDID").toString(),
                                             conn.get("TheirDID").toString(), connectionID, DIDConnStatusEnum.CONNECTION_ESTABLISHED);
                                     logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
                                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};

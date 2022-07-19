@@ -115,7 +115,7 @@ public class CheckOfferVCResponseResource {
                                 vcStatusCode = -2; // return -1 (offer rejected)
                             }
                         }
-                        else if(description.get("code").equals("internal") || description.get("code").equals("accepted")){
+                        /*else if(description.get("code").equals("internal") || description.get("code").equals("accepted")){
                             try {
                                 dbUtil.updateVCStatus(userID, VCStatusEnum.VC_ACCEPTED);
 
@@ -131,7 +131,7 @@ public class CheckOfferVCResponseResource {
                                 logger.log(logRecordSevere);
                             }
                             vcStatusCode = 5; // return 5 (VC accepted)
-                        }
+                        }*/
                     }
                 }
                 else{

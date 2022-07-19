@@ -31,4 +31,19 @@ public class VPStatusRepository extends CouchDbRepositorySupport<VPStatus> {
 
         return null;
     }
+
+    @View( name="byPiid", map = "function(doc) { if (doc.type == 'VPStatus') { emit(doc.piid, doc) } }")
+    public VPStatus findByPiid(String piid) {
+        try {
+            ViewQuery query = createQuery("byPiid")
+                    .key(piid);
+            List<VPStatus> result = db.queryView(query, VPStatus.class);
+            if(result.size() > 0)
+                return result.get(result.size()-1); // get the most recent VP status
+        } catch (DocumentNotFoundException e) {
+            return null;
+        }
+
+        return null;
+    }
 }

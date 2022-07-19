@@ -16,7 +16,7 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn clean test sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN'
+                 sh 'mvn clean test sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_TOKEN'
             }
         }
     
@@ -38,23 +38,45 @@ pipeline {
       }
     
       stage('Docker'){
-            
+            when {
+                branch 'master'
+            }
             agent { label 'master' }
             steps {
                 script{
                   
                       def img
-                      env.VERSION = readMavenPom().getVersion()
-                      img = docker.build('de4a/de4a-ssi-authority-agent-base',".")
-                      docker.withRegistry('','docker-hub-token') {
-                      img.push('latest')
-                      img.push("${env.VERSION}")
-                          }
+			    if (env.BRANCH_NAME == 'master') {
+                      	env.VERSION = readMavenPom().getVersion()
+                      	img = docker.build('de4a/de4a-ssi-authority-agent-base',".")
+                      	docker.withRegistry('','docker-hub-token') {
+                      		img.push('latest')
+                      		img.push("${env.VERSION}")
+                        }
                       }
-                
+                }
                 sh 'docker system prune -f'
             }
         }
-    
+    stage('Docker iteration'){
+            when {
+                branch pattern: 'iteration\\d+', comparator: 'REGEXP'
+            }
+            agent { label 'master' }
+            steps {
+                script{
+                    def img
+
+                    env.VERSION = readMavenPom().getVersion()
+                    img = docker.build('de4a/de4a-ssi-authority-agent-base','.')
+                    docker.withRegistry('','docker-hub-token') {
+                    	img.push("${env.BRANCH_NAME}")
+                    	img.push("${env.VERSION}")
+                    }
+                    
+                }
+                sh 'docker system prune -f'
+            }
+        }
   }
 }
