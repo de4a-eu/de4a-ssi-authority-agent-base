@@ -23,7 +23,7 @@ pipeline {
       stage('Build'){
          when {
                     anyOf{
-                        branch 'master'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
+                        branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
                     }
                 }
                 agent {
@@ -39,9 +39,9 @@ pipeline {
     
       stage('Docker'){
             when {
-                branch 'master'
+                branch 'main'
             }
-            agent { label 'master' }
+            agent { label 'main' }
             steps {
                 script{
                   
