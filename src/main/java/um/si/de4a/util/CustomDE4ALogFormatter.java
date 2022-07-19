@@ -14,7 +14,7 @@ public class CustomDE4ALogFormatter extends Formatter {
         StringBuilder builder = new StringBuilder(1000);
         builder.append("DE4A METRICS - [").append(df.format(new Date(record.getMillis()))).append("] [")
                 .append(record.getLevel()).append("] [").append(record.getParameters()[0]).append("] [1.3] [")
-                .append(record.getParameters()[1]).append("] [").append(record.getParameters()[2])
+                .append(record.getParameters()[1]).append("] [AA").append(record.getParameters()[2])
                 .append("] ").append(record.getMessage()).append(System.lineSeparator());
         return builder.toString();
     }

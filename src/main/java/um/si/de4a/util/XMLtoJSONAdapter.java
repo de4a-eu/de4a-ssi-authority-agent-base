@@ -99,8 +99,8 @@ public class XMLtoJSONAdapter {
         CredentialSchema credentialSchema = new CredentialSchema(schemaURL, "JsonSchemaValidator2018");
         // EBSI schema link (generic): https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema
 
-        DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
+        DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 
         String inputIssueDate = diploma.getDateOfIssue();
         String inputBirthDate = diploma.getHolderOfAchievement().getDateOfBirth();
@@ -134,7 +134,7 @@ public class XMLtoJSONAdapter {
         CredentialSubjectUpdated credentialSubject = new CredentialSubjectUpdated(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
                 diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(), achieved);
 
-        VerifiableCredentialUpdated vc = new VerifiableCredentialUpdated(context, id, type, issuer, outputDateIssued, outputDateIssued, validFrom, expirationDate, credentialSubject, credentialSchema);
+        VerifiableCredentialUpdated vc = new VerifiableCredentialUpdated(context, id, type, issuer, outputDateIssued, validFrom, validFrom, expirationDate, credentialSubject, credentialSchema);
 
         /*LearningAchievement learningAchievement = new LearningAchievement("urn:epass:learningAchievement:1",
                 new Title(new Text(diploma.getTitle().getText().getContentType(), diploma.getTitle().getText().getLang(), diploma.getTitle().getText().getValue())), new SpecifiedBy("urn:epass:qualification:1"), new WasDerivedFrom("urn:epass:assessment:1"),

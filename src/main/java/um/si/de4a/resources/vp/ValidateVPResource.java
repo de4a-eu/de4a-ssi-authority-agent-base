@@ -248,7 +248,7 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-        if(inputData.getPersonIdentifier().equals(vcData.getPersonIdentifier()) && inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
+        if( inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;
     }
@@ -261,6 +261,7 @@ public class ValidateVPResource {
         }
         catch(Exception ex){
             result = 0;
+            ex.printStackTrace();
         }
         if(issuerRecord != null)
             result = 1;
