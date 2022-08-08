@@ -22,7 +22,7 @@ pipeline {
     
       stage('Build'){
 	  environment {
-            JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64/bin/java"
+            JAVA_HOME =/usr/lib/jvm/java-17-openjdk-amd64/bin/java
         }
          when {
                     anyOf{
@@ -36,7 +36,7 @@ pipeline {
                     }
                 }
                 steps {
-					sh "java -version"
+				sh 'java -version'
                     sh 'mvn clean package -U'
                 }
       }
