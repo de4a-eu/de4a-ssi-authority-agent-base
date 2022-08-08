@@ -11,7 +11,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'eclipse-temurin:17'
+                    image 'adoptopenjdk:latest'
                     args '-v $HOME/.m2:/root/.m2 -e HOME="." --network docker-ci_default'
                 }
             }
@@ -29,7 +29,7 @@ pipeline {
                 }
                 agent {
                     docker {
-                        image 'eclipse-temurin:17'
+                        image 'adoptopenjdk:latest'
                         args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                     }
                 }
