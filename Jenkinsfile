@@ -11,7 +11,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'adoptopenjdk/openjdk16'
+                    image 'maven:latest'
                     args '-v $HOME/.m2:/root/.m2 -e HOME="." --network docker-ci_default'
                 }
             }
@@ -21,7 +21,6 @@ pipeline {
         }
     
       stage('Build'){
-	  
          when {
                     anyOf{
                         branch 'master'; branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
@@ -29,7 +28,7 @@ pipeline {
                 }
                 agent {
                     docker {
-                        image 'adoptopenjdk/openjdk16'
+                        image 'maven:latest'
                         args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                     }
                 }
