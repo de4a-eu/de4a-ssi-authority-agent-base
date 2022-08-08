@@ -22,7 +22,7 @@ pipeline {
     
       stage('Build'){
 	  environment {
-            JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+            JAVA_HOME = "/usr/lib/jvm/java-1.17.0-openjdk-amd64"
         }
          when {
                     anyOf{
