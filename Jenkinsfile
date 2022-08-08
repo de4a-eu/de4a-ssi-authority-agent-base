@@ -21,6 +21,9 @@ pipeline {
         }
     
       stage('Build'){
+	  environment {
+            JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64/bin/java"
+        }
          when {
                     anyOf{
                         branch 'master'; branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
@@ -33,6 +36,7 @@ pipeline {
                     }
                 }
                 steps {
+					sh "java -version"
                     sh 'mvn clean package -U'
                 }
       }
