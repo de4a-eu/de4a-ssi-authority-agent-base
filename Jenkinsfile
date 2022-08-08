@@ -11,7 +11,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'adoptopenjdk:latest'
+                    image 'adoptopenjdk:openjdk16'
                     args '-v $HOME/.m2:/root/.m2 -e HOME="." --network docker-ci_default'
                 }
             }
@@ -29,7 +29,7 @@ pipeline {
                 }
                 agent {
                     docker {
-                        image 'adoptopenjdk:latest'
+                        image 'adoptopenjdk:openjdk16'
                         args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                     }
                 }
