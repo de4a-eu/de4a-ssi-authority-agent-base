@@ -11,7 +11,7 @@ pipeline {
             }
             agent {
                 docker {
-                    image 'maven:3-adoptopenjdk-11'
+                    image 'maven:latest'
                     args '-v $HOME/.m2:/root/.m2 -e HOME="." --network docker-ci_default'
                 }
             }
@@ -28,11 +28,12 @@ pipeline {
                 }
                 agent {
                     docker {
-                        image 'maven:3-adoptopenjdk-11'
+                        image 'maven:latest'
                         args '-v $HOME/.m2:/root/.m2 --network docker-ci_default'
                     }
                 }
                 steps {
+				    sh 'java -version'
                     sh 'mvn clean package -U'
                 }
       }
