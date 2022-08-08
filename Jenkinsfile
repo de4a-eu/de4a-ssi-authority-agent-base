@@ -21,9 +21,7 @@ pipeline {
         }
     
       stage('Build'){
-	  environment {
-            JAVA_HOME = "/usr/lib/jvm/java-1.17.0-openjdk-amd64"
-        }
+	  
          when {
                     anyOf{
                         branch 'master'; branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
