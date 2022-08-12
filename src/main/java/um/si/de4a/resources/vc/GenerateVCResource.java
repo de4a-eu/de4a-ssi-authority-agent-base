@@ -19,10 +19,12 @@ import java.util.logging.Logger;
 
 @Path("/generate-vc")
 public class GenerateVCResource {
+    private AppConfig appConfig = null;
+
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public VerifiableCredentialUpdated generateVC(String vcData) throws IOException, ParseException, java.text.ParseException {
+    public VerifiableCredentialUpdated generateVC(String vcData, String alias) throws IOException {
         Logger logger = DE4ALogger.getLogger();
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
@@ -34,8 +36,8 @@ public class GenerateVCResource {
         try {
             jsonObject = (JSONObject) jsonParser.parse(vcData);
         } catch (ParseException e) {
-            logRecordSevere.setMessage("GENERATE-VC: Error parsing input parameters.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};
+            logRecordSevere.setMessage("Object conversion error on Authority Agent: [GENERATE-VC] " + e.getMessage() + ".");
+            Object[] params = new Object[]{"AAE03", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
 
@@ -45,28 +47,25 @@ public class GenerateVCResource {
             HigherEducationDiploma diploma = null;
             try {
                 diploma = XMLtoJSONAdapter.convertXMLToPOJO(jsonObject.get("evidence").toString());
-                logRecordInfo.setMessage("GENERATE-VC: Converted input XML evidence received from Evidence Portal DO.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01007"};
-                logRecordInfo.setParameters(params);
-                logger.log(logRecordInfo);
+                System.out.println("SEND-OFFER: Converted input evidence in format: XML to format: POJO");
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("GENERATE-VC: Conversion error on Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1007"};
+                logRecordSevere.setMessage("Object conversion error on Authority Agent: [GENERATE-VC] " + ex.getMessage() + ".");
+                Object[] params = new Object[]{"AAE03", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
             if (diploma != null) {
                 try {
                     evidenceVC = XMLtoJSONAdapter.convertPOJOtoJSON(diploma, jsonObject.get("publicDID").toString());
-                    logRecordInfo.setMessage("GENERATE-VC: Converted input XML evidence received from Evidence Portal DO to JSON-LD verifiable Credential.");
+                    logRecordInfo.setMessage("SEND-OFFER: Converted input evidence in format: XML to format: JSON-LD");
                     Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01008"};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage("GENERATE-VC: Conversion error on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1008"};
+                    logRecordSevere.setMessage("Object conversion error on Authority Agent: [GENERATE-VC] " + ex.getMessage() + ".");
+                    Object[] params = new Object[]{"AAE03", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }

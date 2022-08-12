@@ -3,6 +3,7 @@ package um.si.de4a.resources.connection;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.AppConfig;
 import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
@@ -19,6 +20,8 @@ import java.util.logging.Logger;
 @Path("/did-conn-status")
 public class DIDConnStatusResource {
 
+    private AppConfig appConfig = null;
+
     @GET
     @Consumes("application/json")
     @Produces("application/json")
@@ -28,6 +31,18 @@ public class DIDConnStatusResource {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
+        String alias = "";
+        appConfig = new AppConfig();
+        try {
+            alias = appConfig.getProperties().getProperty("alias");
+        }
+        catch (Exception ex){
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+
         int connectionStatusCode = 0;
         DIDConn userDidConn = null;
         AriesUtil ariesUtil = new AriesUtil();
@@ -36,21 +51,25 @@ public class DIDConnStatusResource {
         DBUtil dbUtil = new DBUtil();
         try {
             userDidConn =  dbUtil.getCurrentDIDConnStatus(userID);
+            logRecordInfo.setMessage("DID-CONN-STATUS: Received user DIDConn status data.");
+            Object[] params = new Object[]{"AAI14", alias};
+            logRecordInfo.setParameters(params);
+            logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("Error accessing data on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent internal database: [DID-CONN-STATUS] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
-            //System.out.println("[DID-CONN-STATUS] Exception: " + ex.getMessage());
+            //System.out.println("[DID-CONN-STATUS] Exception: " + ex.getMessage() + ".");
         }
 
         if(userDidConn != null) {
             //System.out.println("DID-CONN-STATUS: Current user DIDConn connection ID: " + userDidConn.getConnectionId());
             // DONE: case "status == connection_established": return 1
             if (userDidConn.getStatus() == DIDConnStatusEnum.CONNECTION_ESTABLISHED) {
-                logRecordInfo.setMessage("DID Connection has been established.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1001"};
+                logRecordInfo.setMessage("DID-CONN-STATUS: DID Connection has been established for invitation ID " + userDidConn.getInvitationId() + ".");
+                Object[] params = new Object[]{"AAI29", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
 
@@ -75,22 +94,22 @@ public class DIDConnStatusResource {
                                 try {
                                     dbUtil.updateDIDConnectionStatus(userDidConn.getUserId(), conn.get("MyDID").toString(),
                                             conn.get("TheirDID").toString(), connectionID, DIDConnStatusEnum.CONNECTION_ESTABLISHED);
-                                    logRecordInfo.setMessage("Stored current state in the Authority Agent DT database.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                                    logRecordInfo.setMessage("DID-CONN-STATUS: Stored current state in Authority Agent internal database.");
+                                    Object[] params = new Object[]{"AAI13", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("Error saving data on Authority Agent DT.");
-                                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                    logRecordSevere.setMessage( "Error saving data on Authority Agent internal database: [DID-CONN-STATUS] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE04", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
 
                                 connectionStatusCode = 1;// return 1 (Connection has been established)
 
-                                logRecordInfo.setMessage("DID Connection has been established.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01009"};
+                                logRecordInfo.setMessage("DID-CONN-STATUS: DID Connection has been established for invitation ID " + userDidConn.getInvitationId() + ".");
+                                Object[] params = new Object[]{"AAI29", alias};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             }

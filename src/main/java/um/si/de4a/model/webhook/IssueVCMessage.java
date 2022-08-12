@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class IssueVCMessage extends WebhookMessage {
 
     private AppConfig appConfig;
-    private String clientURL = "";
+    private String clientURL = "", alias = "";
     private Logger logger = null;
     private LogRecord logRecordInfo = null;
     private LogRecord logRecordSevere = null;
@@ -40,10 +40,11 @@ public class IssueVCMessage extends WebhookMessage {
         logRecordSevere = new LogRecord(Level.SEVERE, "");
         try {
             clientURL = appConfig.getProperties().getProperty("client.url");
+            alias = appConfig.getProperties().getProperty("alias");
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "Error reading configuration properties.");
-            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "3001"};
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -51,11 +52,6 @@ public class IssueVCMessage extends WebhookMessage {
 
     @Override
     public int updateStatus(String inputMessage) throws IOException {
-
-        logRecordInfo.setMessage("WEBHOOK-PARSER: Received input event: " + inputMessage);
-        Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01024"};
-        logRecordInfo.setParameters(params);
-        logger.log(logRecordInfo);
 
         int vcStatusCode = 0;
         Gson gson = new Gson();
@@ -68,7 +64,10 @@ public class IssueVCMessage extends WebhookMessage {
         try {
             jsonMessage = (JSONObject) jsonParser.parse(inputMessage);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logRecordSevere.setMessage("Object conversion error in Authority Agent: [WEBHOOK-PARSER-VC] " + e.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
         }
 
         JSONObject jsonProperties = (JSONObject) jsonMessage.get("Properties");
@@ -76,9 +75,13 @@ public class IssueVCMessage extends WebhookMessage {
 
         try {
             vcStatus = dbUtil.getVCStatusByPiid(inputPiid);
+            logRecordInfo.setMessage("WEBHOOK-PARSER: Received user VC status data.");
+            Object[] params = new Object[]{"AAI14", alias};
+            logRecordInfo.setParameters(params);
+            logger.log(logRecordInfo);
         } catch (Exception ex) {
-            logRecordSevere.setMessage("WEBHOOK-PARSER: Error accessing data on Authority Agent DT.");
-            params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent internal database: [WEBHOOK-PARSER-VC] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
             //System.out.println("[DID-CONN-STATUS] Exception: " + ex.getMessage());
@@ -88,8 +91,6 @@ public class IssueVCMessage extends WebhookMessage {
             JSONObject jsonObject = (JSONObject) jsonMessage.get("Message");
 
             if (jsonObject.get("@type").equals("https://didcomm.org/issue-credential/2.0/request-credential")) {
-
-                System.out.println("[WEBHOOK PARSER] Offer accepted!");
 
                 JSONObject action = null;
                 try {
@@ -105,10 +106,10 @@ public class IssueVCMessage extends WebhookMessage {
 
                         if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT) {
 
-                            logRecordInfo.setMessage("WEBHOOK-PARSER: Offer with piid: " + vcStatus.getPiid() + " has been accepted.");
-                            params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01025"};
+                            System.out.println("WEBHOOK-PARSER: Offer with piid: " + vcStatus.getPiid() + " has been accepted.");
+                            /*params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01025"};
                             logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
+                            logger.log(logRecordInfo);*/
 
                             SendVCResource sendVCResource = new SendVCResource();
                             JSONObject user = new JSONObject();
@@ -133,16 +134,14 @@ public class IssueVCMessage extends WebhookMessage {
 
                                 HttpResponse response = httpClient.execute(request);
 
-                                logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification was successfully sent. Received HTTP response code: " + response.getStatusLine());
-                                params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01023"};
+                                logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vcstatus' was successfully sent to " + clientURL +". Received HTTP response code: " + response.getStatusLine() + ".");
+                                Object[] params = new Object[]{"AAI32", alias};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             }
                             catch(Exception ex){
-                                System.out.println(ex.getMessage());
-
-                                logRecordSevere.setMessage("WEBHOOK-PARSER: Event notification could not be sent.");
-                                params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1020"};
+                                logRecordSevere.setMessage("Event notification of type 'vcstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                                Object[] params = new Object[]{"AAE10", alias};
                                 logRecordSevere.setParameters(params);
                                 logger.log(logRecordSevere);
                             }
@@ -154,13 +153,13 @@ public class IssueVCMessage extends WebhookMessage {
                                 try {
                                     dbUtil.updateVCStatus(vcStatus.getUserId(), VCStatusEnum.OFFER_REJECTED);
 
-                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in the Authority Agent DT database.");
-                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                                    Object[] params = new Object[]{"AAI13", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 } catch (Exception ex) {
-                                    logRecordSevere.setMessage("WEBHOOK-PARSER: Error saving data on Authority Agent DT.");
-                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VC] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE04", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -177,14 +176,14 @@ public class IssueVCMessage extends WebhookMessage {
                                     request.setEntity(input);
 
                                     HttpResponse response = httpClient.execute(request);
-                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification was successfully sent. Received HTTP response code: " + response.getStatusLine());
-                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01023"};
+                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vcstatus' was successfully sent to " + clientURL +". Received HTTP response code: " + response.getStatusLine() + ".");
+                                    Object[] params = new Object[]{"AAI32", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("WEBHOOK-PARSER: Event notification could not be sent.");
-                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1020"};
+                                    logRecordSevere.setMessage("Event notification of type 'vcstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE10", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -193,22 +192,19 @@ public class IssueVCMessage extends WebhookMessage {
                     }
                 }
             } else if (jsonObject.get("@type").equals("https://didcomm.org/issue-credential/2.0/ack") && jsonMessage.get("Type").equals("post_state")) {
-                logRecordInfo.setMessage("WEBHOOK-PARSER: VC with piid: " + vcStatus.getPiid() + " has been accepted.");
-                params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01025"};
-                logRecordInfo.setParameters(params);
-                logger.log(logRecordInfo);
+                System.out.println("WEBHOOK-PARSER: VC with piid: " + vcStatus.getPiid() + " has been accepted.");
 
                 if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_SENT) {
                     try {
                         dbUtil.updateVCStatus(vcStatus.getUserId(), VCStatusEnum.VC_ACCEPTED);
 
-                        logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in the Authority Agent DT database.");
-                        params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01006"};
+                        logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                        Object[] params = new Object[]{"AAI13", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     } catch (Exception ex) {
-                        logRecordSevere.setMessage("WEBHOOK-PARSER: Error saving data on Authority Agent DT.");
-                        params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+                        logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VC] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE04", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -226,14 +222,14 @@ public class IssueVCMessage extends WebhookMessage {
 
                         HttpResponse response = httpClient.execute(request);
 
-                        logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification was successfully sent. Received HTTP response code: " + response.getStatusLine());
-                        params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01023"};
+                        logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vcstatus' was successfully sent to " + clientURL +". Received HTTP response code: " + response.getStatusLine() + ".");
+                        Object[] params = new Object[]{"AAI32", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage("WEBHOOK-PARSER: Event notification could not be sent.");
-                        params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1020"};
+                        logRecordSevere.setMessage("Event notification of type 'vcstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE10", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }

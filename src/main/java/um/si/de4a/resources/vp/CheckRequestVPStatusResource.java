@@ -4,6 +4,7 @@ package um.si.de4a.resources.vp;
 import org.jboss.resteasy.annotations.Query;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import um.si.de4a.AppConfig;
 import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VCStatusEnum;
@@ -21,6 +22,8 @@ import java.util.logging.Logger;
 @Path("/check-request-vp-response")
 public class CheckRequestVPStatusResource {
 
+    private AppConfig appConfig = null;
+
     @GET
     @Consumes("application/json")
     @Produces("application/json")
@@ -30,16 +33,32 @@ public class CheckRequestVPStatusResource {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
+        String alias = "";
+        appConfig = new AppConfig();
+        try {
+            alias = appConfig.getProperties().getProperty("alias");
+        }
+        catch (Exception ex){
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+
         int vpRequestStatus = 0;
         DBUtil dbUtil = new DBUtil();
         // DONE: call database getVPStatus(userID): VPStatus object
         VPStatus vpStatus = null;
         try{
             vpStatus = dbUtil.getVPStatus(userId);
+            logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Received user VP status data.");
+            Object[] params = new Object[]{"AAI14", alias};
+            logRecordInfo.setParameters(params);
+            logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("CHECK-VP-REQUEST-STATUS: Error accessing data on Authority Agent DR.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent internal database: [CHECK-VP-REQUEST-STATUS] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -70,13 +89,13 @@ public class CheckRequestVPStatusResource {
                                 boolean updateStatus = false;
                                 try {
                                     updateStatus = dbUtil.updateVPStatus(userId, "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(), VPStatusEnum.VP_RECEIVED);
-                                    logRecordInfo.setMessage("CHECK-VP-REQUEST-STATUS: Stored current state in the Authority Agent DR database.");
-                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                    logRecordInfo.setMessage("CHECK-VP-REQUEST-STATUS: Stored current state in Authority Agent internal database.");
+                                    Object[] params = new Object[]{"AAI13", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 } catch (Exception ex) {
-                                    logRecordSevere.setMessage("CHECK-VP-REQUEST-STATUS: Error saving data on Authority Agent DR.");
-                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [CHECK-VP-REQUEST-STATUS] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE04", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -91,14 +110,14 @@ public class CheckRequestVPStatusResource {
                             if (description.get("code").equals("rejected")) {
                                 try{
                                     dbUtil.updateVPStatus(userId, VPStatusEnum.VP_REJECTED);
-                                    logRecordInfo.setMessage("CHECK-VP-REQUEST-STATUS: Stored current state in the Authority Agent DR database.");
-                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                    logRecordInfo.setMessage("CHECK-VP-REQUEST-STATUS: Stored current state in Authority Agent internal database.");
+                                    Object[] params = new Object[]{"AAI13", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("CHECK-VP-REQUEST-STATUS: Error saving data on Authority Agent DR.");
-                                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [CHECK-VP-REQUEST-STATUS] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE04", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -108,8 +127,8 @@ public class CheckRequestVPStatusResource {
                     }
                 } catch (ParseException e) {
                    // e.printStackTrace();
-                    logRecordSevere.setMessage( "CHECK-VP-REQUEST-STATUS: Error on response from the Aries Government Agent.");
-                    Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1002"};
+                    logRecordSevere.setMessage( "Error on response from Authority Agent: [CHECK-VP-REQUEST-STATUS] " + e.getMessage() + ".");
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }

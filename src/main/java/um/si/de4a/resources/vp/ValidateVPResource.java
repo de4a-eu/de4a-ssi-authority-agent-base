@@ -20,6 +20,7 @@ import um.si.de4a.db.VPStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.util.DE4ALogger;
 import um.si.de4a.util.JsonSchemaValidator;
+import um.si.de4a.util.XMLtoJSONAdapter;
 
 import javax.ws.rs.*;
 import java.io.*;
@@ -56,35 +57,48 @@ public class ValidateVPResource {
         JSONObject jsonEIDAS = null, inputDecodedEIDAS = null;
         JSONParser jsonParser = new JSONParser();
 
+        String alias = "";
+        String deURL = "";
+        appConfig = new AppConfig();
+        try {
+            alias = appConfig.getProperties().getProperty("alias");
+            deURL = appConfig.getProperties().getProperty("de.url");
+        }
+        catch (Exception ex){
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+
         String eidasMds = "";
 
         try {
             jsonEIDAS = (JSONObject) jsonParser.parse(eidasMdsInput);
 
             eidasMds = new String(Base64.getDecoder().decode(jsonEIDAS.get("eidas").toString()));
-            logRecordInfo.setMessage("VALIDATE-VP: Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01001"};
+            logRecordInfo.setMessage("VALIDATE-VP: Decoded input eIDAS user data.");
+            Object[] params = new Object[]{"AAI08", alias};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
 
         } catch (ParseException e) {
-            logRecordSevere.setMessage("VALIDATE-VP: Error parsing input eIDAS data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
+            logRecordSevere.setMessage("Object conversion error on Authority Agent: [VALIDATE-VP] " + e.getMessage() + ".");
+            Object[] params = new Object[]{"AAE03", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
-           // e.printStackTrace();
         }
 
         try {
             inputDecodedEIDAS = (JSONObject) jsonParser.parse(eidasMds);
-            logRecordInfo.setMessage("VALIDATE-VP: Decoded input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01009"};
+            logRecordInfo.setMessage("VALIDATE-VP: Received input eIDAS user data.");
+            Object[] params = new Object[]{"AAI01", alias};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "VALIDATE-VP: Object conversion error on Authority Agent DR.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1008"};
+            logRecordSevere.setMessage("Object conversion error on Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE03", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -94,10 +108,14 @@ public class ValidateVPResource {
         VPStatus userVPStatus = null;
         try{
             userVPStatus = dbUtil.getVPStatus(userId);
+            logRecordInfo.setMessage("VALIDATE-VP: Received user VP status data.");
+            Object[] params = new Object[]{"AAI14", alias};
+            logRecordInfo.setParameters(params);
+            logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("VALIDATE-VP: Error accessing data on Authority Agent DR.");
-            Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent internal database: [VALIDATE-VP] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -112,8 +130,8 @@ public class ValidateVPResource {
                 jsonPresentation = ariesUtil.getPresentation(userVPStatus.getVpName());
             }
             catch(Exception ex){
-                logRecordSevere.setMessage("VALIDATE-VP: Error accessing data on Authority Agent DR.");
-                Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                logRecordSevere.setMessage( "Error on response from Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+                Object[] params = new Object[]{"AAE02", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -133,8 +151,8 @@ public class ValidateVPResource {
                         issuer = vc.get("issuer").toString();
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "VALIDATE-VP: Error on response from the Aries Government Agent.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1002"};
+                        logRecordSevere.setMessage( "Error on response from Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE02", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -145,27 +163,27 @@ public class ValidateVPResource {
                     else
                         signatureCheck = 0;
 
-                    logRecordInfo.setMessage("VALIDATE-VP: Checked the digital signature of VP.");
-                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01010"};
+                    logRecordInfo.setMessage("VALIDATE-VP: Checked the digital signature of the submitted VP.");
+                    Object[] params = new Object[]{"AAI09", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
 
 
                 // holder check
-                if (inputDecodedEIDAS.get("personIdentifier") != null) {
+                if (inputDecodedEIDAS.get("currentGivenName") != null) {
                     try {
                         subjectCheckResult = checkSubject(new eIDASObject(inputDecodedEIDAS.get("personIdentifier").toString().trim(), inputDecodedEIDAS.get("currentGivenName").toString().trim(), inputDecodedEIDAS.get("currentFamilyName").toString().trim(), inputDecodedEIDAS.get("dateOfBirth").toString().trim()),
                                 new eIDASObject(subject.get("personIdentifier").toString().trim(), subject.get("currentGivenName").toString().trim(), subject.get("currentFamilyName").toString().trim(), subject.get("dateOfBirth").toString().trim()));
 
-                        logRecordInfo.setMessage("VALIDATE-VP: Checked the subject of VP.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01011"};
+                        logRecordInfo.setMessage("VALIDATE-VP: Validated the subject of the submitted VP.");
+                        Object[] params = new Object[]{"AAI10", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage("VALIDATE-VP: Error accessing data on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                        logRecordSevere.setMessage( "Error on response from Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE02", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -173,30 +191,28 @@ public class ValidateVPResource {
 
                 try {
                     issuerCheckResult = checkIssuer(issuer);
-                    logRecordInfo.setMessage("VALIDATE-VP:  Checked the issuer of VC for DID " + issuer + ".");
-                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01012"};
+                    logRecordInfo.setMessage("VALIDATE-VP: Validated the issuer the submitted VP.");
+                    Object[] params = new Object[]{"AAI30", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    ex.printStackTrace();
-                    logRecordSevere.setMessage("VALIDATE-VP: Error accessing data on Authority Agent DR.");
-                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                    logRecordSevere.setMessage( "Error on response from Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
 
                 try {
                     schemaCheckResult = checkSchema(vc);
-                    logRecordInfo.setMessage("VALIDATE-VP:  Checked the VC schema.");
-                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01013"};
+                    logRecordInfo.setMessage("VALIDATE-VP: Validated the schema the submitted VP.");
+                    Object[] params = new Object[]{"AAI30", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    ex.printStackTrace();
-                    logRecordSevere.setMessage("VALIDATE-VP: Error accessing data on Authority Agent DR.");
-                    Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                    logRecordSevere.setMessage( "Error on response from Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
@@ -207,14 +223,14 @@ public class ValidateVPResource {
                     try {
                         dbUtil.updateVPStatus(userId, VPStatusEnum.VP_VALID);
 
-                        logRecordInfo.setMessage("VALIDATE-VP: Stored current state in the Authority Agent DR database.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                        logRecordInfo.setMessage("VALIDATE-VP: Stored current state in Authority Agent internal database.");
+                        Object[] params = new Object[]{"AAI13", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage("VALIDATE-VP: Error saving data on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
+                        logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [VALIDATE-VP] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE04", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
@@ -224,18 +240,23 @@ public class ValidateVPResource {
                     try {
                         dbUtil.updateVPStatus(userId, VPStatusEnum.VP_NOT_VALID);
 
-                        logRecordInfo.setMessage("VALIDATE-VP: Stored current state in the Authority Agent DR database.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                        logRecordInfo.setMessage("VALIDATE-VP: Stored current state in Authority Agent internal database.");
+                        Object[] params = new Object[]{"AAI13", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage("VALIDATE-VP: Error saving data on Authority Agent DR.");
-                        Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1001"};
+                        logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [VALIDATE-VP] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE04", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
                 }
+                logRecordInfo.setMessage("VALIDATE-VP: Validated Verifiable Credential " + vc.get("id") + " of type " + XMLtoJSONAdapter.namespace  +
+                        " under invitation" + userVPStatus.getDidConn().getInvitationId() + "for " + deURL + ".");
+                Object[] params = new Object[]{"AAI13", alias};
+                logRecordInfo.setParameters(params);
+                logger.log(logRecordInfo);
             }
         }
 
@@ -253,15 +274,34 @@ public class ValidateVPResource {
         return result;
     }
 
-   private int checkIssuer(String did){
+   private int checkIssuer(String did) throws IOException {
         int result = 0;
         TrustedIssuer issuerRecord = null;
+       Logger logger = DE4ALogger.getLogger();
+       LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
+       LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
+
+       String alias = "";
+       appConfig = new AppConfig();
+       try {
+           alias = appConfig.getProperties().getProperty("alias");
+       }
+       catch (Exception ex){
+           logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+           Object[] params = new Object[]{"AAE09", alias};
+           logRecordSevere.setParameters(params);
+           logger.log(logRecordSevere);
+       }
+
         try{
             issuerRecord = TrustedIssuerClient.INSTANCE.getIssuer(did);
         }
         catch(Exception ex){
             result = 0;
-            ex.printStackTrace();
+            logRecordSevere.setMessage( "Error on response from Authority Agent: [VALIDATE-VP] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE02", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
         }
         if(issuerRecord != null)
             result = 1;
@@ -294,10 +334,10 @@ public class ValidateVPResource {
         }
 
         Set<ValidationMessage> errors = schema.validate(node);
-        logRecordInfo.setMessage("VALIDATE-VP: Validated submitted VC schema. Number of mismatches detected: " + errors.size());
+        /*logRecordInfo.setMessage("VALIDATE-VP: Validated submitted VC schema. Number of mismatches detected: " + errors.size());
         Object[] params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01022"};
         logRecordInfo.setParameters(params);
-        logger.log(logRecordInfo);
+        logger.log(logRecordInfo);*/
 
         if(errors.size() == 0)
             result = 1;

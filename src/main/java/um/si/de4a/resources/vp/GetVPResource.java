@@ -21,8 +21,7 @@ public class GetVPResource {
     public String getVP(@PathParam("vpName") String vpName) throws IOException {
         JSONObject vp = new JSONObject();
         AriesUtil ariesUtil = new AriesUtil();
-        System.out.println("[GET-VP] VPName: " + vpName);
-
+        //System.out.println("[GET-VP] VPName: " + vpName);
         vp = ariesUtil.getPresentation(vpName);
 
         if(vp != null)

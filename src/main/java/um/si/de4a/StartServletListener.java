@@ -51,7 +51,7 @@ public class StartServletListener extends HttpServlet {
             eventNotifierResource.push(container);
         }
 */
-        ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "/usr/local/tomcat/webapps/DE4AEBSIConnector-0.1-launcher.jar");
+        ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "/usr/local/tomcat/webapps/DE4AEBSIConnector-2.0-launcher.jar");
         Process process = null;
         try {
             process = processBuilder.start();

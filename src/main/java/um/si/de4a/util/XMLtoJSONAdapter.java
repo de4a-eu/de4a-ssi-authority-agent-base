@@ -24,6 +24,7 @@ import um.si.de4a.model.xml.HigherEducationDiploma;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +43,10 @@ public class XMLtoJSONAdapter {
     private static Logger logger = null;
     private static AppConfig appConfig = null;
 
+    public static String namespace = "";
+
     public static HigherEducationDiploma convertXMLToPOJO(String xml){
+        String alias = "";
         try {
             logger = DE4ALogger.getLogger();
         } catch (IOException e) {
@@ -52,6 +56,16 @@ public class XMLtoJSONAdapter {
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
+        try {
+            alias = appConfig.getProperties().getProperty("alias");
+        }
+        catch (Exception ex){
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+
         JAXBContext jaxbContext;
         HigherEducationDiploma diploma = null;
         try {
@@ -59,12 +73,15 @@ public class XMLtoJSONAdapter {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
             diploma = (HigherEducationDiploma) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+            QName qname = jaxbContext.createJAXBIntrospector().getElementName(new HigherEducationDiploma());
+            namespace = qname.getNamespaceURI();
+
+            System.out.println("Namespace: " + namespace);
         } catch (JAXBException e) {
-            logRecordSevere.setMessage("GENERATE-VC: Error parsing input parameters.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1005"};
+            logRecordSevere.setMessage("Object conversion error on Authority Agent: [XML-TO-POJO] " + e.getMessage());
+            Object[] params = new Object[]{"AAE03", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
-            e.printStackTrace();
         }
         return diploma;
     }
@@ -81,12 +98,14 @@ public class XMLtoJSONAdapter {
         appConfig = new AppConfig();
 
         String schemaURL = "";
+        String alias =  "";
         try {
             schemaURL = appConfig.getProperties().getProperty("vc.schema.url");
+            alias = appConfig.getProperties().getProperty("alias");
         }
         catch (Exception ex){
-            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "30017"};
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -264,11 +283,11 @@ public class XMLtoJSONAdapter {
                 agentReferences, lor);*/
         //VerifiableCredential vc = new VerifiableCredential(context, "http://de4a.eu/credentials/" + UUID.randomUUID(), type, didKey, outputDateIssued, validFrom, expirationDate, subject);
 
-        logRecordInfo.setMessage("GENERATE-VC: Generated JSON-LD Verifiable Credential.");
+        /*logRecordInfo.setMessage("GENERATE-VC: Generated JSON-LD Verifiable Credential.");
         Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01005"};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
-
+*/
         return vc;
     }
 }

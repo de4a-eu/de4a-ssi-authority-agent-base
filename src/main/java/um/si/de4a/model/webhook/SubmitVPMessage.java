@@ -9,6 +9,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
 public class SubmitVPMessage extends WebhookMessage {
 
     private AppConfig appConfig;
-    private String clientURL = "";
+    private String clientURL = "", alias = "", deURL = "";
     private Logger logger = null;
     private LogRecord logRecordInfo = null;
     private LogRecord logRecordSevere = null;
@@ -40,10 +41,12 @@ public class SubmitVPMessage extends WebhookMessage {
         logRecordSevere = new LogRecord(Level.SEVERE, "");
         try {
             clientURL = appConfig.getProperties().getProperty("client.url");
+            alias = appConfig.getProperties().getProperty("alias");
+            deURL = appConfig.getProperties().getProperty("de.url");
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "Error reading configuration properties.");
-            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "3001"};
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -52,11 +55,6 @@ public class SubmitVPMessage extends WebhookMessage {
 
     @Override
     public int updateStatus(String inputMessage) throws IOException {
-
-        logRecordInfo.setMessage("WEBHOOK-PARSER: Received input event: " + inputMessage);
-        Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01024"};
-        logRecordInfo.setParameters(params);
-        logger.log(logRecordInfo);
 
         int vpStatusCode = 0;
         Gson gson = new Gson();
@@ -69,7 +67,10 @@ public class SubmitVPMessage extends WebhookMessage {
         try {
             jsonMessage = (JSONObject) jsonParser.parse(inputMessage);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logRecordSevere.setMessage("Object conversion error in Authority Agent: [WEBHOOK-PARSER-VP] " + e.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
         }
 
         JSONObject jsonProperties = (JSONObject) jsonMessage.get("Properties");
@@ -77,9 +78,13 @@ public class SubmitVPMessage extends WebhookMessage {
 
         try {
             vpStatus = dbUtil.getVPStatusByPiid(inputPiid);
+            logRecordInfo.setMessage("WEBHOOK-PARSER: Received user VP status data.");
+            Object[] params = new Object[]{"AAI14", alias};
+            logRecordInfo.setParameters(params);
+            logger.log(logRecordInfo);
         } catch (Exception ex) {
-            logRecordSevere.setMessage("WEBHOOK-PARSER: Error accessing data on Authority Agent DT.");
-            params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1010"};
+            logRecordSevere.setMessage("Error accessing data on Authority Agent internal database: [WEBHOOK-PARSER-VP] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE04", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -99,15 +104,48 @@ public class SubmitVPMessage extends WebhookMessage {
                             boolean acceptResult = ariesUtil.acceptPresentation(vpStatus.getPiid(), new NamesObj(new String[]{"vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid()}));
                             if(acceptResult == true){
                                 boolean updateStatus = false;
+
+                                JSONObject jsonPresentation = null;
+                                try{
+                                    jsonPresentation = ariesUtil.getPresentation("vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid());
+                                }
+                                catch(Exception ex){
+                                    logRecordSevere.setMessage( "Error on response from Authority Agent: [WEBHOOK-PARSER-VP] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE02", alias};
+                                    logRecordSevere.setParameters(params);
+                                    logger.log(logRecordSevere);
+                                }
+                                if (jsonPresentation != null) {
+                                    JSONObject vc = null;
+                                    if (jsonPresentation.containsKey("verifiableCredential")) {
+                                        JSONArray credentials = null;
+                                        try {
+                                            credentials = (JSONArray) jsonPresentation.get("verifiableCredential");
+
+                                            vc = (JSONObject) credentials.get(0);
+
+                                            logRecordInfo.setMessage("WEBHOOK-PARSER: Received Verifiable Credential " + vc.get("id") +
+                                                    " at the verifier " + deURL + " under invitation " + vpStatus.getDidConn().getInvitationId() + ".");
+                                            Object[] params = new Object[]{"AAI20", alias};
+                                            logRecordInfo.setParameters(params);
+                                            logger.log(logRecordInfo);
+                                        } catch (Exception ex) {
+                                            logRecordSevere.setMessage("Error on response from Authority Agent: [WEBHOOK-PARSER-VP] " + ex.getMessage() + ".");
+                                            Object[] params = new Object[]{"AAE02", alias};
+                                            logRecordSevere.setParameters(params);
+                                            logger.log(logRecordSevere);
+                                        }
+                                    }
+                                }
                                 try {
                                     updateStatus = dbUtil.updateVPStatus(vpStatus.getUserId(), "vp-" + vpStatus.getUserId() + "-" + vpStatus.getPiid(), VPStatusEnum.VP_RECEIVED);
-                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in the Authority Agent DR database.");
-                                    params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                                    Object[] params = new Object[]{"AAI13", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 } catch (Exception ex) {
-                                    logRecordSevere.setMessage("WEBHOOK-PARSER: Error saving data on Authority Agent DR.");
-                                    params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VP] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE04", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -127,14 +165,14 @@ public class SubmitVPMessage extends WebhookMessage {
                                         request.setEntity(input);
 
                                         HttpResponse response = httpClient.execute(request);
-                                        logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification was successfully sent. Received HTTP response code: " + response.getStatusLine());
-                                        params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01023"};
+                                        logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vpstatus' was successfully sent to " + clientURL +". Received HTTP response code: " + response.getStatusLine() + ".");
+                                        Object[] params = new Object[]{"AAI32", alias};
                                         logRecordInfo.setParameters(params);
                                         logger.log(logRecordInfo);
                                     }
                                     catch(Exception ex){
-                                        logRecordSevere.setMessage("WEBHOOK-PARSER: Event notification could not be sent.");
-                                        params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1020"};
+                                        logRecordSevere.setMessage("Event notification of type 'vpstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                                        Object[] params = new Object[]{"AAE10", alias};
                                         logRecordSevere.setParameters(params);
                                         logger.log(logRecordSevere);
                                     }
@@ -147,14 +185,14 @@ public class SubmitVPMessage extends WebhookMessage {
                             if (description.get("code").equals("rejected")) {
                                 try{
                                     dbUtil.updateVPStatus(vpStatus.getUserId(), VPStatusEnum.VP_REJECTED);
-                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in the Authority Agent DR database.");
-                                    params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "01006"};
+                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                                    Object[] params = new Object[]{"AAI13", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("WEBHOOK-PARSER: Error saving data on Authority Agent DR.");
-                                    params = new Object[]{"Authority Agent DR", "eProcedure Portal DE", "1010"};
+                                    logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VP] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE04", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -173,14 +211,14 @@ public class SubmitVPMessage extends WebhookMessage {
 
                                     HttpResponse response = httpClient.execute(request);
 
-                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification was successfully sent. Received HTTP response code: " + response.getStatusLine());
-                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "01023"};
+                                    logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vpstatus' was successfully sent to " + clientURL +". Received HTTP response code: " + response.getStatusLine() + ".");
+                                    Object[] params = new Object[]{"AAI32", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
                                 catch(Exception ex){
-                                    logRecordSevere.setMessage("WEBHOOK-PARSER: Event notification could not be sent.");
-                                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "1020"};
+                                    logRecordSevere.setMessage("Event notification of type 'vpstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                                    Object[] params = new Object[]{"AAE10", alias};
                                     logRecordSevere.setParameters(params);
                                     logger.log(logRecordSevere);
                                 }
@@ -189,8 +227,8 @@ public class SubmitVPMessage extends WebhookMessage {
                     }
                 } catch (ParseException e) {
                     // e.printStackTrace();
-                    logRecordSevere.setMessage( "WEBHOOK-PARSER: Error on response from the Aries Government Agent.");
-                    params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1002"};
+                    logRecordSevere.setMessage( "Error on response from Authority Agent: [WEBHOOK-PARSER-VP] " + e.getMessage() + ".");
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }

@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -12,6 +13,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -77,16 +79,16 @@ public class AriesUtil {
             urlConnection.connect();
         }
         catch (Exception ex){
-            logRecordSevere.setMessage( "GENERATE-INVITATION: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/create-invitation] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
 
         int responseCode = urlConnection.getResponseCode();
 
-        logRecordInfo.setMessage("GENERATE-INVITATION: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString());
-        Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "0101"};
+        logRecordInfo.setMessage("GENERATE-INVITATION: Received HTTP response code: " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+        Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
 
@@ -101,14 +103,14 @@ public class AriesUtil {
 
             if(jsonObject.containsKey("invitation_url"))
                 jsonObject.put("invitation_url", invitationURL);
-            //jsonInvitation = (JSONObject) jsonObject.get("invitation");
-            logRecordInfo.setMessage("GENERATE-INVITATION: Generated DID invitation for edge agent.");
-            params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0203"};
+            jsonInvitation = (JSONObject) jsonObject.get("invitation");
+            logRecordInfo.setMessage("GENERATE-INVITATION: Generated DID invitation for edge agent with ID " + jsonInvitation.get("@id") + ".");
+            params = new Object[]{"AAI03", alias};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         } else {
-            logRecordSevere.setMessage( "GENERATE-INVITATION: Error on response from the Aries Government Agent.");
-            params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/create-invitation] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -126,16 +128,16 @@ public class AriesUtil {
             urlConnection.connect();
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "DID-CONN-STATUS: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/connections] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
 
         int responseCode = urlConnection.getResponseCode();
 
-        logRecordInfo.setMessage("DID-CONN-STATUS: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString());
-        Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "0101"};
+        logRecordInfo.setMessage("DID-CONN-STATUS: Received HTTP response code: " + responseCode + " from endpoint: " + urlConnection.getURL().toString()+ ".");
+        Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
 
@@ -156,7 +158,7 @@ public class AriesUtil {
                             JSONObject connectionObj = (JSONObject) resultsArray.get(i);
                             connectionList.add(connectionObj);
                             logRecordInfo.setMessage("DID-CONN-STATUS: Processing the JSON response received from /connections.");
-                            params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0102"};
+                            params = new Object[]{"AAI12", alias};
                             logRecordInfo.setParameters(params);
                             logger.log(logRecordInfo);
                         }
@@ -164,16 +166,16 @@ public class AriesUtil {
                     //System.out.println("[ARIES connectionList] Size: " + connectionList.size());
                 }
             }catch(Exception ex){
-                logRecordSevere.setMessage( "DID-CONN-STATUS: Error on response from the Aries Government Agent.");
-                params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                logRecordSevere.setMessage( "Object conversion error in Authority Agent: [DID-CONN-STATUS] " + ex.getMessage());
+                params = new Object[]{"AAE03", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
                 //System.out.println("[ARIES get connections] Exception: " + ex.getMessage());
             }
 
         } else {
-            logRecordSevere.setMessage( "DID-CONN-STATUS: Connection error with Aries Government Agent.");
-            params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/connections] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -181,6 +183,7 @@ public class AriesUtil {
 
         return connectionList;
     }
+
 
     public SignedVerifiableCredentialUpdated signCredential(SignRequest vcCredential) throws IOException, ParseException {
         JSONObject jsonSignedCredential = null;
@@ -200,14 +203,14 @@ public class AriesUtil {
 
             try {
                 response = httpClient.execute(request);
-                logRecordInfo.setMessage("SEND-OFFER: Received HTTP response code " + response.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "verifiable/signcredential");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "0101"};
+                logRecordInfo.setMessage("SEND-OFFER: Received HTTP response code: " + response.getStatusLine().getStatusCode() + " from endpoint: " + request.getURI().toString() + ".");
+                Object[] params = new Object[]{"AAI11", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "SEND-OFFER: Connection error with Aries Government Agent.");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+                logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/signcredential] " + ex.getMessage());
+                Object[] params = new Object[]{"AAE01", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -220,28 +223,29 @@ public class AriesUtil {
                 JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
                 try {
                     jsonSignedCredential = (JSONObject) jsonObject.get("verifiableCredential");
-                    logRecordInfo.setMessage("SEND-OFFER: Processing the JSON response received from /sign-credential.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0102"};
+                    logRecordInfo.setMessage("SEND-OFFER: Processing the JSON response received from /signcredential.");
+                    Object[] params = new Object[]{"AAI12", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch (Exception ex){
-                    logRecordSevere.setMessage( "SEND-OFFER: Error on response from the Aries Government Agent.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                    HttpEntity entity = response.getEntity();
+                    logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/signcredential] " + EntityUtils.toString(entity, "UTF-8"));
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
                 try {
                     signedVC = gson.fromJson(gson.toJson(jsonSignedCredential), SignedVerifiableCredentialUpdated.class);
 
-                    logRecordInfo.setMessage("SEND-OFFER: Signed a Verifiable Credential." + signedVC.getId());
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0205"};
+                    logRecordInfo.setMessage("SEND-OFFER: Signed a Verifiable Credential.");
+                    Object[] params = new Object[]{"AAI05", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                    logRecordSevere.setMessage("Object conversion error in Authority Agent: [SEND-OFFER] " + ex.getMessage());
+                    Object[] params = new Object[]{"AAE03", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
@@ -250,8 +254,8 @@ public class AriesUtil {
         }
         catch(Exception ex) {
             //System.out.println("[ARIES sign-credential] Exception: " + ex.getMessage());
-            logRecordSevere.setMessage( "SEND-OFFER: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/signcredential] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         } finally {
@@ -278,14 +282,14 @@ public class AriesUtil {
             request.setEntity(input);
             try {
                 response = httpClient.execute(request);
-                logRecordInfo.setMessage("SEND-OFFER: Received HTTP response code " + response.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "issuecredential/send-offer");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "0101"};
+                logRecordInfo.setMessage("SEND-OFFER: Received HTTP response code " + response.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "issuecredential/send-offer.");
+                Object[] params = new Object[]{"AAI11", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "SEND-OFFER: Connection error with Aries Government Agent.");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+                logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/send-offer] " + ex.getMessage());
+                Object[] params = new Object[]{"AAE01", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -299,22 +303,23 @@ public class AriesUtil {
                 try {
                     piid = jsonObject.get("piid").toString();
 
-                    logRecordInfo.setMessage("SEND-OFFER: Received response data PIID: " + piid);
-                    Object[] params = new Object[]{"Authority Agent DT",  "Aries Government Agent", "0106"};
+                    logRecordInfo.setMessage("SEND-OFFER: Received response data PIID: " + piid + ".");
+                    Object[] params = new Object[]{"AAI16", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage( "SEND-OFFER: Error on response from the Aries Government Agent.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                    HttpEntity entity = response.getEntity();
+                    logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/send-offer] " + EntityUtils.toString(entity, "UTF-8"));
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
             }
         }
         catch (Exception ex) {
-            logRecordSevere.setMessage( "SEND-OFFER: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/send-offer] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         } finally {
@@ -344,14 +349,14 @@ public class AriesUtil {
             try {
                 httpResponse = httpClient.execute(request);
 
-                logRecordInfo.setMessage("SEND-VC: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "issuecredential/accept-request");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "0101"};
+                logRecordInfo.setMessage("SEND-VC: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "issuecredential/accept-request.");
+                Object[] params = new Object[]{"AAI11", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "SEND-VC: Connection error with Aries Government Agent.");
-                Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+                logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/issuecredential/accept-request] " + ex.getMessage());
+                Object[] params = new Object[]{"AAE01", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -366,28 +371,24 @@ public class AriesUtil {
                     jsonObject = (JSONObject) jsonParser.parse(result);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage( "SEND-VC: Error on response from the Aries Government Agent.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                    logRecordSevere.setMessage("Object conversion error in Authority Agent: [SEND-VC] " + ex.getMessage());
+                    Object[] params = new Object[]{"AAE03", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
                 //System.out.println("[ARIES result] " + jsonObject.toString());
 
                 if (jsonObject.toString().equals("{}")) {
-                    logRecordInfo.setMessage("SEND-VC: Sent a Verifiable Credential to the edge agent.");
-                    Object[] params = new Object[]{"Authority Agent DT",  "Evidence Portal DT", "0206"};
-                    logRecordInfo.setParameters(params);
-                    logger.log(logRecordInfo);
                     response = true;
                 }
             }
         }
         catch (Exception ex) {
-            logRecordSevere.setMessage( "SEND-VC: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+            HttpEntity entity = httpResponse.getEntity();
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/issuecredential/accept-request] " + EntityUtils.toString(entity, "UTF-8"));
+            Object[] params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
-            //System.out.println("[ARIES send-vc] Exception: " + ex.getMessage());
         } finally {
             httpClient.close();
         }
@@ -404,16 +405,16 @@ public class AriesUtil {
             urlConnection.connect();
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/issuecredential/actions] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
 
         int responseCode = urlConnection.getResponseCode();
 
-        logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString());
-        Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "0101"};
+        logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+        Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
 
@@ -433,15 +434,15 @@ public class AriesUtil {
                     if (resultsArray.size() > 0) {
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject actionObj = (JSONObject) resultsArray.get(i);
-                            /*logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
-                            params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0102"};
+                            logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
+                            params = new Object[]{"AAI12", alias};
                             logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);*/
+                            logger.log(logRecordInfo);
 
                             if(actionObj.get("PIID").equals(piid)){
                                 action = actionObj;
-                                logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Found a VC action match with PIID: " + piid);
-                                params = new Object[]{"Authority Agent DT",  "Evidence Portal DT", "0107"};
+                                logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Found a VC action match with PIID: " + piid + ".");
+                                params = new Object[]{"AAI17", alias};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             }
@@ -449,15 +450,15 @@ public class AriesUtil {
                     }
                 }
             }catch(Exception ex){
-                logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Error on response from the Aries Government Agent.");
-                params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                logRecordSevere.setMessage("Object conversion error in Authority Agent: [CHECK-VC-OFFER-STATUS] " + ex.getMessage());
+                params = new Object[]{"AAE03", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
 
         } else {
-            logRecordSevere.setMessage( "CHECK-OFFER-VC-STATUS: Connection error with Aries Government Agent.");
-            params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/issuecredential/actions] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -481,14 +482,14 @@ public class AriesUtil {
         try {
             httpResponse = httpClient.execute(request);
 
-            logRecordInfo.setMessage("SEND-VP-REQUEST: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "presentproof/send-request-presentation");
-            Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "0101"};
+            logRecordInfo.setMessage("SEND-VP-REQUEST: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "presentproof/send-request-presentation.");
+            Object[] params = new Object[]{"AAI11", alias};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
         }
         catch(Exception ex){
-            logRecordSevere.setMessage( "SEND-VP-REQUEST: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/send-request-presentation] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -504,8 +505,8 @@ public class AriesUtil {
                 jsonObject = (JSONObject) jsonParser.parse(result);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "Error on response from the Aries Government Agent.");
-                Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "1003"};
+                logRecordSevere.setMessage( "Object conversion error in Authority Agent: [SEND-VP-REQUEST] " + ex.getMessage());
+                Object[] params = new Object[]{"AAE03", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -514,14 +515,14 @@ public class AriesUtil {
             if (jsonObject.containsKey("piid")){
                 try {
                     piid = jsonObject.get("piid").toString();
-                    logRecordInfo.setMessage("SEND-VP-REQUEST: Received response data PIID: " + piid);
-                    Object[] params = new Object[]{"Authority Agent DR",  "Aries Government Agent", "0106"};
+                    logRecordInfo.setMessage("SEND-VP-REQUEST: Received response data PIID: " + piid + ".");
+                    Object[] params = new Object[]{"AAI16", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage( "SEND-VP-REQUEST: Error on response from the Aries Government Agent.");
-                    Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+                    logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/send-request-presentation] " + ex.getMessage());
+                    Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
@@ -529,8 +530,9 @@ public class AriesUtil {
 
         }
         else{
-            logRecordSevere.setMessage( "SEND-VP-REQUEST: Connection error with Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+            HttpEntity entity = httpResponse.getEntity();
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/send-request-presentation] " + EntityUtils.toString(entity, "UTF-8"));
+            Object[] params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -543,12 +545,20 @@ public class AriesUtil {
 
         HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "presentproof/actions").openConnection();
         urlConnection.setRequestMethod("GET");
-        urlConnection.connect();
+        try {
+            urlConnection.connect();
+        }
+        catch(Exception ex){
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/presentproof/actions] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
 
         int responseCode = urlConnection.getResponseCode();
 
-        logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString());
-        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "0101"};
+        logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+        Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
 
@@ -569,14 +579,14 @@ public class AriesUtil {
                             JSONObject actionObj = (JSONObject) resultsArray.get(i);
 
                             logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Processing the JSON response received from /presentproof/actions.");
-                            params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0102"};
+                            params = new Object[]{"AAI12", alias};
                             logRecordInfo.setParameters(params);
                             logger.log(logRecordInfo);
 
                             if(actionObj.get("PIID").equals(piid)){
                                 action = actionObj;
-                                logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Found a VP action match with PIID: " + piid);
-                                params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0107"};
+                                logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Found a VP action match with PIID: " + piid + ".");
+                                params = new Object[]{"AAI17", alias};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                                 //System.out.println("[ARIES actions] Found action match: " + action.get("PIID"));
@@ -585,16 +595,16 @@ public class AriesUtil {
                     }
                 }
             }catch(Exception ex){
-                logRecordSevere.setMessage( "CHECK-REQUEST-VP-STATUS: Error on response from the Aries Government Agent.");
-                params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+                logRecordSevere.setMessage( "Object conversion error in Authority Agent: [CHECK-VP-REQUEST-STATUS] " + ex.getMessage());
+                params = new Object[]{"AAE03", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
                 //System.out.println("[ARIES get actions] Exception: " + ex.getMessage());
             }
 
         } else {
-            logRecordSevere.setMessage( "CHECK-REQUEST-VP-STATUS: Connection error with Aries Government Agent.");
-            params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/presentproof/actions] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
             // System.out.println("[ARIES JSON actions] GET request has not worked");
@@ -624,14 +634,14 @@ public class AriesUtil {
             try {
                 httpResponse = httpClient.execute(request);
 
-                logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "presentproof/accept-presentation");
-                Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "0101"};
+                logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + baseUrl + "presentproof/accept-presentation.");
+                Object[] params = new Object[]{"AAI11", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "CHECK-REQUEST-VP-STATUS: Connection error with Aries Government Agent.");
-                Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+                logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/accept-presentation] " + ex.getMessage());
+                Object[] params = new Object[]{"AAE01", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -641,13 +651,21 @@ public class AriesUtil {
                 String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
 
                 JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
-
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = (JSONObject) jsonParser.parse(result);
+                }
+                catch(Exception ex){
+                    logRecordSevere.setMessage( "Object conversion error in Authority Agent: [CHECK-VP-REQUEST-STATUS] " + ex.getMessage());
+                    Object[] params = new Object[]{"AAE03", alias};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
                 //System.out.println("[ARIES result] " + jsonObject.toString());
 
                 if (jsonObject.toString().equals("{}")) {
                     logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Accepted a submitted Verifiable Presentation.");
-                    Object[] params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0207"};
+                    Object[] params = new Object[]{"AAI07", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                     response = true;
@@ -655,8 +673,8 @@ public class AriesUtil {
             }
         }
         catch (Exception ex) {
-            logRecordSevere.setMessage( "CHECK-REQUEST-VP-STATUS: Error on response from the Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/accept-presentation] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
 
@@ -672,12 +690,20 @@ public class AriesUtil {
 
         HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "verifiable/presentations").openConnection();
         urlConnection.setRequestMethod("GET");
-        urlConnection.connect();
+        try {
+            urlConnection.connect();
+        }
+        catch(Exception ex){
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/verifiable/presentations] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
 
         int responseCode = urlConnection.getResponseCode();
 
-        logRecordInfo.setMessage("GET-VP: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString());
-        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "0101"};
+        logRecordInfo.setMessage("GET-VP: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+        Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
 
@@ -689,7 +715,16 @@ public class AriesUtil {
             try {
 
                 JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = (JSONObject) jsonParser.parse(result);
+                }
+                catch(Exception ex){
+                    logRecordSevere.setMessage( "Object conversion error in Authority Agent: [GET-VP] " + ex.getMessage());
+                    params = new Object[]{"AAE03", alias};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
 
                 if (!jsonObject.isEmpty()) {
                     JSONArray resultsArray = null;
@@ -697,7 +732,7 @@ public class AriesUtil {
                         resultsArray = (JSONArray) jsonObject.get("result");
 
                         logRecordInfo.setMessage("GET-VP: Processing the JSON response received from /verifiable/presentations.");
-                        params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0102"};
+                        params = new Object[]{"AAI12", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
 
@@ -707,8 +742,8 @@ public class AriesUtil {
                                 if(presentationObj.get("name").equals(name)){
                                     presentation = presentationObj;
 
-                                    logRecordInfo.setMessage("GET-VP: Found a Verifiable Presentation with name: " + name);
-                                    params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0108"};
+                                    logRecordInfo.setMessage("GET-VP: Found a Verifiable Presentation with name: " + name + ".");
+                                    params = new Object[]{"AAI18", alias};
                                     logRecordInfo.setParameters(params);
                                     logger.log(logRecordInfo);
                                 }
@@ -716,22 +751,22 @@ public class AriesUtil {
                         }
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "GET-VP: Error on response from the Aries Government Agent.");
-                        params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+                        logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/presentations] " + ex.getMessage());
+                        params = new Object[]{"AA02", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
                 }
             }catch(Exception ex){
-                logRecordSevere.setMessage( "GET-VP: Error on response from the Aries Government Agent.");
-                params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+                logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/presentations] " + ex.getMessage());
+                params = new Object[]{"AA02", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
 
         } else {
-            logRecordSevere.setMessage( "GET-VP: Connection error with Aries Government Agent.");
-            params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/presentations] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AA02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -746,11 +781,19 @@ public class AriesUtil {
 
         HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "verifiable/presentation/" + vpID).openConnection();
         urlConnection.setRequestMethod("GET");
-        urlConnection.connect();
+        try {
+            urlConnection.connect();
+        }
+        catch(Exception ex){
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/verifiable/presentation] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
 
         int responseCode = urlConnection.getResponseCode();
-        logRecordInfo.setMessage("GET-VP: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString());
-        Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "0101"};
+        logRecordInfo.setMessage("GET-VP: Received HTTP response code " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+        Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
 
@@ -762,7 +805,16 @@ public class AriesUtil {
             try {
 
                 JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+                JSONObject jsonObject = null;
+                try{
+                    jsonObject = (JSONObject) jsonParser.parse(result);
+                }
+                catch(Exception ex){
+                    logRecordSevere.setMessage( "Object conversion error in Authority Agent: [GET-VP] " + ex.getMessage());
+                    params = new Object[]{"AAE03", alias};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
 
                 if (!jsonObject.isEmpty()) {
                     JSONObject verifiablePresentationJSON = null;
@@ -770,35 +822,35 @@ public class AriesUtil {
                         verifiablePresentationJSON = (JSONObject) jsonObject.get("verifiablePresentation");
 
                         logRecordInfo.setMessage("GET-VP: Processing the JSON response received from /verifiable/presentation/" + vpID + ".");
-                        params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0102"};
+                        params = new Object[]{"AAI12", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                     catch(Exception ex){
-                        logRecordSevere.setMessage( "GET-VP: Error on response from the Aries Government Agent.");
-                        params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+                        logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/presentation] " + ex.getMessage());
+                        params = new Object[]{"AA02", alias};
                         logRecordSevere.setParameters(params);
                         logger.log(logRecordSevere);
                     }
 
                     if (verifiablePresentationJSON != null) {
                         presentation = verifiablePresentationJSON;
-                        logRecordInfo.setMessage("GET-VP: Found a Verifiable Presentation with ID: " + vpID);
-                        params = new Object[]{"Authority Agent DR",  "eProcedure Portal DE", "0109"};
+                        logRecordInfo.setMessage("GET-VP: Found a Verifiable Presentation with ID: " + vpID + ".");
+                        params = new Object[]{"AAI19", alias};
                         logRecordInfo.setParameters(params);
                         logger.log(logRecordInfo);
                     }
                 }
             }catch(Exception ex){
-                logRecordSevere.setMessage( "GET-VP: Error on response from the Aries Government Agent.");
-                params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+                logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/presentation] " + urlConnection.getResponseMessage());
+                params = new Object[]{"AA02", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
 
         } else {
-            logRecordSevere.setMessage( "GET-VP: Connection error with Aries Government Agent.");
-            params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/presentation] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AA02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -827,13 +879,13 @@ public class AriesUtil {
                 httpResponse = httpClient.execute(request);
 
                 logRecordInfo.setMessage("VALIDATE-VP: Received HTTP response code " + httpResponse.getStatusLine().getStatusCode() + " from endpoint: " + url + ".");
-                Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "0101"};
+                Object[] params = new Object[]{"AAI11", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
             }
             catch(Exception ex){
-                logRecordSevere.setMessage( "VALIDATE-VP: Connection error with Aries Government Agent.");
-                Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10703"};
+                logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/verifiable/credential/validate] " + ex.getMessage());
+                Object[] params = new Object[]{"AAE01", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -843,8 +895,16 @@ public class AriesUtil {
                 String result = IOUtils.toString(in, StandardCharsets.UTF_8.name());
 
                 JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
-
+                JSONObject jsonObject = null;
+                try{
+                    jsonObject = (JSONObject) jsonParser.parse(result);
+                }
+                catch(Exception ex){
+                    logRecordSevere.setMessage( "Object conversion error in Authority Agent: [VALIDATE-VP] " + ex.getMessage());
+                    Object[] params = new Object[]{"AAE03", alias};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                }
                 //System.out.println("[ARIES result] " + jsonObject.toString());
 
                 if (jsonObject.toString().equals("{}")) {
@@ -853,8 +913,9 @@ public class AriesUtil {
             }
         }
         catch (Exception ex) {
-            logRecordSevere.setMessage( "VALIDATE-VP: Error on response from the Aries Government Agent.");
-            Object[] params = new Object[]{"Authority Agent DR", "Aries Government Agent", "10704"};
+            HttpEntity entity = httpResponse.getEntity();
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/verifiable/credential/validate] " + EntityUtils.toString(entity, "UTF-8"));
+            Object[] params = new Object[]{"AA02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         } finally {
@@ -863,6 +924,73 @@ public class AriesUtil {
 
         return response;
     }
+
+    public ArrayList<JSONObject> getConnectionsForWebhooks() throws IOException, ParseException {
+        ArrayList<JSONObject> connectionList = new ArrayList<>();
+        JSONObject connection = null;
+
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(baseUrl + "connections").openConnection();
+        urlConnection.setRequestMethod("GET");
+        try {
+            urlConnection.connect();
+        }
+        catch(Exception ex){
+            logRecordSevere.setMessage( "Connection error with Aries Government Agent: [/connections] " + ex.getMessage());
+            Object[] params = new Object[]{"AAE01", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+
+        int responseCode = urlConnection.getResponseCode();
+
+        logRecordInfo.setMessage("WEBHOOK-PARSER: Received HTTP response code: " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+        Object[] params = new Object[]{"AAI11", alias};
+        logRecordInfo.setParameters(params);
+        logger.log(logRecordInfo);
+
+        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+            InputStream stream = urlConnection.getInputStream();
+
+            String result = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
+            try {
+
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+
+                if (!jsonObject.isEmpty()) {
+                    JSONArray resultsArray = (JSONArray) jsonObject.get("results");
+
+                    if (resultsArray.size() > 0) {
+                        for (int i = 0; i < resultsArray.size(); i++) {
+                            JSONObject connectionObj = (JSONObject) resultsArray.get(i);
+                            connectionList.add(connectionObj);
+                            logRecordInfo.setMessage("WEBHOOK-PARSER: Processing the JSON response received from /connections.");
+                            params = new Object[]{"AAI12", alias};
+                            logRecordInfo.setParameters(params);
+                            logger.log(logRecordInfo);
+                        }
+                    }
+                    //System.out.println("[ARIES connectionList] Size: " + connectionList.size());
+                }
+            }catch(Exception ex){
+                logRecordSevere.setMessage( "Object conversion error in Authority Agent: [WEBHOOK-PARSER] " + ex.getMessage());
+                params = new Object[]{"AAE03", alias};
+                logRecordSevere.setParameters(params);
+                logger.log(logRecordSevere);
+                //System.out.println("[ARIES get connections] Exception: " + ex.getMessage());
+            }
+
+        } else {
+            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/connections] " + urlConnection.getResponseMessage());
+            params = new Object[]{"AAE02", alias};
+            logRecordSevere.setParameters(params);
+            logger.log(logRecordSevere);
+        }
+        urlConnection.disconnect();
+
+        return connectionList;
+    }
+
 
     private String buildURL(String baseURL, String endpoint, String parameter, String method){
         return baseURL + endpoint + "/" + parameter + "/" + method;

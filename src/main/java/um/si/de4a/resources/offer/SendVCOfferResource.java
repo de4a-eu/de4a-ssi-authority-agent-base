@@ -17,6 +17,7 @@ import um.si.de4a.resources.vc.Data;
 import um.si.de4a.resources.vc.GenerateVCResource;
 import org.json.simple.parser.JSONParser;
 import um.si.de4a.util.DE4ALogger;
+import um.si.de4a.util.XMLtoJSONAdapter;
 
 import javax.ws.rs.*;
 import java.io.*;
@@ -45,13 +46,17 @@ public class SendVCOfferResource {
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
 
         String signatureType = "";
+        String alias = "";
+        String doURL = "";
         appConfig = new AppConfig();
         try {
             signatureType = appConfig.getProperties().getProperty("signature.type");
+            alias = appConfig.getProperties().getProperty("alias");
+            doURL = appConfig.getProperties().getProperty("do.url");
         }
         catch (Exception ex){
-            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Authority Agent DT", "30017"};
+            logRecordSevere.setMessage( "Configuration error occurred on Authority Agent.");
+            Object[] params = new Object[]{"AAE09", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -66,14 +71,13 @@ public class SendVCOfferResource {
             jsonOffer = (JSONObject) jsonParser.parse(inputOffer);
             //jsonOffer = (JSONObject) jsonParser.parse(new InputStreamReader(new ByteArrayInputStream(inputOffer.getBytes(StandardCharsets.UTF_8)), "UTF-8"));
             logRecordInfo.setMessage("SEND-OFFER: Received input eIDAS user data.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+            Object[] params = new Object[]{"AAI01", alias};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
-
         }
         catch(Exception ex){
-            logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
-            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+            logRecordSevere.setMessage("Object conversion error on Authority Agent: [SEND-OFFER] " + ex.getMessage() + ".");
+            Object[] params = new Object[]{"AAE03", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
@@ -83,18 +87,23 @@ public class SendVCOfferResource {
             String userID = "", evidence = "";
             try{
                 userID = jsonOffer.get("userId").toString();
-
-                //ByteBuffer buffer = StandardCharsets.UTF_8.encode(jsonOffer.get("evidence").toString());
-                //evidence = jsonOffer.get("evidence").toString();
-                byte[] evidenceBytes = Base64.getDecoder().decode(jsonOffer.get("evidence").toString());
-                //evidence = jsonOffer.get("evidence").toString();
-                evidence = new String(evidenceBytes, "ISO-8859-1");
-
-                 //System.out.println("[SEND-OFFER-DEBUG] Evidence: " + evidence);
             }
             catch (Exception ex){
-                logRecordSevere.setMessage("SEND-OFFER: Arguments missing or invalid at Authority Agent DT.");
-                Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "10702"};
+                logRecordSevere.setMessage("Missing or invalid arguments at Authority Agent /send-offer: userId");
+                Object[] params = new Object[]{"AAE05", alias};
+                logRecordSevere.setParameters(params);
+                logger.log(logRecordSevere);
+            }
+
+            try{
+
+                byte[] evidenceBytes = Base64.getDecoder().decode(jsonOffer.get("evidence").toString());
+
+                evidence = new String(evidenceBytes, "ISO-8859-1");
+            }
+            catch (Exception ex){
+                logRecordSevere.setMessage("Missing or invalid arguments at Authority Agent /send-offer: evidence");
+                Object[] params = new Object[]{"AAE05", alias};
                 logRecordSevere.setParameters(params);
                 logger.log(logRecordSevere);
             }
@@ -108,26 +117,22 @@ public class SendVCOfferResource {
                     System.out.println("SEND-OFFER: Current Invitation ID: " + userDIDConn.getInvitationId());
 
                     myDID = userDIDConn.getMyDID();
-                    logRecordInfo.setMessage("SEND-OFFER: myDID: " + myDID);
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
-                    logRecordInfo.setParameters(params);
-                    logger.log(logRecordInfo);
+                    System.out.println("SEND-OFFER: myDID: " + myDID);
 
                     publicDID = dbUtil.getDID();
-                    logRecordInfo.setMessage("SEND-OFFER: publicDID: " + publicDID);
-                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
-                    logRecordInfo.setParameters(params);
-                    logger.log(logRecordInfo);
+                    System.out.println("SEND-OFFER: publicDID: " + publicDID);
 
                     theirDID = userDIDConn.getTheirDID();
-                    logRecordInfo.setMessage("SEND-OFFER: theirDID: " + theirDID);
-                    params = new Object[]{"Authority Agent DT", "Evidence portal DO", "0201"};
+                    System.out.println("SEND-OFFER: theirDID: " + theirDID);
+
+                    logRecordInfo.setMessage("SEND-OFFER: Received user DIDConn status data.");
+                    Object[] params = new Object[]{"AAI14", alias};
                     logRecordInfo.setParameters(params);
                     logger.log(logRecordInfo);
                 }
                 catch(Exception ex){
-                    logRecordSevere.setMessage( "SEND-OFFER: Error accessing data on Authority Agent DT.");
-                    Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+                    logRecordSevere.setMessage( "Error accessing data on Authority Agent internal database: [SEND-OFFER] " + ex.getMessage() + ".");
+                    Object[] params = new Object[]{"AAE04", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
                 }
@@ -143,7 +148,7 @@ public class SendVCOfferResource {
                 // DONE: call generateVC(evidence, myDID, theirDID) method: VC
                 GenerateVCResource generateVCResource = new GenerateVCResource();
 
-                VerifiableCredentialUpdated generatedVC = generateVCResource.generateVC(jsonRequest);
+                VerifiableCredentialUpdated generatedVC = generateVCResource.generateVC(jsonRequest, alias);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
                // System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
@@ -165,15 +170,15 @@ public class SendVCOfferResource {
                         //String prettyJson = gson.toJson(credential);
                         //System.out.println("[SEND-VC-OFFER] Signed credential: " + prettyJson);
 
-                        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
+                        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 
                         String outputLastModTime = "";
                         try {
                             Calendar cal = Calendar.getInstance();
                             outputLastModTime = outputFormat.format(cal.getTime());
                         } catch (Exception ex) {
-                            logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                            logRecordSevere.setMessage("Object conversion error on Authority Agent: [SEND-OFFER] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE03", alias};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
@@ -198,8 +203,8 @@ public class SendVCOfferResource {
                             offersAttaches.add(offersAttach);
                         }
                         catch(Exception ex){
-                            logRecordSevere.setMessage("SEND-OFFER: Object conversion error on Authority Agent DT.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Evidence portal DO", "20005"};
+                            logRecordSevere.setMessage("Object conversion error on Authority Agent: [SEND-OFFER] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE03", alias};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
@@ -210,10 +215,16 @@ public class SendVCOfferResource {
                         String piid = "";
                         try {
                             piid = ariesUtil.sendOffer(offer);
+
+                            logRecordInfo.setMessage("SEND-OFFER: Sent Offer for Verifiable Credential " + credential.getId() + " of type " + XMLtoJSONAdapter.namespace
+                                            + " under invitation " + userDIDConn.getInvitationId() + " from " + doURL + ".");
+                            Object[] params = new Object[]{"AAI22", alias};
+                            logRecordInfo.setParameters(params);
+                            logger.log(logRecordInfo);
                         }
                         catch(Exception ex){
-                            logRecordSevere.setMessage( "SEND-OFFER: Error on response from the Aries Government Agent.");
-                            Object[] params = new Object[]{"Authority Agent DT", "Aries Government Agent", "10704"};
+                            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [SEND-OFFER] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE02", alias};
                             logRecordSevere.setParameters(params);
                             logger.log(logRecordSevere);
                         }
@@ -222,16 +233,16 @@ public class SendVCOfferResource {
                             try {
                                 dbUtil.saveVCStatus(userID, piid, gson.toJson(credential), VCStatusEnum.OFFER_SENT);
 
-                                logRecordInfo.setMessage("SEND-OFFER: Stored current state in the Authority Agent DT internal database.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal", "0103"};
+                                logRecordInfo.setMessage("SEND-OFFER: Stored current state in Authority Agent internal database.");
+                                Object[] params = new Object[]{"AAI13", alias};
                                 logRecordInfo.setParameters(params);
                                 logger.log(logRecordInfo);
                             } catch (Exception ex) {
-                                logRecordSevere.setMessage( "SEND-OFFER: Error saving data on Authority Agent DT.");
-                                Object[] params = new Object[]{"Authority Agent DT", "Evidence Portal DO", "20006"};
+                                logRecordSevere.setMessage( "Error saving data on Authority Agent internal database: [SEND-OFFER] " + ex.getMessage() + ".");
+                                Object[] params = new Object[]{"AAE04", alias};
                                 logRecordSevere.setParameters(params);
                                 logger.log(logRecordSevere);
-                                //System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage());
+                                //System.out.println("[SEND-VC-OFFER] Exception: " + ex.getMessage() + ".");
                             }
                             resultStatus = true;
                         }
