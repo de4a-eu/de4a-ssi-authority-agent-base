@@ -27,7 +27,7 @@ pipeline {
                     }
                 }
 				steps {
-				    sh docker network create docker-ci_default
+				    sh 'docker network create docker-ci_default'
                 }
                 agent {
                     docker {
