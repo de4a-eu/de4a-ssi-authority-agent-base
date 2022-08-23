@@ -17,7 +17,6 @@ pipeline {
             }
             steps {
                 sh 'mvn clean test sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN'
-				sh 'docker network create docker-ci_default'
             }
         }
 	  stage('createnetwork'){
@@ -28,7 +27,7 @@ pipeline {
                 }
 				agent { label 'master' }
 			steps {
-				    
+				  sh 'docker network create docker-ci_default'  
                 }	
 	  }
       stage('Build'){
