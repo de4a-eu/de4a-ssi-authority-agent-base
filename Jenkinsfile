@@ -19,17 +19,7 @@ pipeline {
                 sh 'mvn clean test sonar:sonar -Dsonar.host.url=http://sonarqube:9000/sonarqube -Dsonar.login=$SONAR_TOKEN'
             }
         }
-	  stage('createnetwork'){
-			when {
-                    anyOf{
-                        branch 'master'; branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
-                    }
-                }
-				agent { label 'master' }
-			steps {
-				  sh 'docker network create docker-ci_default'  
-                }	
-	  }
+	  
       stage('Build'){
          when {
                     anyOf{
