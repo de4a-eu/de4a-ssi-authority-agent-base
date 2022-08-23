@@ -26,6 +26,9 @@ pipeline {
                         branch 'master'; branch 'main'; branch pattern: 'iteration\\d+', comparator: 'REGEXP'
                     }
                 }
+				steps {
+				    sh docker network create docker-ci_default
+                }
                 agent {
                     docker {
                         image 'maven:latest'
