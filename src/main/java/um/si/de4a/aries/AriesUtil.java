@@ -87,7 +87,8 @@ public class AriesUtil {
 
         int responseCode = urlConnection.getResponseCode();
 
-        logRecordInfo.setMessage("GENERATE-INVITATION: Received HTTP response code: " + responseCode + " from endpoint: " + urlConnection.getURL().toString() + ".");
+
+        logRecordInfo.setMessage("GENERATE-INVITATION: Received HTTP response code: " + responseCode + " from endpoint: " + urlConnection.getURL().toString().getBytes(StandardCharsets.ISO_8859_1) + ".");
         Object[] params = new Object[]{"AAI11", alias};
         logRecordInfo.setParameters(params);
         logger.log(logRecordInfo);
