@@ -154,13 +154,14 @@ public class AriesUtil {
                     JSONArray resultsArray = (JSONArray) jsonObject.get("results");
 
                     if (resultsArray.size() > 0) {
+                        logRecordInfo.setMessage("DID-CONN-STATUS: Processing the JSON response received from /connections.");
+                        params = new Object[]{"AAI12", alias};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
+
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject connectionObj = (JSONObject) resultsArray.get(i);
                             connectionList.add(connectionObj);
-                            logRecordInfo.setMessage("DID-CONN-STATUS: Processing the JSON response received from /connections.");
-                            params = new Object[]{"AAI12", alias};
-                            logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
                         }
                     }
                     //System.out.println("[ARIES connectionList] Size: " + connectionList.size());
@@ -174,11 +175,12 @@ public class AriesUtil {
             }
 
         } else {
-            logRecordSevere.setMessage( "Error on response from Aries Government Agent: [/connections] " + urlConnection.getResponseMessage());
+            logRecordSevere.setMessage("Error on response from Aries Government Agent: [/connections] " + urlConnection.getResponseMessage());
             params = new Object[]{"AAE02", alias};
             logRecordSevere.setParameters(params);
             logger.log(logRecordSevere);
         }
+
         urlConnection.disconnect();
 
         return connectionList;
@@ -432,12 +434,13 @@ public class AriesUtil {
                     JSONArray resultsArray = (JSONArray) jsonObject.get("actions");
 
                     if (resultsArray.size() > 0) {
+                        logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
+                        params = new Object[]{"AAI12", alias};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
+
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject actionObj = (JSONObject) resultsArray.get(i);
-                            logRecordInfo.setMessage("CHECK-OFFER-VC-STATUS: Processing the JSON response received from /issuecredential/actions.");
-                            params = new Object[]{"AAI12", alias};
-                            logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
 
                             if(actionObj.get("PIID").equals(piid)){
                                 action = actionObj;
@@ -575,13 +578,13 @@ public class AriesUtil {
                     JSONArray resultsArray = (JSONArray) jsonObject.get("actions");
 
                     if (resultsArray.size() > 0) {
+                        logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Processing the JSON response received from /presentproof/actions.");
+                        params = new Object[]{"AAI12", alias};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
+
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject actionObj = (JSONObject) resultsArray.get(i);
-
-                            logRecordInfo.setMessage("CHECK-REQUEST-VP-STATUS: Processing the JSON response received from /presentproof/actions.");
-                            params = new Object[]{"AAI12", alias};
-                            logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
 
                             if(actionObj.get("PIID").equals(piid)){
                                 action = actionObj;
