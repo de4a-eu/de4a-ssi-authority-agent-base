@@ -111,7 +111,7 @@
   <!--                       only valid for GET requests. [true]            -->
 
 
-    <servlet>
+  <servlet>
         <servlet-name>default</servlet-name>
         <servlet-class>um.si.de4a.StartServletListener</servlet-class>
         <load-on-startup>1</load-on-startup>
