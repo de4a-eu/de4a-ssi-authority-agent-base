@@ -965,13 +965,14 @@ public class AriesUtil {
                     JSONArray resultsArray = (JSONArray) jsonObject.get("results");
 
                     if (resultsArray.size() > 0) {
+                        logRecordInfo.setMessage("WEBHOOK-PARSER: Processing the JSON response received from /connections.");
+                        params = new Object[]{"AAI12", alias};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
                         for (int i = 0; i < resultsArray.size(); i++) {
                             JSONObject connectionObj = (JSONObject) resultsArray.get(i);
                             connectionList.add(connectionObj);
-                            logRecordInfo.setMessage("WEBHOOK-PARSER: Processing the JSON response received from /connections.");
-                            params = new Object[]{"AAI12", alias};
-                            logRecordInfo.setParameters(params);
-                            logger.log(logRecordInfo);
+
                         }
                     }
                     //System.out.println("[ARIES connectionList] Size: " + connectionList.size());
