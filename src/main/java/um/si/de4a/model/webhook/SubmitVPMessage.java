@@ -66,6 +66,8 @@ public class SubmitVPMessage extends WebhookMessage {
         JSONObject jsonMessage = null;
         try {
             jsonMessage = (JSONObject) jsonParser.parse(inputMessage);
+            System.out.println("WEBHOOK-PARSER-DEBUG: Received input webhook message: " + jsonMessage);
+
         } catch (ParseException e) {
             logRecordSevere.setMessage("Object conversion error in Authority Agent: [WEBHOOK-PARSER-VP] " + e.getMessage() + ".");
             Object[] params = new Object[]{"AAE04", alias};
@@ -231,6 +233,51 @@ public class SubmitVPMessage extends WebhookMessage {
                     Object[] params = new Object[]{"AAE02", alias};
                     logRecordSevere.setParameters(params);
                     logger.log(logRecordSevere);
+                }
+            }
+            else if(jsonObject.get("@type").equals("https://didcomm.org/present-proof/2.0/problem-report")) {
+                JSONObject description = (JSONObject) jsonObject.get("description");
+                if (description.get("code").equals("rejected")) {
+                    try{
+                        dbUtil.updateVPStatus(vpStatus.getUserId(), VPStatusEnum.VP_REJECTED);
+                        logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                        Object[] params = new Object[]{"AAI13", alias};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
+                    }
+                    catch(Exception ex){
+                        logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VP] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE04", alias};
+                        logRecordSevere.setParameters(params);
+                        logger.log(logRecordSevere);
+                    }
+                    vpStatusCode = -2; // return -2 (vp rejected)
+                    SocketEvent event = new SocketEvent("vpstatus", vpStatus.getUserId(), inputPiid, vpStatusCode);
+
+                    CloseableHttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+                    try {
+
+                        HttpPost request = new HttpPost(clientURL);
+                        StringEntity input = new StringEntity(gson.toJson(event));
+
+                        input.setContentType("application/json;charset=UTF-8");
+                        input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
+                        request.setEntity(input);
+
+                        HttpResponse response = httpClient.execute(request);
+
+                        logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vpstatus' was successfully sent to " + clientURL +". Received HTTP response code: " + response.getStatusLine() + ".");
+                        Object[] params = new Object[]{"AAI32", alias};
+                        logRecordInfo.setParameters(params);
+                        logger.log(logRecordInfo);
+                    }
+                    catch(Exception ex){
+                        logRecordSevere.setMessage("Event notification of type 'vpstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                        Object[] params = new Object[]{"AAE10", alias};
+                        logRecordSevere.setParameters(params);
+                        logger.log(logRecordSevere);
+                    }
+
                 }
             }
         }

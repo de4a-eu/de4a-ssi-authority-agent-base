@@ -89,6 +89,7 @@ public class IssueVCMessage extends WebhookMessage {
         }
 
         if (vcStatus != null) {
+            System.out.println("WEBHOOK-PARSER-DEBUG: Found vcStatus for user.");
             JSONObject jsonObject = (JSONObject) jsonMessage.get("Message");
 
             if (jsonObject.get("@type").equals("https://didcomm.org/issue-credential/2.0/request-credential")) {
@@ -193,7 +194,97 @@ public class IssueVCMessage extends WebhookMessage {
                         }
                     }
                 }
-            } else if (jsonObject.get("@type").equals("https://didcomm.org/issue-credential/2.0/ack") && jsonMessage.get("Type").equals("post_state")) {
+            }
+            else if (jsonObject.get("@type").equals("https://didcomm.org/issue-credential/2.0/problem-report") && jsonObject.get("description") != null) {
+
+                JSONObject action = null;
+                try {
+                    action = ariesUtil.getAction(vcStatus.getPiid());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                if (action != null) {
+                JSONObject description = (JSONObject) jsonObject.get("description");
+                if (description.get("code").equals("rejected")) {
+                    if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT) {
+                        try {
+                            dbUtil.updateVCStatus(vcStatus.getUserId(), VCStatusEnum.OFFER_REJECTED);
+
+                            logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                            Object[] params = new Object[]{"AAI13", alias};
+                            logRecordInfo.setParameters(params);
+                            logger.log(logRecordInfo);
+                        } catch (Exception ex) {
+                            logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VC] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE04", alias};
+                            logRecordSevere.setParameters(params);
+                            logger.log(logRecordSevere);
+                        }
+                        vcStatusCode = -2; // return -2 (offer rejected)
+                        SocketEvent event = new SocketEvent("vcstatus", vcStatus.getUserId(), inputPiid, vcStatusCode);
+
+                        CloseableHttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+                        try {
+                            HttpPost request = new HttpPost(clientURL);
+                            StringEntity input = new StringEntity(gson.toJson(event));
+
+                            input.setContentType("application/json;charset=UTF-8");
+                            input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=UTF-8"));
+                            request.setEntity(input);
+
+                            HttpResponse response = httpClient.execute(request);
+                            logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vcstatus' was successfully sent to " + clientURL + ". Received HTTP response code: " + response.getStatusLine() + ".");
+                            Object[] params = new Object[]{"AAI32", alias};
+                            logRecordInfo.setParameters(params);
+                            logger.log(logRecordInfo);
+                        } catch (Exception ex) {
+                            logRecordSevere.setMessage("Event notification of type 'vcstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE10", alias};
+                            logRecordSevere.setParameters(params);
+                            logger.log(logRecordSevere);
+                        }
+                    } else {
+                        try {
+                            dbUtil.updateVCStatus(vcStatus.getUserId(), VCStatusEnum.VC_REJECTED);
+
+                            logRecordInfo.setMessage("WEBHOOK-PARSER: Stored current state in Authority Agent internal database.");
+                            Object[] params = new Object[]{"AAI13", alias};
+                            logRecordInfo.setParameters(params);
+                            logger.log(logRecordInfo);
+                        } catch (Exception ex) {
+                            logRecordSevere.setMessage("Error saving data on Authority Agent internal database: [WEBHOOK-PARSER-VC] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE04", alias};
+                            logRecordSevere.setParameters(params);
+                            logger.log(logRecordSevere);
+                        }
+                        vcStatusCode = -4; // return -4 (vc rejected)
+                        SocketEvent event = new SocketEvent("vcstatus", vcStatus.getUserId(), inputPiid, vcStatusCode);
+
+                        CloseableHttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+                        try {
+                            HttpPost request = new HttpPost(clientURL);
+                            StringEntity input = new StringEntity(gson.toJson(event));
+
+                            input.setContentType("application/json;charset=UTF-8");
+                            input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=UTF-8"));
+                            request.setEntity(input);
+
+                            HttpResponse response = httpClient.execute(request);
+                            logRecordInfo.setMessage("WEBHOOK-PARSER: Event notification of type 'vcstatus' was successfully sent to " + clientURL + ". Received HTTP response code: " + response.getStatusLine() + ".");
+                            Object[] params = new Object[]{"AAI32", alias};
+                            logRecordInfo.setParameters(params);
+                            logger.log(logRecordInfo);
+                        } catch (Exception ex) {
+                            logRecordSevere.setMessage("Event notification of type 'vcstatus' could not be sent: [WEBHOOK-PARSER] " + ex.getMessage() + ".");
+                            Object[] params = new Object[]{"AAE10", alias};
+                            logRecordSevere.setParameters(params);
+                            logger.log(logRecordSevere);
+                        }
+                    }
+                }
+                }
+            }
+            else if (jsonObject.get("@type").equals("https://didcomm.org/issue-credential/2.0/ack") && jsonMessage.get("Type").equals("post_state")) {
                 System.out.println("WEBHOOK-PARSER: VC with piid: " + vcStatus.getPiid() + " has been accepted.");
 
                 if (vcStatus.getVCStatusEnum() == VCStatusEnum.VC_SENT) {
