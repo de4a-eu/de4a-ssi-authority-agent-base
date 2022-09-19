@@ -65,6 +65,8 @@ public class DIDConnMessage extends WebhookMessage  implements Serializable {
         JSONObject jsonMessage = null;
         try {
             jsonMessage = (JSONObject) jsonParser.parse(inputMessage);
+            System.out.println("WEBHOOK-PARSER: Received input webhook message: " + jsonMessage);
+
         } catch (ParseException e) {
             logRecordSevere.setMessage("Object conversion error in Authority Agent: [WEBHOOK-PARSER-DIDConn] " + e.getMessage() + ".");
             Object[] params = new Object[]{"AAE04", alias};

@@ -63,6 +63,7 @@ public class IssueVCMessage extends WebhookMessage {
         JSONObject jsonMessage = null;
         try {
             jsonMessage = (JSONObject) jsonParser.parse(inputMessage);
+            System.out.println("WEBHOOK-PARSER-DEBUG: Received input webhook message: " + jsonMessage);
         } catch (ParseException e) {
             logRecordSevere.setMessage("Object conversion error in Authority Agent: [WEBHOOK-PARSER-VC] " + e.getMessage() + ".");
             Object[] params = new Object[]{"AAE04", alias};
@@ -75,7 +76,7 @@ public class IssueVCMessage extends WebhookMessage {
 
         try {
             vcStatus = dbUtil.getVCStatusByPiid(inputPiid);
-            logRecordInfo.setMessage("WEBHOOK-PARSER: Received user VC status data.");
+            logRecordInfo.setMessage("WEBHOOK-PARSER-DEBUG: Received user VC status data.");
             Object[] params = new Object[]{"AAI14", alias};
             logRecordInfo.setParameters(params);
             logger.log(logRecordInfo);
@@ -148,6 +149,7 @@ public class IssueVCMessage extends WebhookMessage {
                         }
                     } else {
                         JSONObject description = (JSONObject) msg.get("description");
+                        System.out.println("Description: " + description.toJSONString());
                         if (description.get("code").equals("rejected")) {
                             if (vcStatus.getVCStatusEnum() == VCStatusEnum.OFFER_SENT) {
                                 try {
