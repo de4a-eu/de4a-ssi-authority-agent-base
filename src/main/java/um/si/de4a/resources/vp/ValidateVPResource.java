@@ -253,7 +253,7 @@ public class ValidateVPResource {
                     }
                 }
                 logRecordInfo.setMessage("VALIDATE-VP: Validated Verifiable Credential " + vc.get("id") + " of type " + XMLtoJSONAdapter.namespace  +
-                        " under invitation" + userVPStatus.getDidConn().getInvitationId() + "for " + deURL + ".");
+                        " under invitation" + userVPStatus.getDidConn().getInvitationId() + " for " + deURL + ".");
                 Object[] params = new Object[]{"AAI13", alias};
                 logRecordInfo.setParameters(params);
                 logger.log(logRecordInfo);
