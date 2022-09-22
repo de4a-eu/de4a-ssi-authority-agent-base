@@ -10,9 +10,9 @@ public class SpecifiedByUpdated {
     private String title;
     private String volumeOfLearning;
     private String[] iSCEDFCode;
-    private int eCTSCreditPoints;
+    private float eCTSCreditPoints;
 
-    public SpecifiedByUpdated(String id, String title, String volumeOfLearning, String[] iSCEDFCode, int eCTSCreditPoints) {
+    public SpecifiedByUpdated(String id, String title, String volumeOfLearning, String[] iSCEDFCode, float eCTSCreditPoints) {
         this.id = id;
         this.title = title;
         this.volumeOfLearning = volumeOfLearning;
@@ -52,11 +52,11 @@ public class SpecifiedByUpdated {
         this.iSCEDFCode = iSCEDFCode;
     }
 
-    public int geteCTSCreditPoints() {
+    public float geteCTSCreditPoints() {
         return eCTSCreditPoints;
     }
 
-    public void seteCTSCreditPoints(int eCTSCreditPoints) {
+    public void seteCTSCreditPoints(float eCTSCreditPoints) {
         this.eCTSCreditPoints = eCTSCreditPoints;
     }
 }

@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
@@ -140,7 +141,7 @@ public class XMLtoJSONAdapter {
 
         ArrayList<SpecifiedByUpdated> specifiedBy = new ArrayList<>();
         specifiedBy.add(new SpecifiedByUpdated("urn:epass:qualification:1", diploma.getTitle().getText().getValue(), diploma.getDurationOfEducation(), new String[]{ "urn:epass:code:123"},
-                Integer.valueOf(diploma.getScope())));
+                Float.parseFloat(diploma.getScope())));
 
         String awardingLocation = "urn:" + diploma.getPlaceOfIssue().getName().getText().getValue().replaceAll(" ", "");
         WasAwardedByUpdated wasAwardedBy = new WasAwardedByUpdated("urn:epass:awardingProcess:1", new String[]{diploma.getInstitutionName().getValue()}, outputDateIssued, new String[]{awardingLocation});
