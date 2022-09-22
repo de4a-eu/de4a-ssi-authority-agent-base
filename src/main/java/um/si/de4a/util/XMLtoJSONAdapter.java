@@ -111,6 +111,8 @@ public class XMLtoJSONAdapter {
             logger.log(logRecordSevere);
         }
 
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
         String[] context = {"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"};
         String[] type = {"VerifiableCredential", "UniversityDegreeCredential"};
         String issuer = didKey;
@@ -120,7 +122,9 @@ public class XMLtoJSONAdapter {
         // EBSI schema link (generic): https://api.preprod.ebsi.eu/trusted-schemas-registry/v1/schemas/link-to-DE4A-schema
 
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        outputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         String inputIssueDate = diploma.getDateOfIssue();
         String inputBirthDate = diploma.getHolderOfAchievement().getDateOfBirth();
