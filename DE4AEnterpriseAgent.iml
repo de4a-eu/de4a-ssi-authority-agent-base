@@ -63,12 +63,12 @@
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.ejb:javax.ejb-api:3.2.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.transaction:javax.transaction-api:1.3" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.1" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.4" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.woodstox:stax2-api:4.2.1" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.woodstox:woodstox-core:6.2.8" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.1" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.1" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.1" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.4" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.4" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:javax.servlet-api:4.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.xml.ws:jaxws-api:2.3.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.xml.bind:jaxb-api:2.3.1" level="project" />
@@ -134,9 +134,13 @@
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-slf4j18-impl:2.14.1" level="project" />
     <orderEntry type="library" name="Maven: com.networknt:json-schema-validator:1.0.68" level="project" />
     <orderEntry type="library" name="Maven: com.ethlo.time:itu:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.beust:klaxon:5.5" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.4.31" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt:waltid-ssi-kit:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: info.weboftrust:ld-signatures-java:0.5-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: io.github.erdtman:java-json-canonicalization:1.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.nimbusds:nimbus-jose-jwt:9.9" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: decentralized-identity:jsonld-common-java:0.2.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.apicatalog:titanium-json-ld:1.1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: io.setl:rdf-urdna:1.1" level="project" />
@@ -186,6 +190,11 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.checkerframework:checker-qual:3.12.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.google.errorprone:error_prone_annotations:2.7.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.google.j2objc:j2objc-annotations:1.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt:waltid-ssikit-vclib:1.5.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.victools:jsonschema-generator:4.20.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml:classmate:1.5.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.lighthousegames:logging-jvm:1.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-simple:1.7.32" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.json:json:20210307" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.pwall.json:json-kotlin-schema:0.29" level="project" />
@@ -267,17 +276,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.28" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sksamuel.hoplite:hoplite-hikaricp:1.4.11" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt.servicematrix:WaltID-ServiceMatrix:1.0.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.5.20" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sksamuel.hoplite:hoplite-hocon:1.4.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.typesafe:config:1.4.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: id.walt:waltid-ssikit-vclib:1.4.7" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.victools:jsonschema-generator:4.18.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml:classmate:1.5.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.lighthousegames:logging-jvm:1.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-simple:1.7.32" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.nimbusds:nimbus-jose-jwt:9.9" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" level="project" />
-    <orderEntry type="library" name="Maven: com.beust:klaxon:5.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.websocket:javax.websocket-api:1.1" level="project" />
   </component>
 </module>
