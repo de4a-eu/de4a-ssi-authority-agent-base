@@ -41,17 +41,18 @@
             <id>waltid-ssi-kit</id>
             <url>https://maven.walt.id/repository/waltid-ssi-kit/</url>
         </repository>
-
+        -->
         <repository>
             <id>danubetech</id>
             <url>https://repo.danubetech.com/repository/maven-public/</url>
         </repository>
--->
+
         <repository>
             <id>waltid-dt-bak</id>
             <url>https://maven.walt.id/repository/danubetech</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.danubetech</groupId>
@@ -299,55 +300,14 @@
             <version>1.6.10</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
-        </dependency>
-        <!--<dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j18-impl</artifactId>
-            <version>2.17.1</version>
-        </dependency>-->
-        <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
             <version>1.0.68</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core -->
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.5.2</version>
-            <type>pom</type>
-        </dependency>
-
-
-
-
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>klaxon</artifactId>
             <version>5.5</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.microutils</groupId>
-            <artifactId>kotlin-logging-jvm</artifactId>
-            <version>2.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>1.4.31</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
@@ -382,7 +342,7 @@
             <type>pom</type>
         </dependency>
 
-       <!-- <dependency>
+        <!--<dependency>
             <groupId>id.walt</groupId>
             <artifactId>waltid-ssi-kit</artifactId>
             <version>1.13.0-SNAPSHOT5</version>
@@ -400,8 +360,8 @@
             <artifactId>waltid-ssikit-vclib</artifactId>
             <version>1.23.5</version>
             <scope>provided</scope>
-        </dependency>-->
-
+        </dependency>
+-->
         <dependency>
             <groupId>javax.websocket</groupId>
             <artifactId>javax.websocket-api</artifactId>
