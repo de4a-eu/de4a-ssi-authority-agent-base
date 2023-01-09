@@ -298,7 +298,7 @@ public class ValidateVPResource {
         try{
             System.out.println("Checking the issuer....");
 
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL("https://api-pilot.ebsi.eu/trusted-issuers-registry/v3/issuers/").openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL("https://api-pilot.ebsi.eu/trusted-issuers-registry/v3/issuers/" + did).openConnection();
             urlConnection.setRequestMethod("GET");
             try {
                 urlConnection.connect();
