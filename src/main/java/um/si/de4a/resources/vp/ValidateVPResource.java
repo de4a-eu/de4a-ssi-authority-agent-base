@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
-import id.walt.model.TrustedIssuer;
-import id.walt.services.essif.TrustedIssuerClient;
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,6 +16,8 @@ import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
+import um.si.de4a.model.AttributesDE4A;
+import um.si.de4a.model.TrustedIssuerDE4A;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.util.DE4ALogger;
 import um.si.de4a.util.JsonSchemaValidator;
@@ -24,6 +25,7 @@ import um.si.de4a.util.XMLtoJSONAdapter;
 
 import javax.ws.rs.*;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -276,7 +278,7 @@ public class ValidateVPResource {
 
    private int checkIssuer(String did) throws IOException {
         int result = 0;
-        TrustedIssuer issuerRecord = null;
+        TrustedIssuerDE4A issuerRecord = null;
        Logger logger = DE4ALogger.getLogger();
        LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
        LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
@@ -294,7 +296,53 @@ public class ValidateVPResource {
        }
 
         try{
-            issuerRecord = TrustedIssuerClient.INSTANCE.getIssuer(did);
+            System.out.println("Checking the issuer....");
+
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL("https://api-pilot.ebsi.eu/trusted-issuers-registry/v3/issuers/").openConnection();
+            urlConnection.setRequestMethod("GET");
+            try {
+                urlConnection.connect();
+            }
+            catch(Exception ex){
+                logRecordSevere.setMessage( "Connection error with EBSI TIR endpoint: " + ex.getMessage());
+                Object[] params = new Object[]{"AAE01", alias};
+                logRecordSevere.setParameters(params);
+                logger.log(logRecordSevere);
+            }
+
+            int responseCode = urlConnection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                InputStream stream = urlConnection.getInputStream();
+
+                String resultEBSI = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
+
+                try {
+                    System.out.println("RESULT EBSI: " + resultEBSI);
+                    JSONParser jsonParser = new JSONParser();
+                    JSONObject jsonObject = (JSONObject) jsonParser.parse(resultEBSI);
+
+                    System.out.println("EBSI object: " + jsonObject);
+                    if (!jsonObject.isEmpty() && jsonObject.get("did") != null) {
+                        issuerRecord = new TrustedIssuerDE4A(jsonObject.get("did").toString());
+                    }
+                }catch(Exception ex){
+                    logRecordSevere.setMessage( "Object conversion error in Authority Agent: [VALIDATE-VP] " + ex.getMessage());
+                    Object[] params = new Object[]{"AAE03", alias};
+                    logRecordSevere.setParameters(params);
+                    logger.log(logRecordSevere);
+                    //System.out.println("[ARIES get connections] Exception: " + ex.getMessage());
+                }
+
+            } else {
+                logRecordSevere.setMessage("Error on response from EBSI TIR endpoint: " + urlConnection.getResponseMessage());
+                Object[] params = new Object[]{"AAE02", alias};
+                logRecordSevere.setParameters(params);
+                logger.log(logRecordSevere);
+            }
+
+            urlConnection.disconnect();
+
         }
         catch(Exception ex){
             result = 0;
@@ -317,9 +365,6 @@ public class ValidateVPResource {
         appConfig = new AppConfig();
 
         JsonSchemaValidator validator = new JsonSchemaValidator();
-        /*JsonNode schemaNode = validator.getJsonNodeFromStringContent(
-                "{\"$schema\": \"http://json-schema.org/draft-06/schema#\", \"properties\": { \"id\": {\"type\": \"number\"}}}");
-        JsonSchema schema = validator.getJsonSchemaFromJsonNodeAutomaticVersion(schemaNode);*/
         String jsonObject = readJsonFromUrl(appConfig.getProperties().getProperty("vc.schema.url"));
 
         JsonNode schemaNode = validator.getJsonNodeFromStringContent(jsonObject);
