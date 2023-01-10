@@ -139,14 +139,12 @@ public class DIDConnMessage extends WebhookMessage  implements Serializable {
                                 logger.log(logRecordInfo);
 
                                 SocketEvent event = new SocketEvent("did-exchange",userDidConn.getUserId(), invitationID, connectionStatusCode);
-                                System.out.println("Socket event: " + event.getUserID() + ", " + event.getStatusCode() + ", " + event.getUniqueIdentifier());
 
                                 CloseableHttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
                                 try {
                                     HttpPost request = new HttpPost(clientURL);
                                     StringEntity input = new StringEntity(gson.toJson(event));
 
-                                    System.out.println("Input socket event data: " + input.getContent().toString());
                                     input.setContentType("application/json;charset=UTF-8");
                                     input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
                                     request.setEntity(input);
