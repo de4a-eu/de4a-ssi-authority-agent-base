@@ -145,6 +145,7 @@ public class DIDConnMessage extends WebhookMessage  implements Serializable {
                                     HttpPost request = new HttpPost(clientURL);
                                     StringEntity input = new StringEntity(gson.toJson(event));
 
+                                    System.out.println("Input socket event data: " + gson.toJson(input));
                                     input.setContentType("application/json;charset=UTF-8");
                                     input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
                                     request.setEntity(input);
