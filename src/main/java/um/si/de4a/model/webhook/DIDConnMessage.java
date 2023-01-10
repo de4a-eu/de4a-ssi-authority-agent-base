@@ -9,6 +9,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -145,7 +146,8 @@ public class DIDConnMessage extends WebhookMessage  implements Serializable {
                                     HttpPost request = new HttpPost(clientURL);
                                     StringEntity input = new StringEntity(gson.toJson(event));
 
-                                    System.out.println("Input socket event data: " + gson.toJson(input));
+                                    System.out.println("Input socket event data: " + EntityUtils.toString(input));
+
                                     input.setContentType("application/json;charset=UTF-8");
                                     input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));
                                     request.setEntity(input);
