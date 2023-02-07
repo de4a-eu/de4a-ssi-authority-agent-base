@@ -31,10 +31,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -271,7 +268,9 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-        if( inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
+        if( inputData.getCurrentGivenName().trim().toLowerCase().equals(vcData.getCurrentGivenName().trim().toLowerCase()) &&
+                inputData.getCurrentFamilyName().trim().toLowerCase().equals(vcData.getCurrentFamilyName().trim().toLowerCase())
+                && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;
     }

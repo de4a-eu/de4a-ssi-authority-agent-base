@@ -1,6 +1,6 @@
 package um.si.de4a.resources.vp;
 
-public class eIDASObject {
+public class    eIDASObject {
     private String personIdentifier;
     private String currentGivenName;
     private String currentFamilyName;
