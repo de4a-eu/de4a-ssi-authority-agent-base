@@ -268,8 +268,8 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-        if( inputData.getCurrentGivenName().trim().toLowerCase(Locale.ENGLISH).equals(vcData.getCurrentGivenName().trim().toLowerCase(Locale.ENGLISH)) &&
-                inputData.getCurrentFamilyName().trim().toLowerCase(Locale.ENGLISH).equals(vcData.getCurrentFamilyName().trim().toLowerCase(Locale.ENGLISH))
+        if( inputData.getCurrentGivenName().equalsIgnoreCase(vcData.getCurrentGivenName()) &&
+                inputData.getCurrentFamilyName().equalsIgnoreCase(vcData.getCurrentFamilyName())
                 && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;
