@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: University of Maribor (UM)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package um.si.de4a.resources.offer;
 
 import com.google.gson.Gson;
@@ -10,9 +27,7 @@ import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
-import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.model.json.VerifiableCredential;
-import um.si.de4a.model.json.VerifiableCredentialUpdated;
 import um.si.de4a.resources.vc.Data;
 import um.si.de4a.resources.vc.GenerateVCResource;
 import org.json.simple.parser.JSONParser;
@@ -21,7 +36,6 @@ import um.si.de4a.util.XMLtoJSONAdapter;
 
 import javax.ws.rs.*;
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -148,7 +162,7 @@ public class SendVCOfferResource {
                 // DONE: call generateVC(evidence, myDID, theirDID) method: VC
                 GenerateVCResource generateVCResource = new GenerateVCResource();
 
-                VerifiableCredentialUpdated generatedVC = generateVCResource.generateVC(jsonRequest, alias);
+                VerifiableCredential generatedVC = generateVCResource.generateVC(jsonRequest, alias);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
                // System.out.println("[GENERATE VC]: " + gson.toJson(generatedVC));
@@ -162,7 +176,7 @@ public class SendVCOfferResource {
                             dbUtil.getDID(), signatureType);
 
                     // DONE: call Aries /issuecredential/send-offer(myDID, theirDID, VC) : PIID
-                    SignedVerifiableCredentialUpdated credential = ariesUtil.signCredential(jsonSignRequest);
+                    SignedVerifiableCredential credential = ariesUtil.signCredential(jsonSignRequest);
 
 
                     if(credential != null) {

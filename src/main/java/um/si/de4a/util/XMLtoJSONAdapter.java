@@ -1,24 +1,24 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: University of Maribor (UM)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package um.si.de4a.util;
 
 import um.si.de4a.AppConfig;
 import um.si.de4a.model.json.*;
-import um.si.de4a.model.json.assessment.Assessment;
-import um.si.de4a.model.json.assessment.AssessmentReferences;
-import um.si.de4a.model.json.assessment.DateTime;
-import um.si.de4a.model.json.assessment.IssuedDate;
-import um.si.de4a.model.json.awardingprocess.AwardingBody;
-import um.si.de4a.model.json.awardingprocess.AwardingLocation;
-import um.si.de4a.model.json.awardingprocess.AwardingProcess;
-import um.si.de4a.model.json.awardingprocess.AwardingProcessReferences;
-import um.si.de4a.model.json.location.Location;
-import um.si.de4a.model.json.location.LocationReferences;
-import um.si.de4a.model.json.location.SpatialCode;
-import um.si.de4a.model.json.opportunity.LearningOpportunity;
-import um.si.de4a.model.json.opportunity.LearningOpportunityReferences;
-import um.si.de4a.model.json.opportunity.LearningSchedule;
-import um.si.de4a.model.json.organisation.AgentReferences;
-import um.si.de4a.model.json.organisation.Organisation;
-import um.si.de4a.model.json.qualification.*;
 import um.si.de4a.model.xml.HigherEducationDiploma;
 
 import javax.xml.bind.JAXBContext;
@@ -27,14 +27,9 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -46,7 +41,7 @@ public class XMLtoJSONAdapter {
 
     public static String namespace = "";
 
-    public static HigherEducationDiploma convertXMLToPOJO(String xml){
+    public static HigherEducationDiploma convertXMLToPOJO(String xml) throws IOException {
         String alias = "";
         try {
             logger = DE4ALogger.getLogger();
@@ -56,6 +51,8 @@ public class XMLtoJSONAdapter {
 
         LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
         LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
+
+        appConfig = new AppConfig();
 
         try {
             alias = appConfig.getProperties().getProperty("alias");
@@ -87,7 +84,7 @@ public class XMLtoJSONAdapter {
         return diploma;
     }
 
-    public static VerifiableCredentialUpdated convertPOJOtoJSON(HigherEducationDiploma diploma, String didKey) throws ParseException, IOException {
+    public static VerifiableCredential convertPOJOtoJSON(HigherEducationDiploma diploma, String didKey) throws ParseException, IOException {
         try {
             logger = DE4ALogger.getLogger();
         } catch (IOException e) {
@@ -140,25 +137,25 @@ public class XMLtoJSONAdapter {
         cal.add(Calendar.YEAR, 1);
         String expirationDate = outputFormat.format(cal.getTime());
 
-        ArrayList<WasDerivedFromUpdated> wasDerivedFrom = new ArrayList<>();
-        wasDerivedFrom.add(new WasDerivedFromUpdated("urn:epass:assessment:1", "Overall Diploma Assessment", "excellent (10)", inputIssueDate));
+        ArrayList<WasDerivedFrom> wasDerivedFrom = new ArrayList<>();
+        wasDerivedFrom.add(new WasDerivedFrom("urn:epass:assessment:1", "Overall Diploma Assessment", "excellent (10)", inputIssueDate));
 
         ArrayList<SpecifiedByUpdated> specifiedBy = new ArrayList<>();
         specifiedBy.add(new SpecifiedByUpdated("urn:epass:qualification:1", diploma.getTitle().getText().getValue(), diploma.getDurationOfEducation(), new String[]{ "urn:epass:code:123"},
                 Float.parseFloat(diploma.getScope())));
 
         String awardingLocation = "urn:" + diploma.getPlaceOfIssue().getName().getText().getValue().replaceAll(" ", "");
-        WasAwardedByUpdated wasAwardedBy = new WasAwardedByUpdated("urn:epass:awardingProcess:1", new String[]{diploma.getInstitutionName().getValue()}, outputDateIssued, new String[]{awardingLocation});
-        LearningAchievementUpdated learningAchievement = new LearningAchievementUpdated("urn:epass:learningAchievement:1", diploma.getTitle().getText().getValue(),
+        WasAwardedBy wasAwardedBy = new WasAwardedBy("urn:epass:awardingProcess:1", new String[]{diploma.getInstitutionName().getValue()}, outputDateIssued, new String[]{awardingLocation});
+        LearningAchievement learningAchievement = new LearningAchievement("urn:epass:learningAchievement:1", diploma.getTitle().getText().getValue(),
                 wasAwardedBy, specifiedBy, wasDerivedFrom, "urn:epass:learningopportunity:1");
 
-        ArrayList<LearningAchievementUpdated> achieved = new ArrayList<>();
+        ArrayList<LearningAchievement> achieved = new ArrayList<>();
         achieved.add(learningAchievement);
 
-        CredentialSubjectUpdated credentialSubject = new CredentialSubjectUpdated(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
+        CredentialSubject credentialSubject = new CredentialSubject(diploma.getHolderOfAchievement().getFamilyName().getText().getValue(),
                 diploma.getHolderOfAchievement().getGivenNames().getText().getValue(), outputDateBirth, diploma.getHolderOfAchievement().getNationalId(), achieved);
 
-        VerifiableCredentialUpdated vc = new VerifiableCredentialUpdated(context, id, type, issuer, outputDateIssued, validFrom, validFrom, expirationDate, credentialSubject, credentialSchema);
+        VerifiableCredential vc = new VerifiableCredential(context, id, type, issuer, outputDateIssued, validFrom, validFrom, expirationDate, credentialSubject, credentialSchema);
 
         /*LearningAchievement learningAchievement = new LearningAchievement("urn:epass:learningAchievement:1",
                 new Title(new Text(diploma.getTitle().getText().getContentType(), diploma.getTitle().getText().getLang(), diploma.getTitle().getText().getValue())), new SpecifiedBy("urn:epass:qualification:1"), new WasDerivedFrom("urn:epass:assessment:1"),

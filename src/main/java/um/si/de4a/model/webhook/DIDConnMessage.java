@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: University of Maribor (UM)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package um.si.de4a.model.webhook;
 
 import com.google.gson.Gson;
@@ -9,7 +26,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -141,12 +157,11 @@ public class DIDConnMessage extends WebhookMessage  implements Serializable {
 
                                 SocketEvent event = new SocketEvent("did-exchange",userDidConn.getUserId(), invitationID, connectionStatusCode);
 
+
                                 CloseableHttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
                                 try {
                                     HttpPost request = new HttpPost(clientURL);
                                     StringEntity input = new StringEntity(gson.toJson(event));
-
-                                    System.out.println("Input socket event data: " + EntityUtils.toString(input));
 
                                     input.setContentType("application/json;charset=UTF-8");
                                     input.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,"application/json;charset=UTF-8"));

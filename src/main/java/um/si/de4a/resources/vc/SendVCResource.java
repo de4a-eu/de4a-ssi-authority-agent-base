@@ -1,24 +1,36 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: University of Maribor (UM)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package um.si.de4a.resources.vc;
 
 import com.google.gson.Gson;
-import org.apache.commons.lang3.SerializationUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import um.si.de4a.AppConfig;
 import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
-import um.si.de4a.db.DIDConn;
 import um.si.de4a.db.VCStatus;
 import um.si.de4a.db.VCStatusEnum;
 import um.si.de4a.model.json.SignedVerifiableCredential;
-import um.si.de4a.model.json.SignedVerifiableCredentialUpdated;
 import um.si.de4a.util.DE4ALogger;
 
 import javax.ws.rs.*;
 import java.io.IOException;
-import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -102,9 +114,9 @@ public class SendVCResource {
             AriesUtil ariesUtil = new AriesUtil();
             Gson gson = new Gson();
 
-            SignedVerifiableCredentialUpdated credential = null;
+            SignedVerifiableCredential credential = null;
             try {
-                credential = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredentialUpdated.class);
+                credential = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class);
             }
             catch(Exception ex){
                 logRecordSevere.setMessage( "Object conversion error in Authority Agent: [SEND-VC] " + ex.getMessage() + ".");
@@ -148,7 +160,7 @@ public class SendVCResource {
                     try {
                         vcAcceptStatus = ariesUtil.acceptRequest(vcStatus.getPiid(), request);
 
-                        SignedVerifiableCredentialUpdated vc = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredentialUpdated.class);
+                        SignedVerifiableCredential vc = gson.fromJson(vcStatus.getVc(), SignedVerifiableCredential.class);
                         logRecordInfo.setMessage("SEND-VC: Sent Verifiable Credential " + vc.getId() + " to the edge agent under invitation " +
                                 vcStatus.getDidConn().getInvitationId() + " from " + doURL + ".");
                         Object[] params = new Object[]{"AAI06", alias};

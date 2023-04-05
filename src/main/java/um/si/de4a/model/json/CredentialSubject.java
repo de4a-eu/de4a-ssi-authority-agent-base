@@ -1,45 +1,38 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: University of Maribor (UM)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package um.si.de4a.model.json;
 
-import um.si.de4a.model.json.assessment.AssessmentReferences;
-import um.si.de4a.model.json.awardingprocess.AwardingProcessReferences;
-import um.si.de4a.model.json.location.LocationReferences;
-import um.si.de4a.model.json.opportunity.LearningOpportunityReferences;
-import um.si.de4a.model.json.organisation.AgentReferences;
-import um.si.de4a.model.json.qualification.LearningSpecificationReferences;
+import java.util.ArrayList;
 
 public class CredentialSubject {
     private String currentFamilyName;
     private String currentGivenName;
     private String dateOfBirth;
     private String personIdentifier;
-    private LearningAchievement learningAchievement;
-    private LearningSpecificationReferences learningSpecificationReferences;
-    private AssessmentReferences assessmentReferences;
-    private AwardingProcessReferences awardingProcessReferences;
-    private LocationReferences locationReferences;
-    private AgentReferences agentReferences;
-    private LearningOpportunityReferences learningOpportunityReferences;
+    private ArrayList<LearningAchievement> achieved;
 
-    public CredentialSubject(String currentFamilyName, String currentGivenName, String dateOfBirth, String personIdentifier, LearningAchievement learningAchievement, LearningSpecificationReferences learningSpecificationReferences, AssessmentReferences assessmentReferences, AwardingProcessReferences awardingProcessReferences, LocationReferences locationReferences, AgentReferences agentReferences, LearningOpportunityReferences learningOpportunityReferences) {
+    public CredentialSubject(String currentFamilyName, String currentGivenName, String dateOfBirth, String personIdentifier, ArrayList<LearningAchievement> achieved) {
         this.currentFamilyName = currentFamilyName;
         this.currentGivenName = currentGivenName;
         this.dateOfBirth = dateOfBirth;
         this.personIdentifier = personIdentifier;
-        this.learningAchievement = learningAchievement;
-        this.learningSpecificationReferences = learningSpecificationReferences;
-        this.assessmentReferences = assessmentReferences;
-        this.awardingProcessReferences = awardingProcessReferences;
-        this.locationReferences = locationReferences;
-        this.agentReferences = agentReferences;
-        this.learningOpportunityReferences = learningOpportunityReferences;
+        this.achieved = achieved;
     }
-
-   /* public CredentialSubject(String currentFamilyName, String currentGivenName, String dateOfBirth, String personIdentifier) {
-        this.currentFamilyName = currentFamilyName;
-        this.currentGivenName = currentGivenName;
-        this.dateOfBirth = dateOfBirth;
-        this.personIdentifier = personIdentifier;
-    }*/
 
     public String getCurrentFamilyName() {
         return currentFamilyName;
@@ -73,62 +66,11 @@ public class CredentialSubject {
         this.personIdentifier = personIdentifier;
     }
 
-
-    public LearningAchievement getLearningAchievement() {
-        return learningAchievement;
+    public ArrayList<LearningAchievement> getAchieved() {
+        return achieved;
     }
 
-    public void setLearningAchievement(LearningAchievement learningAchievement) {
-        this.learningAchievement = learningAchievement;
+    public void setAchieved(ArrayList<LearningAchievement> achieved) {
+        this.achieved = achieved;
     }
-
-    public LearningSpecificationReferences getLearningSpecificationReferences() {
-        return learningSpecificationReferences;
-    }
-
-    public void setLearningSpecificationReferences(LearningSpecificationReferences learningSpecificationReferences) {
-        this.learningSpecificationReferences = learningSpecificationReferences;
-    }
-
-    public AssessmentReferences getAssessmentReferences() {
-        return assessmentReferences;
-    }
-
-    public void setAssessmentReferences(AssessmentReferences assessmentReferences) {
-        this.assessmentReferences = assessmentReferences;
-    }
-
-    public AwardingProcessReferences getAwardingProcessReferences() {
-        return awardingProcessReferences;
-    }
-
-    public void setAwardingProcessReferences(AwardingProcessReferences awardingProcessReferences) {
-        this.awardingProcessReferences = awardingProcessReferences;
-    }
-
-    public LocationReferences getLocationReferences() {
-        return locationReferences;
-    }
-
-    public void setLocationReferences(LocationReferences locationReferences) {
-        this.locationReferences = locationReferences;
-    }
-
-    public AgentReferences getAgentReferences() {
-        return agentReferences;
-    }
-
-    public void setAgentReferences(AgentReferences agentReferences) {
-        this.agentReferences = agentReferences;
-    }
-
-    public LearningOpportunityReferences getLearningOpportunityReferences() {
-        return learningOpportunityReferences;
-    }
-
-    public void setLearningOpportunityReferences(LearningOpportunityReferences learningOpportunityReferences) {
-        this.learningOpportunityReferences = learningOpportunityReferences;
-    }
-
-
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: University of Maribor (UM)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package um.si.de4a.resources.vp;
 
 
@@ -6,7 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
-import org.apache.commons.io.IOUtils;
+import id.walt.model.TrustedIssuer;
+import id.walt.services.essif.TrustedIssuerClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -16,22 +34,38 @@ import um.si.de4a.aries.AriesUtil;
 import um.si.de4a.db.DBUtil;
 import um.si.de4a.db.VPStatus;
 import um.si.de4a.db.VPStatusEnum;
-import um.si.de4a.model.AttributesDE4A;
-import um.si.de4a.model.TrustedIssuerDE4A;
 import um.si.de4a.model.json.SignedVerifiableCredential;
 import um.si.de4a.util.DE4ALogger;
 import um.si.de4a.util.JsonSchemaValidator;
 import um.si.de4a.util.XMLtoJSONAdapter;
-
 import javax.ws.rs.*;
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLOutput;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Iterator;
+/*
+ * Copyright (C) 2023, Partners of the EU funded DE4A project consortium
+ *   (https://www.de4a.eu/consortium), under Grant Agreement No.870635
+ * Author: Austrian Federal Computing Center (BRZ)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -268,17 +302,15 @@ public class ValidateVPResource {
 
     private int checkSubject(eIDASObject inputData, eIDASObject vcData){
         int result = 0;
-
-        if( inputData.getCurrentGivenName().equalsIgnoreCase(vcData.getCurrentGivenName()) &&
-                inputData.getCurrentFamilyName().equalsIgnoreCase(vcData.getCurrentFamilyName())
-                && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
+        if( inputData.getCurrentGivenName().equals(vcData.getCurrentGivenName()) && inputData.getCurrentFamilyName().equals(vcData.getCurrentFamilyName()) && inputData.getDateOfBirth().equals(vcData.getDateOfBirth()))
             result = 1;
         return result;
     }
 
    private int checkIssuer(String did) throws IOException {
         int result = 0;
-        TrustedIssuerDE4A issuerRecord = null;
+        
+        TrustedIssuer issuerRecord = null;
        Logger logger = DE4ALogger.getLogger();
        LogRecord logRecordInfo = new LogRecord(Level.INFO, "");
        LogRecord logRecordSevere = new LogRecord(Level.SEVERE, "");
@@ -296,53 +328,7 @@ public class ValidateVPResource {
        }
 
         try{
-            System.out.println("Checking the issuer....");
-
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL("https://api-pilot.ebsi.eu/trusted-issuers-registry/v3/issuers/" + did).openConnection();
-            urlConnection.setRequestMethod("GET");
-            try {
-                urlConnection.connect();
-            }
-            catch(Exception ex){
-                logRecordSevere.setMessage( "Connection error with EBSI TIR endpoint: " + ex.getMessage());
-                Object[] params = new Object[]{"AAE01", alias};
-                logRecordSevere.setParameters(params);
-                logger.log(logRecordSevere);
-            }
-
-            int responseCode = urlConnection.getResponseCode();
-
-            if (responseCode == HttpURLConnection.HTTP_OK) { // success
-                InputStream stream = urlConnection.getInputStream();
-
-                String resultEBSI = IOUtils.toString(stream, StandardCharsets.UTF_8.name());
-
-                try {
-                    System.out.println("RESULT EBSI: " + resultEBSI);
-                    JSONParser jsonParser = new JSONParser();
-                    JSONObject jsonObject = (JSONObject) jsonParser.parse(resultEBSI);
-
-                    System.out.println("EBSI object: " + jsonObject);
-                    if (!jsonObject.isEmpty() && jsonObject.get("did") != null) {
-                        issuerRecord = new TrustedIssuerDE4A(jsonObject.get("did").toString());
-                    }
-                }catch(Exception ex){
-                    logRecordSevere.setMessage( "Object conversion error in Authority Agent: [VALIDATE-VP] " + ex.getMessage());
-                    Object[] params = new Object[]{"AAE03", alias};
-                    logRecordSevere.setParameters(params);
-                    logger.log(logRecordSevere);
-                    //System.out.println("[ARIES get connections] Exception: " + ex.getMessage());
-                }
-
-            } else {
-                logRecordSevere.setMessage("Error on response from EBSI TIR endpoint: " + urlConnection.getResponseMessage());
-                Object[] params = new Object[]{"AAE02", alias};
-                logRecordSevere.setParameters(params);
-                logger.log(logRecordSevere);
-            }
-
-            urlConnection.disconnect();
-
+            issuerRecord = TrustedIssuerClient.INSTANCE.getIssuer(did);
         }
         catch(Exception ex){
             result = 0;
@@ -365,6 +351,9 @@ public class ValidateVPResource {
         appConfig = new AppConfig();
 
         JsonSchemaValidator validator = new JsonSchemaValidator();
+        /*JsonNode schemaNode = validator.getJsonNodeFromStringContent(
+                "{\"$schema\": \"http://json-schema.org/draft-06/schema#\", \"properties\": { \"id\": {\"type\": \"number\"}}}");
+        JsonSchema schema = validator.getJsonSchemaFromJsonNodeAutomaticVersion(schemaNode);*/
         String jsonObject = readJsonFromUrl(appConfig.getProperties().getProperty("vc.schema.url"));
 
         JsonNode schemaNode = validator.getJsonNodeFromStringContent(jsonObject);
