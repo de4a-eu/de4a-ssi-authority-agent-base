@@ -20,14 +20,6 @@ This product includes/uses software(s) developed by 'Jetbrains s.r.o.' (https://
   - kotlinx-serialization-*(https://github.com/Kotlin/kotlinx.serialization)
   - kotlin-stdlib (https://kotlinlang.org/api/latest/jvm/stdlib/)
   - kotlin-logging-jvm (https://github.com/oshai/kotlin-logging)
-
-This product includes/uses software(s) developed by 'Oracle Inc.' (https://www.oracle.com/)
-  - Javax EJB API (https://github.com/javaee/javax.ejb)
-  - javax.servlet-api (https://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
-  - jaxws-api (https://javaee.github.io/metro-jax-ws/)
-  - javax.jws-api (https://javadoc.io/doc/javax.jws/javax.jws-api/latest/index.html)
-  - json-schema-validator (https://docs.oracle.com/cd/E50612_01/doc.11122/user_guide/content/content_schema_json.html)
-  - WebSocket Server API (https://docs.oracle.com/javaee/7/tutorial/websocket.htm)
   
 This product includes/uses software(s) developed by 'FasterXML, LLC' (http://fasterxml.com/)
   - Jackson (https://github.com/FasterXML/jackson)
@@ -36,14 +28,8 @@ This product includes/uses software(s) developed by 'FasterXML, LLC' (http://fas
 This product includes/uses software(s) developed by 'RedHat' (https://www.redhat.com/)
   - RESTEasy (https://resteasy.dev/)
   
-This product includes/uses software(s) developed by 'Eclipse Foundation' (https://www.eclipse.org/org/foundation/)
-  - JAXB (https://projects.eclipse.org/projects/ee4j.jaxb-impl)
-  
 This product includes/uses software(s) developed by 'The JODA Project' (https://www.joda.org/)
   - Joda-Time (https://www.joda.org/joda-time/)
-  
-This product includes/uses software(s) developed by 'QOS.ch Sarl' (https://www.qos.ch/)
-  - SLF4J (https://www.slf4j.org/)
   
 This product includes/uses software(s) developed by Cedric Beust (https://github.com/cbeust)
   - Klaxon (https://github.com/cbeust/klaxon)
